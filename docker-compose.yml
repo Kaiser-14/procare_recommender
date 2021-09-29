@@ -1,10 +1,10 @@
-version: "1.0"
+version: "3.5"
 services: 
   recommender:
     image: procare_re:1.0
     restart: always
     networks:
-      data_net:
+        - data_net
     build:
       context: . 
       dockerfile: Dockerfile
@@ -15,31 +15,22 @@ services:
     environment:
       - TESTING=yes
     deploy:
-      placement:
-        constraints: [
-          node.role == manager
-        ]
   db:
     image: postgres
     restart: always
     networks:
-      data_net:
-#    environment:
+        - data_net
+    environment:
 #      - POSTGRES_HOST_AUTH_METHOD=trust
-#      - POSTGRES_USER=postgres
-#      - POSTGRES_PASSWORD=tender
-#      - POSTGRES_DB=procare
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=procare
+      - POSTGRES_DB=procare
     volumes:
-      - postgress_data:/var/lib/postgresql/data
-    deploy:
-      placement:
-        constraints: [
-          node.role == manager
-        ]
-
+      - postgres_data:/var/lib/postgresql/data
+      
 volumes:
-  postgress_data:
+  postgres_data:
 
 networks:
   data_net:
-    external: true
+    driver: overlay
