@@ -1,4 +1,6 @@
 # import dependencies
+import json
+
 from flask import Flask
 # from flask_sqlalchemy import SQLAlchemy
 import requests
@@ -14,7 +16,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://' + config.postgres_user +
 
 @app.route("/get_patients/", methods=['GET'])
 def index():
-    return requests.get(config.ccdr_url+"/api/v1/mobile/patient").json()
+    return json.load(requests.get(config.ccdr_url+"/api/v1/mobile/patient").json())
 
 
 if __name__ == '__main__':
