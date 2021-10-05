@@ -1,8 +1,10 @@
-from helper.utils import db
 import requests
+from flask_sqlalchemy import SQLAlchemy
 
 from helper.utils import logger
 from helper import config
+
+db = SQLAlchemy()
 
 
 class RecommenderPatients(db.Model):
