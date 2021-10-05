@@ -3,6 +3,7 @@ import logging
 import colorlog
 import time
 import shutil
+from app import app
 
 from flask_sqlalchemy import SQLAlchemy
 
@@ -91,7 +92,7 @@ def init_logger(dunder_name, testing_logger) -> logging.Logger:
 
 
 def init_db(drop=False):
-    _db = SQLAlchemy()
+    _db = SQLAlchemy(app)
     if drop:
         _db.drop_all()
     _db.create_all()
