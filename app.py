@@ -6,11 +6,17 @@ from flask import Flask
 
 # Import project dependencies
 from helper import config
+from helper.utils import init_db
 from models.patients import RecommenderPatients
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://' + config.postgres_user + ':' + config.postgres_pass + '@' \
                                         + config.postgres_host + ':' + config.postgres_port + '/' + config.postgres_db
+
+if config.drop_tables == "yes":
+    db = init_db(app, drop=True)
+else:
+    db = init_db(app, drop=False)
 
 
 @app.route("/status/", methods=['GET'])

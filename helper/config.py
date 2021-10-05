@@ -39,3 +39,8 @@ if os.getenv("CCDR_URL") is not None:
     ccdr_url = os.getenv("CCDR_URL")
 else:
     ccdr_url = "http://195.82.130.203:8086"
+
+if os.getenv("DROP_TABLES") is not None:
+    drop_tables = os.getenv("DROP_TABLES")
+else:
+    drop_tables = "no"
