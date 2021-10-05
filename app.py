@@ -13,6 +13,11 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://' + config.postgres_user +
                                         + config.postgres_host + ':' + config.postgres_port + '/' + config.postgres_db
 
 
+@app.route("/status/", methods=['GET'])
+def status():
+    return "running"
+
+
 @app.route("/update/", methods=['GET'])
 def update():
     response = {
