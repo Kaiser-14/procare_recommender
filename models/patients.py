@@ -1,5 +1,6 @@
 import requests
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import UserMixin
 
 from helper.utils import logger
 from helper import config
@@ -7,7 +8,7 @@ from helper import config
 db = SQLAlchemy()
 
 
-class RecommenderPatients(db.Model):
+class RecommenderPatients(db.Model, UserMixin):
     __tablename__ = 'RecommenderPatients'
 
     id = db.Column(db.Integer, primary_key=True)

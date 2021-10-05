@@ -4,8 +4,6 @@ import colorlog
 import time
 import shutil
 
-from flask_sqlalchemy import SQLAlchemy
-
 
 def check_directory_expired_date(total_time=3600, app_logs_dir="app_logs"):
     try:
@@ -89,11 +87,13 @@ def init_logger(dunder_name, testing_logger) -> logging.Logger:
     return logger
 
 
-def init_db(_app, drop=False):
-    _db = SQLAlchemy(_app)
-    if drop:
-        _db.drop_all()
-    _db.create_all()
+def init_db(_db, app, drop=False):
+    _db.init_app(app)
+    with app.app_context():
+        if drop:
+            _db.drop_all()
+        # Service.__table__.drop()
+        _db.create_all()
     return _db
 
 

@@ -12,8 +12,6 @@ services:
       - "5005:5005"
     depends_on:
       - db
-    environment:
-      - TESTING=yes
   db:
     image: postgres
     restart: always
