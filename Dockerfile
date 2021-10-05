@@ -8,7 +8,7 @@ RUN  apt upgrade -y
 # RUN  apt install -y gnupg2  
 # RUN  apt install -y python3 
 # RUN  apt install -y python3-pip
-RUN  apt install -y libpq-dev
+RUN  apt install -y libpq-dev gcc
 # RUN  apt install -y python3-dev 
 # RUN  apt install -y apt-transport-https 
 # RUN  apt install -y wget 
