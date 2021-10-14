@@ -1,3 +1,4 @@
+import json
 import os
 import logging
 import colorlog
@@ -102,3 +103,5 @@ if testing_mode == "yes":
     logger = init_logger(__name__, testing_logger=True)
 else:
     logger = init_logger(__name__, testing_logger=False)
+
+par_notifications = json.load(open('par/par_notifications.json'))
