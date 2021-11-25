@@ -76,34 +76,34 @@ class RecommenderPatients(db.Model, UserMixin):
         if valid_quests:
             final_quest = valid_quests[0]
             vigorous_days, vigorous_hours, vigorous_minutes, moderate_days, moderate_hours, moderate_minutes, \
-            walk_days, walk_hours, walk_minutes, sitting_hours, sitting_minutes = (None,) * 11
+                walk_days, walk_hours, walk_minutes, sitting_hours, sitting_minutes = (None,) * 11
             for answer in final_quest["answers"]:
                 question_id = answer["question_id"]
-                if question_id is 0:
+                if question_id == 0:
                     vigorous_days = int(answer["text_input_value"])
-                if question_id is 1:
+                if question_id == 1:
                     vigorous_hours = int(answer["text_input_value"])
-                if question_id is 2:
+                if question_id == 2:
                     vigorous_minutes = int(answer["text_input_value"])
-                if question_id is 3:
+                if question_id == 3:
                     moderate_days = int(answer["text_input_value"])
-                if question_id is 4:
+                if question_id == 4:
                     moderate_hours = int(answer["text_input_value"])
-                if question_id is 5:
+                if question_id == 5:
                     moderate_minutes = int(answer["text_input_value"])
-                if question_id is 6:
+                if question_id == 6:
                     walk_days = int(answer["text_input_value"])
-                if question_id is 7:
+                if question_id == 7:
                     walk_hours = int(answer["text_input_value"])
-                if question_id is 8:
+                if question_id == 8:
                     walk_minutes = int(answer["text_input_value"])
-                if question_id is 9:
+                if question_id == 9:
                     sitting_hours = int(answer["text_input_value"])
-                if question_id is 10:
+                if question_id == 10:
                     sitting_minutes = int(answer["text_input_value"])
 
             variables = vigorous_days, vigorous_hours, vigorous_minutes, moderate_days, moderate_hours, \
-                        moderate_minutes, walk_days, walk_hours, walk_minutes, sitting_hours, sitting_minutes
+                moderate_minutes, walk_days, walk_hours, walk_minutes, sitting_hours, sitting_minutes
 
             if None not in variables:
                 vigorous_met_value = 8.0
