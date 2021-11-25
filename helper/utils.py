@@ -5,6 +5,8 @@ import colorlog
 import time
 import shutil
 
+from helper.config import testing_mode
+
 
 def check_directory_expired_date(total_time=3600, app_logs_dir="app_logs"):
     try:
@@ -98,10 +100,15 @@ def init_db(_db, app, drop=False):
     return _db
 
 
-testing_mode = os.environ['TESTING'] if "TESTING" in os.environ else "no"
 if testing_mode == "yes":
     logger = init_logger(__name__, testing_logger=True)
 else:
     logger = init_logger(__name__, testing_logger=False)
 
-par_notifications = json.load(open('par/par_notifications.json'))
+
+script_dir = os.path.dirname(__file__)  # <-- absolute dir the script is in
+rel_path = "../par/par_notifications.json"
+abs_file_path = os.path.join(script_dir, rel_path)
+
+with open(abs_file_path) as json_file:
+    par_notifications = json.load(json_file)

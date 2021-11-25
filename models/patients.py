@@ -3,6 +3,7 @@ from uuid import uuid4
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
 from flask_login import UserMixin
+from datetime import datetime, timedelta
 
 from helper.utils import logger, par_notifications
 from helper import config
@@ -36,6 +37,11 @@ class RecommenderPatients(db.Model, UserMixin):
     def par_notification(self):
         notification = Notifications(par_notifications[str(self.par_day)])
         self.notification.append(notification)
+        if self.par_day == 7:
+            category = self.par_analysis()
+            analysis_notification = Notifications("Activity category: " + str(category))
+            self.notification.append(analysis_notification)
+            analysis_notification.send()
         self.par_day = self.par_day + 1
         db.session.commit()
         notification.send()
@@ -46,6 +52,90 @@ class RecommenderPatients(db.Model, UserMixin):
     @staticmethod
     def get_by_ccdr_ref(ref):
         return RecommenderPatients.query.filter_by(ccdr_reference=ref).first()
+
+    def par_analysis(self):
+        logger.info("Evaluating activity for patient " + str(self.ccdr_reference))
+        post = {
+            "identity_management_key": self.ccdr_reference
+        }
+        today = datetime.today()
+        week_ago = today - timedelta(weeks=1)
+        response = requests.post(config.ccdr_url + "/api/v1/web/questionnaire/getPatientQuestionnairesResponses",
+                                 json=post).json()
+
+        valid_quests = []
+        for quest in response.json():
+            survey_id = quest["survey_id"].split(".")[0]
+            if survey_id == "7":
+                # test = "Mon Jun 28 09:07:16 UTC 2021".replace(" UTC ", " ")
+                survey_datetime = datetime.strptime(quest["date"].replace(" UTC ", " "), '%a %b %d %H:%M:%S %Y')
+                if today > survey_datetime > week_ago:
+                    valid_quests.append(quest)
+                    logger.debug(quest)
+
+        if valid_quests:
+            final_quest = valid_quests[0]
+            vigorous_days, vigorous_hours, vigorous_minutes, moderate_days, moderate_hours, moderate_minutes, \
+                walk_days, walk_hours, walk_minutes, sitting_hours, sitting_minutes = (None,) * 11
+            for answer in final_quest["answers"]:
+                question_id = answer["question_id"]
+                if question_id is 0:
+                    vigorous_days = int(answer["text_input_value"])
+                if question_id is 1:
+                    vigorous_hours = int(answer["text_input_value"])
+                if question_id is 2:
+                    vigorous_minutes = int(answer["text_input_value"])
+                if question_id is 3:
+                    moderate_days = int(answer["text_input_value"])
+                if question_id is 4:
+                    moderate_hours = int(answer["text_input_value"])
+                if question_id is 5:
+                    moderate_minutes = int(answer["text_input_value"])
+                if question_id is 6:
+                    walk_days = int(answer["text_input_value"])
+                if question_id is 7:
+                    walk_hours = int(answer["text_input_value"])
+                if question_id is 8:
+                    walk_minutes = int(answer["text_input_value"])
+                if question_id is 9:
+                    sitting_hours = int(answer["text_input_value"])
+                if question_id is 10:
+                    sitting_minutes = int(answer["text_input_value"])
+
+            variables = vigorous_days, vigorous_hours, vigorous_minutes, moderate_days, moderate_hours, \
+                moderate_minutes, walk_days, walk_hours, walk_minutes, sitting_hours, sitting_minutes
+
+            if None not in variables:
+                vigorous_met_value = 8.0
+                moderate_met_value = 4.0
+                walk_met_value = 3.3
+                vigorous_time = vigorous_minutes + (60 * vigorous_hours)
+                moderate_time = moderate_minutes + (60 * moderate_hours)
+                walk_time = walk_minutes + (60 * walk_hours)
+                vigorous_met = vigorous_met_value * vigorous_days * vigorous_time
+                moderate_met = moderate_met_value * moderate_days * moderate_time
+                walk_met = walk_met_value * walk_days * walk_time
+                total_met_value = vigorous_met + moderate_met + walk_met
+
+                if vigorous_days >= 3 and vigorous_time >= 20:
+                    category = 1  # Minimally active
+                    if vigorous_met >= 1500:
+                        category = 2  # HEPA Active
+                    else:
+                        if walk_days + moderate_days + vigorous_days >= 7 and total_met_value >= 3000:
+                            category = 2  # HEPA Active
+                else:
+                    if moderate_days + walk_days >= 5:
+                        if moderate_time + walk_time >= 30:
+                            category = 1  # Minimally active
+                        else:
+                            if walk_days + moderate_days + vigorous_days >= 5 and total_met_value >= 600:
+                                category = 1  # Minimally active
+                            else:
+                                category = 0  # Inactive
+                    else:
+                        category = 0  # Inactive
+                return category
 
     @staticmethod
     def get_all():
@@ -109,7 +199,7 @@ class Notifications(db.Model, UserMixin):
     def save(self):
         if self.id and self.msg and self.read and self.patient:
             db.session.add(self)
-            logger.debug("Notification "+str(self.id)+" saved")
+            logger.debug("Notification " + str(self.id) + " saved")
         else:
             logger.error("Incomplete notification couldn't be saved")
         db.session.commit()

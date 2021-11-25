@@ -1,5 +1,7 @@
 import os
 
+testing_mode = os.environ['TESTING'] if "TESTING" in os.environ else "no"
+
 if os.getenv("FLASK_HOST") is not None:
     flask_host = os.getenv("FLASK_HOST")
 else:
@@ -8,7 +10,10 @@ else:
 if os.getenv("FLASK_PORT") is not None:
     flask_port = os.getenv("FLASK_PORT")
 else:
-    flask_port = "5005"
+    if testing_mode == "yes":
+        flask_port = "5006"
+    else:
+        flask_port = "5005"
 
 if os.getenv("POSTGRES_USER") is not None:
     postgres_user = os.getenv("POSTGRES_USER")
@@ -23,7 +28,10 @@ else:
 if os.getenv("POSTGRES_HOST") is not None:
     postgres_host = os.getenv("POSTGRES_HOST")
 else:
-    postgres_host = "db"
+    if testing_mode == "yes":
+        postgres_host = "localhost"
+    else:
+        postgres_host = "db"
 
 if os.getenv("POSTGRES_PORT") is not None:
     postgres_port = os.getenv("POSTGRES_PORT")
