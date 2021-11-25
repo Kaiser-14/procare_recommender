@@ -37,12 +37,12 @@ class RecommenderPatients(db.Model, UserMixin):
     def par_notification(self):
         notification = Notifications(par_notifications[str(self.par_day)])
         self.notification.append(notification)
-        if self.par_day == 7:
+        if self.par_day in [1, 7, 14, 21, 28, 35]:
             category = self.par_analysis()
             analysis_notification = Notifications("Activity category: " + str(category))
             self.notification.append(analysis_notification)
             analysis_notification.send()
-        self.par_day = self.par_day + 1
+        self.par_day = (self.par_day + 1) % 41
         db.session.commit()
         notification.send()
 
@@ -76,7 +76,7 @@ class RecommenderPatients(db.Model, UserMixin):
         if valid_quests:
             final_quest = valid_quests[0]
             vigorous_days, vigorous_hours, vigorous_minutes, moderate_days, moderate_hours, moderate_minutes, \
-                walk_days, walk_hours, walk_minutes, sitting_hours, sitting_minutes = (None,) * 11
+            walk_days, walk_hours, walk_minutes, sitting_hours, sitting_minutes = (None,) * 11
             for answer in final_quest["answers"]:
                 question_id = answer["question_id"]
                 if question_id is 0:
@@ -103,7 +103,7 @@ class RecommenderPatients(db.Model, UserMixin):
                     sitting_minutes = int(answer["text_input_value"])
 
             variables = vigorous_days, vigorous_hours, vigorous_minutes, moderate_days, moderate_hours, \
-                moderate_minutes, walk_days, walk_hours, walk_minutes, sitting_hours, sitting_minutes
+                        moderate_minutes, walk_days, walk_hours, walk_minutes, sitting_hours, sitting_minutes
 
             if None not in variables:
                 vigorous_met_value = 8.0

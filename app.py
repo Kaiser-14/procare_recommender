@@ -88,7 +88,7 @@ with app.app_context():
     update()
 
 
-@scheduler.scheduled_job('cron', id='update_and_par', day='*', hour='14', minute='26')
+@scheduler.scheduled_job('cron', id='update_and_par', day='*', hour='13')
 def update_and_par():
     logger.info("Running daily scheduled database update and PAR round")
     with app.app_context():
