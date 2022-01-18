@@ -165,6 +165,31 @@ class RecommenderPatients(db.Model, UserMixin):
             logger.error("Getting all patients from CCDR error", exc_info=True)
             return str(e), 0
 
+    @staticmethod
+    def calculate_all_scores():
+        patients, total = RecommenderPatients.get_all()
+        for patient in patients:
+            patient.calculate_scores()
+
+    def calculate_scores(self):
+        today = datetime.today()
+        week_ago = today - timedelta(weeks=1)
+        body = {
+            "identity_management_key": "Recommender",
+            "organization": "Recommender",
+            "role": "Recommender",
+            "patient_identity_management_key": self.ccdr_reference,
+            "measurements_start_date": week_ago.strftime("dd-mm-yyyy"),
+            "measurements_end_date": today.strftime("dd-mm-yyyy")
+        }
+        actionlib_response = requests.post(config.actionlib_url+"/calculate_scores", json=body)
+        fusionlib_response = requests.post(config.fusionlib_url + "/calculate_scores", json=body)
+
+        if actionlib_response.status_code != 200:
+            logger.error(actionlib_response.text)
+        if fusionlib_response.status_code != 200:
+            logger.error(fusionlib_response.text)
+
 
 class Notifications(db.Model, UserMixin):
     __tablename__ = 'Notifications'

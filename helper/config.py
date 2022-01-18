@@ -48,6 +48,16 @@ if os.getenv("CCDR_URL") is not None:
 else:
     ccdr_url = "http://195.82.130.203:8086"
 
+if os.getenv("ACTIONLIB_URL") is not None:
+    actionlib_url = os.getenv("ACTIONLIB_URL")
+else:
+    actionlib_url = "http://195.82.130.203:8090"
+
+if os.getenv("FUSIONLIB_URL") is not None:
+    fusionlib_url = os.getenv("FUSIONLIB_URL")
+else:
+    fusionlib_url = "http://195.82.130.203:8090"
+
 if os.getenv("DROP_TABLES") is not None:
     drop_tables = os.getenv("DROP_TABLES")
 else:
