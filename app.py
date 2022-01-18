@@ -88,7 +88,7 @@ with app.app_context():
     update()
 
 
-@scheduler.scheduled_job('cron', id='calculate_all_scores', day='*', hour='12', minutes='55')
+@scheduler.scheduled_job('cron', id='calculate_all_scores', day='*', hour='12', minute='55')
 def scheduled_calculate_all_scores():
     RecommenderPatients.calculate_all_scores()
 
