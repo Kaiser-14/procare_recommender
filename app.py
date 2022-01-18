@@ -88,12 +88,12 @@ with app.app_context():
     update()
 
 
-@scheduler.scheduled_job('cron', id='calculate_all_scores', day='*', hour='12', minute='55')
+@scheduler.scheduled_job('cron', id='calculate_all_scores', day='*', hour='12', minute='12')
 def scheduled_calculate_all_scores():
     RecommenderPatients.calculate_all_scores()
 
 
-@scheduler.scheduled_job('cron', id='update_and_par', day='*', hour='13')
+@scheduler.scheduled_job('cron', id='update_and_par', day='*', hour='12', minute='13')
 def update_and_par():
     logger.info("Running daily scheduled database update and PAR round")
     with app.app_context():
