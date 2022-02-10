@@ -56,7 +56,12 @@ else:
 if os.getenv("FUSIONLIB_URL") is not None:
     fusionlib_url = os.getenv("FUSIONLIB_URL")
 else:
-    fusionlib_url = "http://195.82.130.203:8090"
+    fusionlib_url = "http://195.82.130.203:8091"
+
+if os.getenv("IDM_URL") is not None:
+    idm_url = os.getenv("IDM_URL")
+else:
+    idm_url = "http://195.82.130.203:8085"
 
 if os.getenv("DROP_TABLES") is not None:
     drop_tables = os.getenv("DROP_TABLES")
