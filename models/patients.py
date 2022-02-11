@@ -144,11 +144,11 @@ class RecommenderPatients(db.Model, UserMixin):
                 return category
 
     # TODO: Remove
-    @staticmethod
-    def get_all():
-        list_of_services = RecommenderPatients.query.all()
-        total = len(list_of_services)
-        return list_of_services, total
+    # @staticmethod
+    # def get_all():
+    #     list_of_services = RecommenderPatients.query.all()
+    #     total = len(list_of_services)
+    #     return list_of_services, total
 
     # Get all patient unique identifiers from the identity management API
     @staticmethod
@@ -271,15 +271,39 @@ class Notifications(db.Model, UserMixin):
         self.msg = msg
         self.read = False
 
-    def send(self):
+    @staticmethod
+    def send(msg):
         notification = {
-            "receiverUniqueIdentifier": self.patient,
-            "messageBody": self.msg,
-            "messageUniqueIdentifier": self.id,
-            "senderUniqueIdentifier": "Recommender"
+            "identity_management_key": "97902929",  # Patient
+            # "receiverUniqueIdentifier": self.patient,
+            "messageBody": msg,  # self.msg,
+            "messageUniqueIdentifier": "1234",  # self.id,
+            "senderUniqueIdentifier": "Recommender",
+            "receiver_device_type": "web",  # web, mobile or game
         }
+
         logger.debug(notification)
-        # TODO post notification
+        # TODO: post notification. Which IP and PORT?
+        # http: // < IP >: 8092 / notification / sendNotifications
+        headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
+        notification_response = requests.post(
+            config.fusionlib_url + "/notification/sendNotifications", data=json.dumps(notification), headers=headers)
+
+        if notification_response.status_code == 200:
+            print('Notification sent to {} via {}'.format(notification['identity_management_key'],
+                                                          notification['receiver_device_type']))
+        elif notification_response.status_code == 1000:
+            print('NOTIFICATION ERROR: Request returned general error.')
+        elif notification_response.status_code == 1007:
+            print('NOTIFICATION ERROR: There is no patient with the patient_identity_management_key {}'.format(
+                notification['identity_management_key']))
+        elif notification_response.status_code == 1060:
+            print('NOTIFICATION ERROR: receiver_device_type ({}) does not match the user role'.format(
+                notification['receiver_device_type']))
+        elif notification_response.status_code == 1048:
+            print('NOTIFICATION ERROR: notification_queue_key not found')
+        else:
+            print('NOTIFICATION ERROR.')
 
     def get_dict(self):
         return {

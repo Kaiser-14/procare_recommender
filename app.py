@@ -1,5 +1,6 @@
 # import dependencies
 import json
+import os
 from flask import Flask, request
 from apscheduler.schedulers.background import BackgroundScheduler
 
@@ -28,28 +29,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 def status():
     return "Running"
 
-
-@app.route("/notification/readStatus/", methods=['POST'])
-def notification_read():
-    content = request.get_json()
-    ref = content.get("messageUniqueIdentifier")
-    if ref:
-        notification = Notifications.get_by_id(ref)
-        if notification:
-            notification.read = True
-            notification.save()
-            return {"status": "OK",
-                    "statusCode": 0
-                    }
-        else:
-            return {"status": "Reference not found",
-                    "statusCode": 2
-                    }
-    else:
-        return {"status": "Bad request",
-                "statusCode": 1
-                }
-
+# Recommender calls
 
 # @app.route("/recommender/update_patient_db/", methods=['GET'])
 # def update():
@@ -99,8 +79,55 @@ def schedule_scores_injection():
 def update_and_par():
     logger.info("Running daily scheduled database update and PAR round")
     with app.app_context():
-        update()
+        # TODO: Uncomment and understand it
+        # update()
         RecommenderPatients.par_notifications_round()
+
+
+# Notifications calls
+
+# Send notifications to a user
+@app.route("/notification/sendNotifications/", methods=['GET'])
+def notification_send():
+    # content = request.get_json()
+
+    # Get par notifications
+    script_dir = os.path.dirname(__file__)  # <-- absolute dir the script is in
+    rel_path = "./par/par_notifications.json"
+    abs_file_path = os.path.join(script_dir, rel_path)
+
+    with open(abs_file_path) as json_file:
+        par_notifications = json.load(json_file)
+
+    # TODO: Properly select par notification
+    msg = list(par_notifications.values())[1]
+
+    print('Notification: {}'.format(msg))
+    Notifications.send(msg=msg)
+
+    return 'Notification sent:\n{}'.format(msg)
+
+# Send to the backend the unique identifier of the notification message when the user reads the notification
+@app.route("/notification/readStatus/", methods=['POST'])
+def notification_read():
+    content = request.get_json()
+    ref = content.get("messageUniqueIdentifier")
+    if ref:
+        notification = Notifications.get_by_id(ref)
+        if notification:
+            notification.read = True
+            notification.save()
+            return {"status": "OK",
+                    "statusCode": 0
+                    }
+        else:
+            return {"status": "Reference not found",
+                    "statusCode": 2
+                    }
+    else:
+        return {"status": "Bad request",
+                "statusCode": 1
+                }
 
 
 scheduler.start()
