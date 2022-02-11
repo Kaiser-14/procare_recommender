@@ -1,3 +1,5 @@
+import json
+
 import requests
 from uuid import uuid4
 from flask_sqlalchemy import SQLAlchemy
@@ -9,6 +11,10 @@ from helper.utils import logger, par_notifications
 from helper import config
 
 db = SQLAlchemy()
+
+# Flags
+test_flag = True
+debug_requests = True
 
 
 class RecommenderPatients(db.Model, UserMixin):
@@ -49,9 +55,9 @@ class RecommenderPatients(db.Model, UserMixin):
     def get_notifications(self):
         return self.notification
 
-    @staticmethod
-    def get_by_ccdr_ref(ref):
-        return RecommenderPatients.query.filter_by(ccdr_reference=ref).first()
+    # @staticmethod
+    # def get_by_ccdr_ref(ref):
+    #     return RecommenderPatients.query.filter_by(ccdr_reference=ref).first()
 
     def par_analysis(self):
         logger.info("Evaluating activity for patient " + str(self.ccdr_reference))
@@ -137,11 +143,25 @@ class RecommenderPatients(db.Model, UserMixin):
                         category = 0  # Inactive
                 return category
 
+    # TODO: Remove
     @staticmethod
     def get_all():
         list_of_services = RecommenderPatients.query.all()
         total = len(list_of_services)
         return list_of_services, total
+
+    # Get all patient unique identifiers from the identity management API
+    @staticmethod
+    def get_patients():
+        headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
+        if not test_flag:
+            idm_response = requests.get(
+                config.idm_url + "/getAllPacientKeys", headers=headers)
+        else:
+            idm_response = ["98284945", "98284945"]
+
+        number_of_patients = len(idm_response)
+        return idm_response, number_of_patients
 
     @staticmethod
     def par_notifications_round():
@@ -149,46 +169,93 @@ class RecommenderPatients(db.Model, UserMixin):
         for patient in patients:
             patient.par_notification()
 
+    # @staticmethod
+    # def update_db():
+    #     try:
+    #         response = requests.get(config.ccdr_url + "/api/v1/mobile/patient").json()
+    #         for patient in response:
+    #             ccdr_ref = patient["identity_management_key"]
+    #             rec_patient = RecommenderPatients.get_by_ccdr_ref(ccdr_ref)
+    #             if not rec_patient:
+    #                 rec_patient = RecommenderPatients(ccdr_ref)
+    #             rec_patient.save()
+    #         return RecommenderPatients.get_all()
+    #
+    #     except requests.exceptions.RequestException as e:
+    #         logger.error("Getting all patients from CCDR error", exc_info=True)
+    #         return str(e), 0
+
     @staticmethod
-    def update_db():
-        try:
-            response = requests.get(config.ccdr_url + "/api/v1/mobile/patient").json()
-            for patient in response:
-                ccdr_ref = patient["identity_management_key"]
-                rec_patient = RecommenderPatients.get_by_ccdr_ref(ccdr_ref)
-                if not rec_patient:
-                    rec_patient = RecommenderPatients(ccdr_ref)
-                rec_patient.save()
-            return RecommenderPatients.get_all()
+    def scores_injection():
+        # patients, total = RecommenderPatients.get_all()
+        patients, number_of_patients = RecommenderPatients.get_patients()
 
-        except requests.exceptions.RequestException as e:
-            logger.error("Getting all patients from CCDR error", exc_info=True)
-            return str(e), 0
+        if not test_flag:
+            start_dates = ["01-11-2021", "08-11-2021", "15-11-2021", "22-11-2021", "29-11-2021",
+                           "06-12-2021", "13-12-2021", "20-12-2021", "27-12-2021", "03-01-2022",
+                           "10-01-2022", "17-01-2022", "24-01-2022", "31-01-2022", "07-02-2022"]
+            end_dates = ["07-11-2021", "14-11-2021", "21-11-2021", "28-11-2021", "05-12-2021",
+                         "12-12-2021", "19-12-2021", "26-12-2021", "02-01-2022", "09-01-2022",
+                         "16-01-2022", "23-01-2022", "30-01-2022", "06-02-2022", "13-02-2022"]
+        else:
+            start_dates = ["25-08-2021", "25-08-2021"]
+            end_dates = ["25-08-2021", "25-08-2021"]
 
+        patient_count = 0
+        for patient_data in patients:
+            period_count = 0
+            patient_count = patient_count + 1
+            print("Processing patient " + patient_data + "....\n")
+            for start_date, end_date in zip(start_dates, end_dates):
+                period_count = period_count + 1
+                date = [start_date, end_date]
+                actionlib_response, fusionlib_response = RecommenderPatients.calculate_scores(patient_data, date)
+
+                print("Completed data injection " + str(period_count) + "/" + str(
+                    len(start_dates)) + " for " + patient_data + " between " + start_date + " and " + end_date +
+                      " ActionLib: " + str(actionlib_response.status_code) + " FusionLib: " + str(
+                    fusionlib_response.status_code))
+
+                print("ActionLib Response:\nStatus: {}\nContent: {}\n".format(str(actionlib_response.status_code),
+                                                                              str(actionlib_response.content)))
+                print("FusionLib Response:\nStatus: {}\nContent: {}\n".format(str(actionlib_response.status_code),
+                                                                              str(actionlib_response.content)))
+                print("--------------")
+
+            print("\nInjection completed. Patient: {}/{}\n".format(str(patient_count), str(number_of_patients)))
+            print("--------------")
+
+        print("Data injection completed")
+
+    # Run both ActionLib (HBR) scores and FusionLib (MMF) deviation for specific patient and date
     @staticmethod
-    def calculate_all_scores():
-        patients, total = RecommenderPatients.get_all()
-        for patient in patients:
-            patient.calculate_scores()
-
-    def calculate_scores(self):
-        today = datetime.today()
-        week_ago = today - timedelta(weeks=1)
+    def calculate_scores(patient, date):
+        # today = datetime.today()
+        # week_ago = today - timedelta(weeks=1)
         body = {
-            "identity_management_key": "Recommender",
-            "organization": "Recommender",
-            "role": "Recommender",
-            "patient_identity_management_key": self.ccdr_reference,
-            "measurements_start_date": week_ago.strftime("dd-mm-yyyy"),
-            "measurements_end_date": today.strftime("dd-mm-yyyy")
+            "identity_management_key": "123456789",
+            "organization": "000",
+            "role": "system",
+            "scenario": "data_injection",
+            "patient_identity_management_key": patient,
+            "measurements_start_date": date[0],
+            "measurements_end_date": date[1],
         }
-        actionlib_response = requests.post(config.actionlib_url+"/calculate_scores", json=body)
-        fusionlib_response = requests.post(config.fusionlib_url + "/calculate_scores", json=body)
+
+        print("Request: {}\n".format(str(body)))
+
+        headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
+        actionlib_response = requests.post(
+            config.actionlib_url + "/calculate_scores", data=json.dumps(body), headers=headers)
+        fusionlib_response = requests.post(
+            config.fusionlib_url + "/calculate_deviations", data=json.dumps(body), headers=headers)
 
         if actionlib_response.status_code != 200:
             logger.error(actionlib_response.text)
         if fusionlib_response.status_code != 200:
             logger.error(fusionlib_response.text)
+
+        return actionlib_response, fusionlib_response
 
 
 class Notifications(db.Model, UserMixin):
