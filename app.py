@@ -87,8 +87,11 @@ def update_and_par():
 # Notifications calls
 
 # Send notifications to a user
-@app.route("/notification/sendNotifications/", methods=['GET'])
+@app.route("/notification/sendNotifications/", methods=['POST'])
 def notification_send():
+    # TODO: This notification should be sent by own recommender? I mean, the recommender based on scores, should define
+    # the message body which corresponds to par notifications. ID patient is retrieved from get_patients, but
+    # msg unique identifier and receiver device type? Should it be PAR notification? But which device type?
     # content = request.get_json()
 
     # Get par notifications
@@ -103,9 +106,10 @@ def notification_send():
     msg = list(par_notifications.values())[1]
 
     print('Notification: {}'.format(msg))
-    Notifications.send(msg=msg)
+    Notifications.send(msg)
 
     return 'Notification sent:\n{}'.format(msg)
+
 
 # Send to the backend the unique identifier of the notification message when the user reads the notification
 @app.route("/notification/readStatus/", methods=['POST'])
