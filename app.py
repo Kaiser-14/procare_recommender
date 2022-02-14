@@ -92,7 +92,8 @@ def notification_send():
     # TODO: This notification should be sent by own recommender? I mean, the recommender based on scores, should define
     # the message body which corresponds to par notifications. ID patient is retrieved from get_patients, but
     # msg unique identifier and receiver device type? Should it be PAR notification? But which device type?
-    # content = request.get_json()
+    # We could remove form here de par notifications part as it will be part of the POST
+    content = request.get_json()
 
     # Get par notifications
     script_dir = os.path.dirname(__file__)  # <-- absolute dir the script is in
@@ -105,10 +106,26 @@ def notification_send():
     # TODO: Properly select par notification
     msg = list(par_notifications.values())[1]
 
+    destination = 'patient'
+
     print('Notification: {}'.format(msg))
-    Notifications.send(msg)
+    Notifications.send(msg, destination)
 
     return 'Notification sent:\n{}'.format(msg)
+
+
+# Send notifications to a medical professional by patient
+# TODO: Should it be the same as the internal? Remember, device type receiver always must be web
+@app.route("/notification/sendNotificationToMedicalProfessionalByPatient/", methods=['POST'])
+def notification_send_professional():
+    msg = request.get_json()
+
+    destination = 'professional'
+
+    print('Notification: {}'.format(msg))
+    Notifications.send(msg, destination)
+
+    return 'OK'
 
 
 # Send to the backend the unique identifier of the notification message when the user reads the notification

@@ -47,6 +47,7 @@ class RecommenderPatients(db.Model, UserMixin):
 			category = self.par_analysis(patient)
 			analysis_notification = Notifications("Activity category: " + str(category))
 			self.notification.append(analysis_notification)
+			# TODO: What should we send?
 			analysis_notification.send()
 		self.par_day = (self.par_day + 1) % 41
 		# db.session.commit()
@@ -175,7 +176,7 @@ class RecommenderPatients(db.Model, UserMixin):
 			patient_count = patient_count + 1
 			# patient.par_notification()
 			print('Par notification: Patient {}/{}'.format(patient_count, patients_total))
-			par_notifications(patient)
+			RecommenderPatients.par_notification(patient)
 
 	# @staticmethod
 	# def update_db():
@@ -284,14 +285,14 @@ class Notifications(db.Model, UserMixin):
 		self.read = False
 
 	@staticmethod
-	def send(content):
+	def send(content, destination):
 		notification = {
-			"identity_management_key": "97902929",  # Patient
+			"identity_management_key": content["identity_management_key"],  # "97902929",  # Patient
 			# "receiverUniqueIdentifier": self.patient,
-			"messageBody": content,  # self.msg,
-			"messageUniqueIdentifier": "1234",  # self.id,
+			"messageBody": content["messageBody"],  # self.msg,
+			"messageUniqueIdentifier": content["message_unique_identifier"],  # "1234",  # self.id,
 			"senderUniqueIdentifier": "Recommender",
-			"receiver_device_type": "web",  # web, mobile or game
+			"receiver_device_type": content["receiver_device_type"],  # web mobile or game
 		}
 		# notification = {
 		#     "identity_management_key": content['identity_management_key'],  # Patient
@@ -303,30 +304,59 @@ class Notifications(db.Model, UserMixin):
 		# }
 
 		logger.debug(notification)
-		# TODO: post notification. Which IP and PORT?
-		# http: // < IP >: 8092 / notification / sendNotifications
-		headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
-		notification_response = requests.post(
-			config.fusionlib_url + "/notification/sendNotifications", data=json.dumps(notification), headers=headers)
 
-		if notification_response:
-			if notification_response.status_code == 200:
-				print('Notification sent to {} via {}'.format(notification['identity_management_key'],
-										notification['receiver_device_type']))
-			elif notification_response.status_code == 1000:
-				print('NOTIFICATION ERROR: Request returned general error.')
-			elif notification_response.status_code == 1007:
-				print('NOTIFICATION ERROR: There is no patient with the patient_identity_management_key {}'.format(
-										notification['identity_management_key']))
-			elif notification_response.status_code == 1060:
-				print('NOTIFICATION ERROR: receiver_device_type ({}) does not match the user role'.format(
-										notification['receiver_device_type']))
-			elif notification_response.status_code == 1048:
-				print('NOTIFICATION ERROR: notification_queue_key not found')
+		headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
+		if destination == 'patient':
+			# TODO: post notification. Which IP and PORT?
+			# http: // < IP >: 8092 / notification / sendNotifications
+			notification_response = requests.post(
+				config.fusionlib_url + "/notification/sendNotifications",
+				data=json.dumps(notification), headers=headers
+			)
+
+			# Notifications.check_notifications_responses(notification, notification_response, destination)
+
+			if notification_response:
+				if notification_response.status_code == 200:
+					print('Notification sent to {} via {}'.format(notification['identity_management_key'],
+											notification['receiver_device_type']))
+				elif notification_response.status_code == 1000:
+					print('NOTIFICATION ERROR: Request returned general error.')
+				elif notification_response.status_code == 1007:
+					print('NOTIFICATION ERROR: There is no patient with the patient_identity_management_key {}'.format(
+											notification['identity_management_key']))
+				elif notification_response.status_code == 1060:
+					print('NOTIFICATION ERROR: receiver_device_type ({}) does not match the user role'.format(
+											notification['receiver_device_type']))
+				elif notification_response.status_code == 1048:
+					print('NOTIFICATION ERROR: notification_queue_key not found')
+				else:
+					print('NOTIFICATION ERROR.')
 			else:
-				print('NOTIFICATION ERROR.')
-		else:
-			print('No response.')
+				print('No response.')
+		elif destination == 'professional':
+			# TODO: post notification. Which IP and PORT?
+			# http: // < IP >: 8092 / notification / sendNotifications
+			notification_response = requests.post(
+				config.fusionlib_url + "/notification/sendNotificationToMedicalProfessionalByPatient",
+				data=json.dumps(notification), headers=headers
+			)
+
+			if notification_response:
+				if notification_response.status_code == 200:
+					print('Notification sent to {} via {}'.format(notification['identity_management_key'],
+											notification['receiver_device_type']))
+				elif notification_response.status_code == 1000:
+					print('NOTIFICATION ERROR: Request returned general error.')
+				elif notification_response.status_code == 1007:
+					print('NOTIFICATION ERROR: There is no patient with the patient_identity_management_key {}'.format(
+											notification['identity_management_key']))
+				elif notification_response.status_code == 1048:
+					print('NOTIFICATION ERROR: notification_queue_key not found')
+				else:
+					print('NOTIFICATION ERROR.')
+			else:
+				print('No response.')
 
 	def get_dict(self):
 		return {
