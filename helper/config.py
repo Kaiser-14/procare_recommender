@@ -63,6 +63,11 @@ if os.getenv("IDM_URL") is not None:
 else:
     idm_url = "http://195.82.130.203:8085"
 
+if os.getenv("RMQ_URL") is not None:
+    idm_url = os.getenv("RMQ_URL")
+else:
+    idm_url = "http://195.82.130.203:8092"
+
 if os.getenv("DROP_TABLES") is not None:
     drop_tables = os.getenv("DROP_TABLES")
 else:

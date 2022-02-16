@@ -1,4 +1,5 @@
 import json
+import uuid
 
 import requests
 from uuid import uuid4
@@ -85,6 +86,16 @@ class RecommenderPatients(db.Model, UserMixin):
 	# @staticmethod
 	# def get_by_ccdr_ref(ref):
 	#     return RecommenderPatients.query.filter_by(ccdr_reference=ref).first()
+
+	@staticmethod
+	def recommendation(patient, date):
+		# category, variables = RecommenderPatients.par_analysis(patient)
+		scores, deviations = RecommenderPatients.scores_injection_patient(patient, date)
+
+		notification_key = "1"
+		par_notification = par_notifications[str(notification_key)]
+
+		return par_notification
 
 	@staticmethod
 	def par_analysis(patient):
@@ -265,13 +276,27 @@ class RecommenderPatients(db.Model, UserMixin):
 
 		print("Data injection completed")
 
+	@staticmethod
+	def scores_injection_patient(patient, date):
+		print("Processing patient " + patient + "....\n")
+
+		actionlib_response, fusionlib_response = RecommenderPatients.calculate_scores(patient, date)
+
+		print(actionlib_response.json())
+		scores = actionlib_response.json()['scores']
+		deviations = fusionlib_response.json()['deviations']
+
+		print('Scores: {}\nDeviations: {}'.format(scores, deviations))
+
+		return scores, deviations
+
 	# Run both ActionLib (HBR) scores and FusionLib (MMF) deviation for specific patient and date
 	@staticmethod
 	def calculate_scores(patient, date):
 		# today = datetime.today()
 		# week_ago = today - timedelta(weeks=1)
 		body = {
-			"identity_management_key": "123456789",
+			"identity_management_key": str(uuid.uuid4()),
 			"organization": "000",
 			"role": "system",
 			"scenario": "data_injection",
@@ -316,7 +341,7 @@ class Notifications(db.Model, UserMixin):
 			# "receiverUniqueIdentifier": self.patient,
 			"messageBody": content["messageBody"],  # self.msg,
 			"messageUniqueIdentifier": content["message_unique_identifier"],  # "1234",  # self.id,
-			"senderUniqueIdentifier": "Recommender",
+			"senderUniqueIdentifier": "recommendLib",
 			"receiver_device_type": content["receiver_device_type"],  # web mobile or game
 		}
 		# notification = {
