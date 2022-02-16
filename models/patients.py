@@ -40,19 +40,44 @@ class RecommenderPatients(db.Model, UserMixin):
 			logger.debug(self.ccdr_reference)
 		db.session.commit()
 
-	def par_notification(self, patient):
-		notification = Notifications(par_notifications[str(self.par_day)])
-		self.notification.append(notification)
-		if self.par_day in [1, 7, 14, 21, 28, 35]:
-			category = self.par_analysis(patient)
-			analysis_notification = Notifications("Activity category: " + str(category))
-			self.notification.append(analysis_notification)
+	@staticmethod
+	def par_notification(patient, par_day=0):
+		# notification = Notifications(par_notifications[str(self.par_day)])
+		# self.notification.append(notification)
+
+		notification_response = {}
+
+		# Round notifications
+		if par_day in [1, 7, 14, 21, 28, 35]:
+			category, variables = patient.par_analysis()
+			# analysis_notification = Notifications("Activity category: " + str(category))
+			# self.notification.append(analysis_notification)
 			# TODO: What should we send?
-			analysis_notification.send()
-		self.par_day = (self.par_day + 1) % 41
+			# analysis_notification.send()
+			Notifications.send()
+		# PA notification
+		else:
+			category, variables = RecommenderPatients.par_analysis(patient)
+
+			body = {
+				"activity_level": category,
+				"patient_identity_management_key": patient,
+				"sitting_minutes": variables['sitting_minutes'],
+			}
+
+			headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
+			# if destination == 'patient':
+			# TODO: post notification. Which IP and PORT?
+			notification_response = requests.post(
+				config.fusionlib_url + "/notification/sendNotifications",
+				data=json.dumps(body), headers=headers
+			)
+
+		par_day = (par_day + 1) % 41
 		# db.session.commit()
 		# TODO: What should we send?
-		notification.send()
+		# notification.send()
+		return notification_response
 
 	def get_notifications(self):
 		return self.notification
@@ -146,7 +171,7 @@ class RecommenderPatients(db.Model, UserMixin):
 								category = 0  # Inactive
 					else:
 						category = 0  # Inactive
-				return category
+				return category+1, variables
 
 	# TODO: Remove
 	# @staticmethod

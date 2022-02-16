@@ -75,7 +75,8 @@ def schedule_scores_injection():
     return 'Scores injected'
 
 
-@scheduler.scheduled_job('cron', id='update_and_par', day='*', hour='12', minute='13')
+# TODO: It does not work due to previous change. Think if necessary
+# @scheduler.scheduled_job('cron', id='update_and_par', day='*', hour='12', minute='13')
 def update_and_par():
     logger.info("Running daily scheduled database update and PAR round")
     with app.app_context():
@@ -87,7 +88,7 @@ def update_and_par():
 # Notifications calls
 
 # Send notifications to a user
-@app.route("/notification/sendNotifications/", methods=['POST'])
+@app.route("/notification/sendNotifications_patient/", methods=['POST'])
 def notification_send():
     # TODO: This notification should be sent by own recommender? I mean, the recommender based on scores, should define
     # the message body which corresponds to par notifications. ID patient is retrieved from get_patients, but
@@ -116,7 +117,7 @@ def notification_send():
 
 # Send notifications to a medical professional by patient
 # TODO: Should it be the same as the internal? Remember, device type receiver always must be web
-@app.route("/notification/sendNotificationToMedicalProfessionalByPatient/", methods=['POST'])
+@app.route("/notification/sendNotifications_professional/", methods=['POST'])
 def notification_send_professional():
     msg = request.get_json()
 
@@ -149,6 +150,18 @@ def notification_read():
         return {"status": "Bad request",
                 "statusCode": 1
                 }
+
+
+# HTTP request about IPAQ analysis
+# TODO: To be tested once deployed
+@app.route("/notification/activity_level/", methods=['GET'])
+def notification_par():
+    data = request.get_json()
+    patient = data.get("identity_management_key")
+
+    response = RecommenderPatients.par_notification(patient)
+
+    return 'Patient: {}. PA notification: {}.'.format(patient, response.status_code)
 
 
 scheduler.start()
