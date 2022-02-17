@@ -1,5 +1,4 @@
 import json
-import uuid
 
 import requests
 from uuid import uuid4
@@ -296,7 +295,7 @@ class RecommenderPatients(db.Model, UserMixin):
 		# today = datetime.today()
 		# week_ago = today - timedelta(weeks=1)
 		body = {
-			"identity_management_key": str(uuid.uuid4()),
+			"identity_management_key": str(uuid4()),
 			"organization": "000",
 			"role": "system",
 			"scenario": "data_injection",
@@ -337,21 +336,12 @@ class Notifications(db.Model, UserMixin):
 	@staticmethod
 	def send(content, destination):
 		notification = {
-			"identity_management_key": content["identity_management_key"],  # "97902929",  # Patient
-			# "receiverUniqueIdentifier": self.patient,
-			"messageBody": content["messageBody"],  # self.msg,
-			"messageUniqueIdentifier": content["message_unique_identifier"],  # "1234",  # self.id,
+			"identity_management_key": content["identity_management_key"],  # "97902929"
+			"messageBody": content["messageBody"],
+			"messageUniqueIdentifier": str(uuid4()),
 			"senderUniqueIdentifier": "recommendLib",
 			"receiver_device_type": content["receiver_device_type"],  # web mobile or game
 		}
-		# notification = {
-		#     "identity_management_key": content['identity_management_key'],  # Patient
-		#     # "receiverUniqueIdentifier": self.patient,
-		#     "messageBody": content['msg'],  # self.msg,
-		#     "messageUniqueIdentifier": "1234",  # self.id,
-		#     "senderUniqueIdentifier": "Recommender",
-		#     "receiver_device_type": "web",  # web, mobile or game
-		# }
 
 		logger.debug(notification)
 
@@ -360,7 +350,7 @@ class Notifications(db.Model, UserMixin):
 			# TODO: post notification. Which IP and PORT?
 			# http: // < IP >: 8092 / notification / sendNotifications
 			notification_response = requests.post(
-				config.fusionlib_url + "/notification/sendNotifications",
+				config.rmq_url + "/notification/sendNotifications",
 				data=json.dumps(notification), headers=headers
 			)
 

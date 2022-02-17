@@ -143,7 +143,7 @@ def notification_send_professional():
 
 
 # Send to the backend the unique identifier of the notification message when the user reads the notification
-@app.route("/notification/read_status", methods=['POST'])
+@app.route("/notification/readStatus", methods=['POST'])
 def notification_read():
 	content = request.get_json()
 	ref = content.get("messageUniqueIdentifier")
@@ -178,6 +178,32 @@ def notification_par():
 	response = RecommenderPatients.par_notification(patient)
 
 	return 'Patient: {}. PA notification: {}.'.format(patient, response.status_code)
+
+
+# This method is used to receive all the notification that have been sent to the patients in a specific organization,
+# as well as the read status of these notifications.
+@app.route("/notification/getNotifications", methods=['POST'])
+def get_notifications():
+	data = request.get_json()
+
+	organization = data.get('organization_code')
+	date_start = data.get('date_start')
+	date_end = data.get('date_end')
+	date = [date_start, date_end]
+
+	# TODO: We need token auth per patient
+	# request = None
+	notifications = Notifications.retrieve_notifications(organization, date)
+
+	if organization:
+		return request
+	else:
+		return {
+			"status": "ERR",
+			"statusCode": 1000
+		}
+
+	# return 'Not yet implemented'
 
 
 scheduler.start()
