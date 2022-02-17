@@ -25,7 +25,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 #     init_db(db, app, drop=False)
 
 
-@app.route("/status/", methods=['GET'])
+@app.route("/status", methods=['GET'])
 def status():
 	return "Running"
 
@@ -80,7 +80,7 @@ def schedule_scores_injection():
 def create_recommendation():
 	data = request.get_json()
 
-	patient = data.get('identity_management_key')[0]
+	patient = data.get('identity_management_key')
 	date = [data.get('start_date')[0], data.get('end_date')[0]]
 
 	par_notification = RecommenderPatients.recommendation(patient, date)
@@ -191,7 +191,7 @@ def get_notifications():
 	date_end = data.get('date_end')
 	date = [date_start, date_end]
 
-	# TODO: We need token auth per patient
+	# TODO: We need token auth per patient and define function
 	# request = None
 	notifications = Notifications.retrieve_notifications(organization, date)
 

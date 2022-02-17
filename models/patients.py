@@ -88,11 +88,20 @@ class RecommenderPatients(db.Model, UserMixin):
 
 	@staticmethod
 	def recommendation(patient, date):
-		# category, variables = RecommenderPatients.par_analysis(patient)
+		category, variables = RecommenderPatients.par_analysis(patient)
 		scores, deviations = RecommenderPatients.scores_injection_patient(patient, date)
 
 		notification_key = "1"
 		par_notification = par_notifications[str(notification_key)]
+
+		msg = {
+			"identity_management_key": patient,
+			"messageBody": par_notification,
+			"messageUniqueIdentifier": '1234',  # TODO: Change to UUID: str(uuid4())
+			"senderUniqueIdentifier": "recommendLib",
+			"receiver_device_type": 'game',  # TODO: Change to corresponding service: web mobile or game
+		}
+		Notifications.send(msg, destination='patient')
 
 		return par_notification
 
@@ -100,24 +109,31 @@ class RecommenderPatients(db.Model, UserMixin):
 	def par_analysis(patient):
 		# logger.info("Evaluating activity for patient " + str(self.ccdr_reference))
 		logger.info("Evaluating activity for patient " + patient)
-		post = {
+		body = {
 			"identity_management_key": patient
 		}
+
+		# Initialize variables
+		category = None
+		variables = None
 
 		today = datetime.today()
 		week_ago = today - timedelta(weeks=1)
 		response = requests.post(
-			config.ccdr_url + "/api/v1/web/questionnaire/getPatientQuestionnairesResponses", json=post).json()
+			config.ccdr_url + "/api/v1/web/questionnaire/getPatientQuestionnairesResponses", json=body).json()
 
 		valid_quests = []
-		for quest in response.json():
-			survey_id = quest["survey_id"].split(".")[0]
-			if survey_id == "7":
-				# test = "Mon Jun 28 09:07:16 UTC 2021".replace(" UTC ", " ")
-				survey_datetime = datetime.strptime(quest["date"].replace(" UTC ", " "), '%a %b %d %H:%M:%S %Y')
-				if today > survey_datetime > week_ago:
-					valid_quests.append(quest)
-					logger.debug(quest)
+		if response:
+			for quest in response.json():
+				survey_id = quest["survey_id"].split(".")[0]
+				if survey_id == "7":
+					# test = "Mon Jun 28 09:07:16 UTC 2021".replace(" UTC ", " ")
+					survey_datetime = datetime.strptime(quest["date"].replace(" UTC ", " "), '%a %b %d %H:%M:%S %Y')
+					if today > survey_datetime > week_ago:
+						valid_quests.append(quest)
+						logger.debug(quest)
+		else:
+			print('No questionnaire for patient {}'.format(patient))
 
 		if valid_quests:
 			final_quest = valid_quests[0]
@@ -182,6 +198,7 @@ class RecommenderPatients(db.Model, UserMixin):
 					else:
 						category = 0  # Inactive
 				return category+1, variables
+		return category, variables
 
 	# TODO: Remove
 	# @staticmethod
@@ -281,11 +298,10 @@ class RecommenderPatients(db.Model, UserMixin):
 
 		actionlib_response, fusionlib_response = RecommenderPatients.calculate_scores(patient, date)
 
-		print(actionlib_response.json())
 		scores = actionlib_response.json()['scores']
 		deviations = fusionlib_response.json()['deviations']
 
-		print('Scores: {}\nDeviations: {}'.format(scores, deviations))
+		print('Scores: {}\nDeviations: {}\n'.format(scores, deviations))
 
 		return scores, deviations
 
@@ -304,7 +320,7 @@ class RecommenderPatients(db.Model, UserMixin):
 			"measurements_end_date": date[1],
 		}
 
-		print("Request: {}\n".format(str(body)))
+		# print("Request: {}\n".format(str(body)))
 
 		headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
 		actionlib_response = requests.post(
@@ -334,69 +350,44 @@ class Notifications(db.Model, UserMixin):
 		self.read = False
 
 	@staticmethod
-	def send(content, destination):
-		notification = {
-			"identity_management_key": content["identity_management_key"],  # "97902929"
-			"messageBody": content["messageBody"],
-			"messageUniqueIdentifier": str(uuid4()),
-			"senderUniqueIdentifier": "recommendLib",
-			"receiver_device_type": content["receiver_device_type"],  # web mobile or game
-		}
-
-		logger.debug(notification)
+	def send(body, destination):
+		logger.debug(body)
 
 		headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
 		if destination == 'patient':
-			# TODO: post notification. Which IP and PORT?
-			# http: // < IP >: 8092 / notification / sendNotifications
 			notification_response = requests.post(
 				config.rmq_url + "/notification/sendNotifications",
-				data=json.dumps(notification), headers=headers
+				data=json.dumps(body), headers=headers
 			)
-
-			# Notifications.check_notifications_responses(notification, notification_response, destination)
-
-			if notification_response:
-				if notification_response.status_code == 200:
-					print('Notification sent to {} via {}'.format(notification['identity_management_key'],
-											notification['receiver_device_type']))
-				elif notification_response.status_code == 1000:
-					print('NOTIFICATION ERROR: Request returned general error.')
-				elif notification_response.status_code == 1007:
-					print('NOTIFICATION ERROR: There is no patient with the patient_identity_management_key {}'.format(
-											notification['identity_management_key']))
-				elif notification_response.status_code == 1060:
-					print('NOTIFICATION ERROR: receiver_device_type ({}) does not match the user role'.format(
-											notification['receiver_device_type']))
-				elif notification_response.status_code == 1048:
-					print('NOTIFICATION ERROR: notification_queue_key not found')
-				else:
-					print('NOTIFICATION ERROR.')
-			else:
-				print('No response.')
 		elif destination == 'professional':
-			# TODO: post notification. Which IP and PORT?
-			# http: // < IP >: 8092 / notification / sendNotifications
 			notification_response = requests.post(
-				config.fusionlib_url + "/notification/sendNotificationToMedicalProfessionalByPatient",
-				data=json.dumps(notification), headers=headers
+				config.rmq_url + "/notification/sendNotificationToMedicalProfessionalByPatient",
+				data=json.dumps(body), headers=headers
 			)
+		else:
+			notification_response = None
+		Notifications.check_response(destination, notification_response, body)
 
-			if notification_response:
-				if notification_response.status_code == 200:
-					print('Notification sent to {} via {}'.format(notification['identity_management_key'],
-											notification['receiver_device_type']))
-				elif notification_response.status_code == 1000:
-					print('NOTIFICATION ERROR: Request returned general error.')
-				elif notification_response.status_code == 1007:
-					print('NOTIFICATION ERROR: There is no patient with the patient_identity_management_key {}'.format(
-											notification['identity_management_key']))
-				elif notification_response.status_code == 1048:
-					print('NOTIFICATION ERROR: notification_queue_key not found')
-				else:
-					print('NOTIFICATION ERROR.')
+	@staticmethod
+	def check_response(destination, response, body):
+		if response:
+			if response.status_code == 200:
+				print('Notification sent to {} via {}'.format(
+					body['identity_management_key'], body['receiver_device_type']))
+			elif response.status_code == 1000:
+				print('NOTIFICATION ERROR: Request returned general error.')
+			elif response.status_code == 1007:
+				print('NOTIFICATION ERROR: There is no patient with the patient_identity_management_key {}'.format(
+					body['identity_management_key']))
+			elif response.status_code == 1060 and destination == 'patient':
+				print('NOTIFICATION ERROR: receiver_device_type ({}) does not match the user role'.format(
+					body['receiver_device_type']))
+			elif response.status_code == 1048:
+				print('NOTIFICATION ERROR: notification_queue_key not found')
 			else:
-				print('No response.')
+				print('NOTIFICATION ERROR.')
+		else:
+			print('No response.')
 
 	def get_dict(self):
 		return {
