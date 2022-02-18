@@ -59,24 +59,22 @@ class RecommenderPatients(db.Model, UserMixin):
 		else:
 			category, variables = RecommenderPatients.par_analysis(patient)
 
-			body = {
-				"activity_level": category,
-				"patient_identity_management_key": patient,
-				"sitting_minutes": variables['sitting_minutes'],
-			}
+			if category and variables:
+				body = {
+					"identity_management_key": patient,
+					"message_body": {
+						"activity_level_color": category,
+						"inactivity_minutes": variables['sitting_minutes'],
 
-			headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
-			# if destination == 'patient':
-			# TODO: post notification. Which IP and PORT?
-			notification_response = requests.post(
-				config.fusionlib_url + "/notification/sendNotifications",
-				data=json.dumps(body), headers=headers
-			)
+					},
+					"message_unique_identifier": '1234',  # TODO: Change to UUID: str(uuid4())
+					"sender_unique_identifier": "recommendLib",
+					"receiver_device_type": 'game',  # TODO: Change to mobile
+				}
+
+				Notifications.send(body, destination='patient')
 
 		par_day = (par_day + 1) % 41
-		# db.session.commit()
-		# TODO: What should we send?
-		# notification.send()
 		return notification_response
 
 	def get_notifications(self):
@@ -96,9 +94,9 @@ class RecommenderPatients(db.Model, UserMixin):
 
 		msg = {
 			"identity_management_key": patient,
-			"messageBody": par_notification,
-			"messageUniqueIdentifier": '1234',  # TODO: Change to UUID: str(uuid4())
-			"senderUniqueIdentifier": "recommendLib",
+			"message_body": par_notification,
+			"message_unique_identifier": '1234',  # TODO: Change to UUID: str(uuid4())
+			"sender_unique_identifier": "recommendLib",
 			"receiver_device_type": 'game',  # TODO: Change to corresponding service: web mobile or game
 		}
 		Notifications.send(msg, destination='patient')
@@ -107,7 +105,6 @@ class RecommenderPatients(db.Model, UserMixin):
 
 	@staticmethod
 	def par_analysis(patient):
-		# logger.info("Evaluating activity for patient " + str(self.ccdr_reference))
 		logger.info("Evaluating activity for patient " + patient)
 		body = {
 			"identity_management_key": patient
@@ -133,7 +130,7 @@ class RecommenderPatients(db.Model, UserMixin):
 						valid_quests.append(quest)
 						logger.debug(quest)
 		else:
-			print('No questionnaire for patient {}'.format(patient))
+			logger.debug('No questionnaire for patient {}'.format(patient))
 
 		if valid_quests:
 			final_quest = valid_quests[0]
@@ -200,13 +197,6 @@ class RecommenderPatients(db.Model, UserMixin):
 				return category+1, variables
 		return category, variables
 
-	# TODO: Remove
-	# @staticmethod
-	# def get_all():
-	#     list_of_services = RecommenderPatients.query.all()
-	#     total = len(list_of_services)
-	#     return list_of_services, total
-
 	# Get all patient unique identifiers from the identity management API
 	@staticmethod
 	def get_patients():
@@ -224,10 +214,10 @@ class RecommenderPatients(db.Model, UserMixin):
 	def par_notifications_round():
 		patients, patients_total = RecommenderPatients.get_patients()
 		patient_count = 0
+
 		for patient in patients:
 			patient_count = patient_count + 1
-			# patient.par_notification()
-			print('Par notification: Patient {}/{}'.format(patient_count, patients_total))
+			logger.info('Par notification: Patient {}/{}'.format(patient_count, patients_total))
 			RecommenderPatients.par_notification(patient)
 
 	# @staticmethod
@@ -270,38 +260,38 @@ class RecommenderPatients(db.Model, UserMixin):
 		for patient in patients:
 			period_count = 0
 			patient_count = patient_count + 1
-			print("Processing patient " + patient + "....\n")
+			logger.info("Processing patient " + patient + "....\n")
 			for start_date, end_date in zip(start_dates, end_dates):
 				period_count = period_count + 1
 				date = [start_date, end_date]
 				actionlib_response, fusionlib_response = RecommenderPatients.calculate_scores(patient, date)
 
-				print("Completed data injection " + str(period_count) + "/" + str(
+				logger.info("Completed data injection " + str(period_count) + "/" + str(
 					len(start_dates)) + " for " + patient + " between " + start_date + " and " + end_date +
 					" ActionLib: " + str(actionlib_response.status_code) + " FusionLib: " + str(
 					fusionlib_response.status_code))
 
-				print("ActionLib Response:\nStatus: {}\nContent: {}\n".format(
+				logger.debug("ActionLib Response:\nStatus: {}\nContent: {}\n".format(
 					str(actionlib_response.status_code), str(actionlib_response.content)))
-				print("FusionLib Response:\nStatus: {}\nContent: {}\n".format(
+				logger.debug("FusionLib Response:\nStatus: {}\nContent: {}\n".format(
 					str(actionlib_response.status_code), str(actionlib_response.content)))
-				print("--------------")
+				logger.info("--------------")
 
-			print("\nInjection completed. Patient: {}/{}\n".format(str(patient_count), str(patients_total)))
-			print("--------------")
+			logger.info("\nInjection completed. Patient: {}/{}\n".format(str(patient_count), str(patients_total)))
+			logger.info("--------------")
 
-		print("Data injection completed")
+		logger.info("Data injection completed")
 
 	@staticmethod
 	def scores_injection_patient(patient, date):
-		print("Processing patient " + patient + "....\n")
+		logger.info("Processing patient " + patient + "....\n")
 
 		actionlib_response, fusionlib_response = RecommenderPatients.calculate_scores(patient, date)
 
 		scores = actionlib_response.json()['scores']
 		deviations = fusionlib_response.json()['deviations']
 
-		print('Scores: {}\nDeviations: {}\n'.format(scores, deviations))
+		logger.info('Scores: {}\nDeviations: {}\n'.format(scores, deviations))
 
 		return scores, deviations
 
@@ -320,7 +310,7 @@ class RecommenderPatients(db.Model, UserMixin):
 			"measurements_end_date": date[1],
 		}
 
-		# print("Request: {}\n".format(str(body)))
+		# logger("Request: {}\n".format(str(body)))
 
 		headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
 		actionlib_response = requests.post(
@@ -372,22 +362,22 @@ class Notifications(db.Model, UserMixin):
 	def check_response(destination, response, body):
 		if response:
 			if response.status_code == 200:
-				print('Notification sent to {} via {}'.format(
+				logger.debug('Notification sent to {} via {}'.format(
 					body['identity_management_key'], body['receiver_device_type']))
 			elif response.status_code == 1000:
-				print('NOTIFICATION ERROR: Request returned general error.')
+				logger.error('NOTIFICATION ERROR: Request returned general error.')
 			elif response.status_code == 1007:
-				print('NOTIFICATION ERROR: There is no patient with the patient_identity_management_key {}'.format(
+				logger.error('NOTIFICATION ERROR: There is no patient with the patient_identity_management_key {}'.format(
 					body['identity_management_key']))
 			elif response.status_code == 1060 and destination == 'patient':
-				print('NOTIFICATION ERROR: receiver_device_type ({}) does not match the user role'.format(
+				logger.error('NOTIFICATION ERROR: receiver_device_type ({}) does not match the user role'.format(
 					body['receiver_device_type']))
 			elif response.status_code == 1048:
-				print('NOTIFICATION ERROR: notification_queue_key not found')
+				logger.error('NOTIFICATION ERROR: notification_queue_key not found')
 			else:
-				print('NOTIFICATION ERROR.')
+				logger.error('NOTIFICATION ERROR.')
 		else:
-			print('No response.')
+			logger.debug('No response.')
 
 	def get_dict(self):
 		return {

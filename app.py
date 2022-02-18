@@ -75,7 +75,6 @@ def schedule_scores_injection():
 	return 'Scores injected'
 
 
-# TODO: It should be a post request
 @app.route("/recommender/create_recommendation", methods=['POST'])
 def create_recommendation():
 	data = request.get_json()
@@ -88,14 +87,14 @@ def create_recommendation():
 	return 'Notification sent for patient {}: {}'.format(patient, par_notification)
 
 
-# TODO: It does not work due to previous change. Think if necessary
+# TODO: Enable when deploying
 # @scheduler.scheduled_job('cron', id='update_and_par', day='*', hour='12', minute='13')
-def update_and_par():
-	logger.info("Running daily scheduled database update and PAR round")
-	with app.app_context():
-		# TODO: Uncomment and understand it
-		# update()
-		RecommenderPatients.par_notifications_round()
+@app.route("/notification/daily_par", methods=['GET'])
+def daily_par():
+	logger.info("Running daily PAR round")
+
+	RecommenderPatients.par_notifications_round()
+	return "Finished."
 
 
 # Notifications calls
@@ -122,7 +121,7 @@ def notification_send():
 
 	destination = 'patient'
 
-	print('Notification: {}'.format(msg))
+	logger.info('Notification: {}'.format(msg))
 	Notifications.send(msg, destination)
 
 	return 'Notification sent:\n{}'.format(msg)
@@ -136,7 +135,7 @@ def notification_send_professional():
 
 	destination = 'professional'
 
-	print('Notification: {}'.format(msg))
+	logger.info('Notification: {}'.format(msg))
 	Notifications.send(msg, destination)
 
 	return 'OK'
