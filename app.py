@@ -99,54 +99,14 @@ def daily_par():
 
 # Notifications calls
 
-# Send notifications to a user
-@app.route("/notification/send_notifications_patient", methods=['POST'])
-def notification_send():
-	# TODO: This notification should be sent by own recommender? I mean, the recommender based on scores, should define
-	# the message body which corresponds to par notifications. ID patient is retrieved from get_patients, but
-	# msg unique identifier and receiver device type? Should it be PAR notification? But which device type?
-	# We could remove form here de par notifications part as it will be part of the POST
-	content = request.get_json()
-
-	# Get par notifications
-	script_dir = os.path.dirname(__file__)  # <-- absolute dir the script is in
-	rel_path = "./par/par_notifications.json"
-	abs_file_path = os.path.join(script_dir, rel_path)
-
-	with open(abs_file_path) as json_file:
-		par_notifications = json.load(json_file)
-
-	# TODO: Properly select par notification
-	msg = list(par_notifications.values())[1]
-
-	destination = 'patient'
-
-	logger.info('Notification: {}'.format(msg))
-	Notifications.send(msg, destination)
-
-	return 'Notification sent:\n{}'.format(msg)
-
-
-# Send notifications to a medical professional by patient
-# TODO: Should it be the same as the internal? Remember, device type receiver always must be web
-@app.route("/notification/send_notifications_professional", methods=['POST'])
-def notification_send_professional():
-	msg = request.get_json()
-
-	destination = 'professional'
-
-	logger.info('Notification: {}'.format(msg))
-	Notifications.send(msg, destination)
-
-	return 'OK'
-
-
 # Send to the backend the unique identifier of the notification message when the user reads the notification
 @app.route("/notification/readStatus", methods=['POST'])
 def notification_read():
 	content = request.get_json()
-	ref = content.get("messageUniqueIdentifier")
+	ref = content.get("messageId")
 	if ref:
+		# TODO: Complete endpoint
+		Notifications.check_notification(ref)
 		notification = Notifications.get_by_id(ref)
 		if notification:
 			notification.read = True
@@ -185,16 +145,17 @@ def notification_par():
 def get_notifications():
 	data = request.get_json()
 
-	organization = data.get('organization_code')
-	date_start = data.get('date_start')
-	date_end = data.get('date_end')
+	patient = data.get("patient_identity_management_key")
+	organization = data.get("organization_code")
+	date_start = data.get("date_start")
+	date_end = data.get("date_end")
 	date = [date_start, date_end]
 
 	# TODO: We need token auth per patient and define function
 	# request = None
-	notifications = Notifications.retrieve_notifications(organization, date)
+	notifications = Notifications.retrieve_notifications(patient, organization, date)
 
-	if organization:
+	if organization and notifications:
 		return request
 	else:
 		return {

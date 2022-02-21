@@ -68,6 +68,11 @@ if os.getenv("RMQ_URL") is not None:
 else:
     rmq_url = "http://195.82.130.203:8092"
 
+if os.getenv("BACKEND_URL") is not None:
+    backend_url = os.getenv("BACKEND_URL")
+else:
+    backend_url = "http://195.82.130.203:8081"
+
 if os.getenv("DROP_TABLES") is not None:
     drop_tables = os.getenv("DROP_TABLES")
 else:
