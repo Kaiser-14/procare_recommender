@@ -40,52 +40,38 @@ class RecommenderPatients(db.Model, UserMixin):
 			logger.debug(self.ccdr_reference)
 		db.session.commit()
 
-	# @staticmethod
 	def par_notification(self):
-		# notification = Notifications(par_notifications[str(self.par_day)])
-		# self.notification.append(notification)
-
 		notification_response = {}
+		message_body = None
 
-		# Round notifications
-		# TODO: Daily, one after another (in order)
-		# if par_day in [1, 7, 14, 21, 28, 35]:
+		# Daily notification
 		if self.par_day != 0:
-			# category, variables = patient.RecommenderPatients.par_analysis()
-			category, variables = self.par_analysis()
-			# analysis_notification = Notifications("Activity category: " + str(category))
-			# self.notification.append(analysis_notification)
-			# TODO: What should we send?
-			# analysis_notification.send()
-			# Notifications.send()
-			print("Patient {} is in category {}".format(self.ccdr_reference, category))
-			print("Par day previous: {}".format(self.par_day))
-			self.par_day = (self.par_day + 1) % 41
-			print("Par day after: {}".format(self.par_day))
-			if self.par_day in [10, 15, 25, 30, 35, 40]:
-				pass
-		# PA notification
-		else:
-			category, variables = RecommenderPatients.par_analysis(self.ccdr_reference)
-			# pass
+			message_body = par_notifications[str(self.par_day)]
 
+		# Notification after questionnaire
+		if self.par_day in [10, 15, 25, 30, 35, 40]:
+			category, variables = self.par_analysis()
+			category = RecommenderPatients.get_color_category(category)
 			if category and variables:
-				body = {
-					"identity_management_key": self.ccdr_reference,
-					"message_body": {
-						# TODO: Send color category
-						"activity_level_color": category,
-						"inactivity_minutes": variables['sitting_minutes'],
-					},
-					"message_unique_identifier": '1234',  # TODO: Change to UUID: str(uuid4())
-					"sender_unique_identifier": "recommendLib",
-					"receiver_device_type": 'game',  # TODO: Change to mobile
+				message_body = {
+					"activity_level_color": category,
+					"inactivity_minutes": variables['sitting_minutes'],
 				}
 
-				# Notifications.send(body, destination='patient')
+		# Create body for notification
+		if message_body:
+			body = {
+				"identity_management_key": self.ccdr_reference,
+				"message_body": message_body,
+				"message_unique_identifier": '1234',  # TODO: Change to UUID: str(uuid4())
+				"sender_unique_identifier": "recommendLib",
+				"receiver_device_type": 'game',  # TODO: Change to mobile
+			}
 
-		# par_day = (par_day + 1) % 41
-		return notification_response
+			# Send notification to patient
+			Notifications.send(body, destination='patient')
+
+		self.par_day = (self.par_day + 1) % 41
 
 	def get_notifications(self):
 		return self.notification
@@ -204,8 +190,8 @@ class RecommenderPatients(db.Model, UserMixin):
 								category = 0  # Inactive
 					else:
 						category = 0  # Inactive
-				return category+1, variables
-		return category, variables
+				# return category+1, variables
+		return category+1, variables
 
 	# Get all patient unique identifiers from the identity management API
 	@staticmethod
@@ -222,27 +208,17 @@ class RecommenderPatients(db.Model, UserMixin):
 
 	@staticmethod
 	def par_notifications_round():
-		patients, patients_total = RecommenderPatients.get_patients()
+		reference_patients, patients_total = RecommenderPatients.get_patients()
 		patient_count = 0
-		patients = ["98284945"]
+		# TODO: Uncomment once tested
+		reference_patients = ["98284945"]
 		patients_total = 1
 
-		for patient in patients:
-			patient2 = RecommenderPatients.get_by_ccdr_ref(patient)
-			if patient2:
-				patient_count = patient_count + 1
-				logger.info('Par notification: Patient {}/{}'.format(patient_count, patients_total))
-				pat = RecommenderPatients(patient)
-				print(pat.par_day)
-			# if par_day == 0:
-			# 	par_day = RecommenderPatients().get_dict()["par_day"]
-			# else:
-			# 	par_day = RecommenderPatients(par_day).get_dict()["par_day"]
-			# par_day = self.par_day
-			# print(par_day)
-			# RecommenderPatients().par_notification(patient, par_day)
-			pat.par_notification()
-			print(pat.par_day)
+		for reference in reference_patients:
+			patient = RecommenderPatients(reference)
+			patient_count = patient_count + 1
+			logger.info('Par notification: Patient {}/{}'.format(patient_count, patients_total))
+			patient.par_notification()
 
 	# @staticmethod
 	# def update_db():
@@ -348,6 +324,17 @@ class RecommenderPatients(db.Model, UserMixin):
 			logger.error(fusionlib_response.text)
 
 		return actionlib_response, fusionlib_response
+
+	@staticmethod
+	def get_color_category(category):
+		if category == 1:
+			return "red"
+		elif category == 2:
+			return "orange"
+		elif category == 3:
+			return "green"
+		else:
+			return None
 
 
 class Notifications(db.Model, UserMixin):
