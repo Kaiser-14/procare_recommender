@@ -171,14 +171,14 @@ def get_notifications():
 			for notification in patient.get_notifications():
 				notification_dict = notification.get_dict()
 				body = {
-					"message": notification_dict.msg,
+					"message": notification_dict["msg"],
 					# TODO: Return date
 					# "date": "25-02-2022 02:31:29",
-					"isReadStatus": notification_dict.read,
+					"isReadStatus": notification_dict["read"],
 					"user": patient_reference
 				}
 				notifications.append(body)
-			return notifications
+			return str(notifications), 200
 		else:
 			return "Patient not found", 404
 	else:
