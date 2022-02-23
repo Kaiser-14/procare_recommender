@@ -443,7 +443,7 @@ class Notifications(db.Model, UserMixin):
 	@staticmethod
 	def check_par_notification(msg):
 		par = False
-		if msg in par_notifications:
+		if msg in par_notifications.values():
 			par = True
 		return par
 
