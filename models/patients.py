@@ -30,7 +30,7 @@ class RecommenderPatients(db.Model, UserMixin):
 
 	def get_dict(self):
 		return {
-			# "ccdr_reference": self.ccdr_reference,
+			"ccdr_reference": self.ccdr_reference,
 			"par_day": self.par_day
 		}
 
@@ -43,6 +43,18 @@ class RecommenderPatients(db.Model, UserMixin):
 	def par_notification(self):
 		notification_response = {}
 		message_body = None
+
+		# Restored
+		notification = Notifications(par_notifications[str(self.par_day)])
+		self.notification.append(notification)
+		if self.par_day in [1, 7, 14, 21, 28, 35]:
+			category = self.par_analysis()
+			analysis_notification = Notifications("Activity category: " + str(category))
+			self.notification.append(analysis_notification)
+			analysis_notification.send()
+		self.par_day = (self.par_day + 1) % 41
+		db.session.commit()
+		notification.send()
 
 		# Daily notification
 		if self.par_day != 0:
@@ -77,8 +89,8 @@ class RecommenderPatients(db.Model, UserMixin):
 		return self.notification
 
 	# @staticmethod
-	# def get_by_ccdr_ref(ref):
-	#     return RecommenderPatients.query.filter_by(ccdr_reference=ref).first()
+	def get_by_ccdr_ref(ref):
+		return RecommenderPatients.query.filter_by(ccdr_reference=ref).first()
 
 	@staticmethod
 	def recommendation(patient, date):
@@ -193,6 +205,12 @@ class RecommenderPatients(db.Model, UserMixin):
 				# return category+1, variables
 		return category+1, variables
 
+	@staticmethod
+	def get_all():
+		list_of_services = RecommenderPatients.query.all()
+		total = len(list_of_services)
+		return list_of_services, total
+
 	# Get all patient unique identifiers from the identity management API
 	@staticmethod
 	def get_patients():
@@ -220,21 +238,21 @@ class RecommenderPatients(db.Model, UserMixin):
 			logger.info('Par notification: Patient {}/{}'.format(patient_count, patients_total))
 			patient.par_notification()
 
-	# @staticmethod
-	# def update_db():
-	#     try:
-	#         response = requests.get(config.ccdr_url + "/api/v1/mobile/patient").json()
-	#         for patient in response:
-	#             ccdr_ref = patient["identity_management_key"]
-	#             rec_patient = RecommenderPatients.get_by_ccdr_ref(ccdr_ref)
-	#             if not rec_patient:
-	#                 rec_patient = RecommenderPatients(ccdr_ref)
-	#             rec_patient.save()
-	#         return RecommenderPatients.get_all()
-	#
-	#     except requests.exceptions.RequestException as e:
-	#         logger.error("Getting all patients from CCDR error", exc_info=True)
-	#         return str(e), 0
+	@staticmethod
+	def update_db():
+		try:
+			response = requests.get(config.ccdr_url + "/api/v1/mobile/patient").json()
+			for patient in response:
+				ccdr_ref = patient["identity_management_key"]
+				rec_patient = RecommenderPatients.get_by_ccdr_ref(ccdr_ref)
+				if not rec_patient:
+					rec_patient = RecommenderPatients(ccdr_ref)
+				rec_patient.save()
+			return RecommenderPatients.get_all()
+
+		except requests.exceptions.RequestException as e:
+			logger.error("Getting all patients from CCDR error", exc_info=True)
+			return str(e), 0
 
 	@staticmethod
 	def scores_injection():
@@ -349,6 +367,18 @@ class Notifications(db.Model, UserMixin):
 		self.id = str(uuid4())
 		self.msg = msg
 		self.read = False
+
+	# Restored version
+	# def send(self):
+	# 	notification = {
+	# 		"receiverUniqueIdentifier": self.patient,
+	# 		"messageBody": self.msg,
+	# 		"messageUniqueIdentifier": self.id,
+	# 		"senderUniqueIdentifier": "Recommender"
+	# 	}
+	# 	logger.debug(notification)
+	#
+	# # TODO post notification
 
 	@staticmethod
 	def send(body, destination):

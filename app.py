@@ -17,12 +17,12 @@ logger.debug(app.config['SQLALCHEMY_DATABASE_URI'])
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# if config.drop_tables == "yes":
-#     logger.debug("init drop = True")
-#     init_db(db, app, drop=True)
-# else:
-#     logger.debug("init drop = False")
-#     init_db(db, app, drop=False)
+if config.drop_tables == "yes":
+	logger.debug("init drop = True")
+	init_db(db, app, drop=True)
+else:
+	logger.debug("init drop = False")
+	init_db(db, app, drop=False)
 
 
 @app.route("/status", methods=['GET'])
@@ -31,19 +31,19 @@ def status():
 
 # Recommender calls
 
-# @app.route("/recommender/update_patient_db/", methods=['GET'])
-# def update():
-#     response = {
-#         "rec_patients": [],
-#         "total": None
-#     }
-#     patients, total = RecommenderPatients.update_db()
-#     if total:
-#         response["total"] = total
-#     if patients:
-#         for patient in patients:
-#             response["rec_patients"].append(patient.get_dict())
-#     return json.dumps(response, indent=3)
+@app.route("/recommender/update_patient_db/", methods=['GET'])
+def update():
+	response = {
+		"rec_patients": [],
+		"total": None
+	}
+	patients, total = RecommenderPatients.update_db()
+	if total:
+		response["total"] = total
+	if patients:
+		for patient in patients:
+			response["rec_patients"].append(patient.get_dict())
+	return json.dumps(response, indent=3)
 
 
 @app.route("/recommender/get_notifications_of_patient", methods=['GET'])
@@ -63,9 +63,9 @@ def get_notifications_of_patient():
 
 
 scheduler = BackgroundScheduler()
-# with app.app_context():
-#     logger.info("First database update")
-#     update()
+with app.app_context():
+	logger.info("First database update")
+	update()
 
 
 @scheduler.scheduled_job('cron', id='scores_injection', day='*', hour='12', minute='12')
@@ -92,6 +92,9 @@ def create_recommendation():
 @app.route("/notification/daily_par", methods=['GET'])
 def daily_par():
 	logger.info("Running daily PAR round")
+	with app.app_context():
+		update()
+		RecommenderPatients.par_notifications_round()
 
 	RecommenderPatients.par_notifications_round()
 	return "Finished."
