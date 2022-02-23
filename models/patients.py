@@ -41,49 +41,18 @@ class RecommenderPatients(db.Model, UserMixin):
 		db.session.commit()
 
 	def par_notification(self):
-		notification_response = {}
-		message_body = None
-
-		# Restored
 		notification = Notifications(par_notifications[str(self.par_day)])
 		self.notification.append(notification)
-		if self.par_day in [1, 7, 14, 21, 28, 35]:
-			category = self.par_analysis()
-			analysis_notification = Notifications("Activity category: " + str(category))
+		if self.par_day in [10, 15, 25, 30, 35, 40]:
+			category, sitting_minutes = self.par_analysis()
+			category = RecommenderPatients.get_color_category(category)
+			analysis_notification = Notifications(
+				"activity_level_color: ,\ninactivity_minutes: ".format(category, str(sitting_minutes)))
 			self.notification.append(analysis_notification)
 			analysis_notification.send()
 		self.par_day = (self.par_day + 1) % 41
 		db.session.commit()
 		notification.send()
-
-		# Daily notification
-		if self.par_day != 0:
-			message_body = par_notifications[str(self.par_day)]
-
-		# Notification after questionnaire
-		if self.par_day in [10, 15, 25, 30, 35, 40]:
-			category, variables = self.par_analysis()
-			category = RecommenderPatients.get_color_category(category)
-			if category and variables:
-				message_body = {
-					"activity_level_color": category,
-					"inactivity_minutes": variables['sitting_minutes'],
-				}
-
-		# Create body for notification
-		if message_body:
-			body = {
-				"identity_management_key": self.ccdr_reference,
-				"message_body": message_body,
-				"message_unique_identifier": '1234',  # TODO: Change to UUID: str(uuid4())
-				"sender_unique_identifier": "recommendLib",
-				"receiver_device_type": 'game',  # TODO: Change to mobile
-			}
-
-			# Send notification to patient
-			Notifications.send(body, destination='patient')
-
-		self.par_day = (self.par_day + 1) % 41
 
 	def get_notifications(self):
 		return self.notification
@@ -206,7 +175,7 @@ class RecommenderPatients(db.Model, UserMixin):
 		return category+1, variables
 
 	@staticmethod
-	def get_all():
+	def get_patients_db():
 		list_of_services = RecommenderPatients.query.all()
 		total = len(list_of_services)
 		return list_of_services, total
@@ -226,14 +195,11 @@ class RecommenderPatients(db.Model, UserMixin):
 
 	@staticmethod
 	def par_notifications_round():
-		reference_patients, patients_total = RecommenderPatients.get_patients()
+		patient_references, patients_total = RecommenderPatients.get_patients_db()
+		# reference_patients, patients_total = RecommenderPatients.get_patients()
 		patient_count = 0
-		# TODO: Uncomment once tested
-		reference_patients = ["98284945"]
-		patients_total = 1
 
-		for reference in reference_patients:
-			patient = RecommenderPatients(reference)
+		for patient in patient_references:
 			patient_count = patient_count + 1
 			logger.info('Par notification: Patient {}/{}'.format(patient_count, patients_total))
 			patient.par_notification()
@@ -247,8 +213,8 @@ class RecommenderPatients(db.Model, UserMixin):
 				rec_patient = RecommenderPatients.get_by_ccdr_ref(ccdr_ref)
 				if not rec_patient:
 					rec_patient = RecommenderPatients(ccdr_ref)
-				rec_patient.save()
-			return RecommenderPatients.get_all()
+					rec_patient.save()
+			return RecommenderPatients.get_patients_db()
 
 		except requests.exceptions.RequestException as e:
 			logger.error("Getting all patients from CCDR error", exc_info=True)
@@ -256,7 +222,7 @@ class RecommenderPatients(db.Model, UserMixin):
 
 	@staticmethod
 	def scores_injection():
-		# patients, total = RecommenderPatients.get_all()
+		# patients, total = RecommenderPatients.get_patients_db()
 		patients, patients_total = RecommenderPatients.get_patients()
 
 		if not test_flag:
@@ -368,38 +334,73 @@ class Notifications(db.Model, UserMixin):
 		self.msg = msg
 		self.read = False
 
-	# Restored version
-	# def send(self):
-	# 	notification = {
-	# 		"receiverUniqueIdentifier": self.patient,
-	# 		"messageBody": self.msg,
-	# 		"messageUniqueIdentifier": self.id,
-	# 		"senderUniqueIdentifier": "Recommender"
-	# 	}
-	# 	logger.debug(notification)
-	#
-	# # TODO post notification
+	def send(self):
+		body = {
+			"identity_management_key": self.patient,
+			"message_body": self.msg,
+			"message_unique_identifier": self.id,
+			"sender_unique_identifier": "recommendLib",
+			"receiver_device_type": 'game',  # TODO: Change to mobile
+		}
 
-	@staticmethod
-	def send(body, destination):
 		logger.debug(body)
 
 		headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
-		if destination == 'patient':
-			notification_response = requests.post(
-				config.rmq_url + "/notification/sendNotifications",
-				data=json.dumps(body), headers=headers
-			)
-		elif destination == 'professional':
-			# The receiving device should always be web notification
-			body["receiver_device_type"] = "web"
-			notification_response = requests.post(
-				config.rmq_url + "/notification/sendNotificationToMedicalProfessionalByPatient",
-				data=json.dumps(body), headers=headers
-			)
-		else:
-			notification_response = None
+
+		notification_response = requests.post(
+			config.rmq_url + "/notification/sendNotifications",
+			data=json.dumps(body), headers=headers
+		)
+
+		# TODO: Control to send notifications to professionals (always receiver via web)
+		# notification_response = requests.post(
+		# 	config.rmq_url + "/notification/sendNotificationToMedicalProfessionalByPatient",
+		# 	data=json.dumps(body), headers=headers
+		# )
+
+		destination = "patient"
 		Notifications.check_response(destination, notification_response, body)
+
+	# Previous version
+	# @staticmethod
+	# def send(body, destination):
+	# 	logger.debug(body)
+	#
+	# 	headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
+	# 	if destination == 'patient':
+	# 		notification_response = requests.post(
+	# 			config.rmq_url + "/notification/sendNotifications",
+	# 			data=json.dumps(body), headers=headers
+	# 		)
+	# 	elif destination == 'professional':
+	# 		# The receiving device should always be web notification
+	# 		body["receiver_device_type"] = "web"
+	# 		notification_response = requests.post(
+	# 			config.rmq_url + "/notification/sendNotificationToMedicalProfessionalByPatient",
+	# 			data=json.dumps(body), headers=headers
+	# 		)
+	# 	else:
+	# 		notification_response = None
+	# 	Notifications.check_response(destination, notification_response, body)
+
+	def get_dict(self):
+		return {
+			"id": self.id,
+			"msg": self.msg,
+			"read": self.read
+		}
+
+	def save(self):
+		if self.id and self.msg and self.read and self.patient:
+			db.session.add(self)
+			logger.debug("Notification " + str(self.id) + " saved")
+		else:
+			logger.error("Incomplete notification couldn't be saved")
+		db.session.commit()
+
+	@staticmethod
+	def get_by_id(_id):
+		return Notifications.query.filter_by(id=_id).first()
 
 	@staticmethod
 	def check_response(destination, response, body):
@@ -443,22 +444,3 @@ class Notifications(db.Model, UserMixin):
 	def check_notification(ref):
 		# TODO: Define function
 		pass
-
-	def get_dict(self):
-		return {
-			"id": self.id,
-			"msg": self.msg,
-			"read": self.read
-		}
-
-	def save(self):
-		if self.id and self.msg and self.read and self.patient:
-			db.session.add(self)
-			logger.debug("Notification " + str(self.id) + " saved")
-		else:
-			logger.error("Incomplete notification couldn't be saved")
-		db.session.commit()
-
-	@staticmethod
-	def get_by_id(_id):
-		return Notifications.query.filter_by(id=_id).first()

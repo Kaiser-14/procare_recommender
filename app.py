@@ -29,8 +29,8 @@ else:
 def status():
 	return "Running"
 
-# Recommender calls
 
+# Recommender calls
 @app.route("/recommender/update_patient_db/", methods=['GET'])
 def update():
 	response = {
@@ -96,7 +96,6 @@ def daily_par():
 		update()
 		RecommenderPatients.par_notifications_round()
 
-	RecommenderPatients.par_notifications_round()
 	return "Finished."
 
 
