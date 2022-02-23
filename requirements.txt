@@ -1,4 +1,4 @@
-flask~=1.1.2
+flask
 colorlog~=5.0.1
 requests~=2.26.0
 Flask-SQLAlchemy~=2.5.1
