@@ -31,7 +31,7 @@ def status():
 
 
 # Recommender calls
-@app.route("/recommender/update_patient_db/", methods=['GET'])
+@app.route("/recommender/update_patient_db", methods=['GET'])
 def update():
 	response = {
 		"rec_patients": [],
@@ -87,8 +87,7 @@ def create_recommendation():
 	return 'Notification sent for patient {}: {}'.format(patient, par_notification)
 
 
-# TODO: Enable when deploying
-# @scheduler.scheduled_job('cron', id='update_and_par', day='*', hour='12', minute='13')
+@scheduler.scheduled_job('cron', id='update_and_par', day='*', hour='12', minute='13')
 @app.route("/notification/daily_par", methods=['GET'])
 def daily_par():
 	logger.info("Running daily PAR round")
@@ -107,16 +106,27 @@ def notification_read():
 	content = request.get_json()
 	ref = content.get("messageId")
 	if ref:
-		# TODO: Complete endpoint
-		Notifications.check_notification(ref)
 		notification = Notifications.get_by_id(ref)
+		par = Notifications.check_par_notification(notification.msg)
+
+		patient = notification.patient
+		category, sitting_minutes = patient.par_analysis()
+		category = RecommenderPatients.get_color_category(category)
+
+		# TODO: Is it returned to the backend or need a request
 		if notification:
-			notification.read = True
-			notification.save()
-			return {
-				"status": "OK",
-				"statusCode": 0
-			}
+			if not par:
+				notification.read = True
+				notification.save()
+				return {
+					"status": "OK",
+					"statusCode": 0
+				}
+			else:
+				return {
+					"activity_level_color": str(category),
+					"inactivity_minutes": sitting_minutes
+				}
 		else:
 			return {
 				"status": "Reference not found",
@@ -147,25 +157,35 @@ def notification_par():
 def get_notifications():
 	data = request.get_json()
 
-	patient = data.get("patient_identity_management_key")
+	patient_reference = data.get("patient_identity_management_key")
 	organization = data.get("organization_code")
 	date_start = data.get("date_start")
 	date_end = data.get("date_end")
 	date = [date_start, date_end]
 
-	# TODO: We need token auth per patient and define function
-	# request = None
-	notifications = Notifications.retrieve_notifications(patient, organization, date)
+	notifications = []
 
-	if organization and notifications:
-		return request
+	if patient_reference:
+		patient = RecommenderPatients.get_by_ccdr_ref(patient_reference)
+		if patient:
+			for notification in patient.get_notifications():
+				notification_dict = notification.get_dict()
+				body = {
+					"message": notification_dict.msg,
+					# TODO: Return date
+					# "date": "25-02-2022 02:31:29",
+					"isReadStatus": notification_dict.read,
+					"user": patient_reference
+				}
+				notifications.append(body)
+			return notifications
+		else:
+			return "Patient not found", 404
 	else:
 		return {
 			"status": "ERR",
 			"statusCode": 1000
 		}
-
-	# return 'Not yet implemented'
 
 
 scheduler.start()

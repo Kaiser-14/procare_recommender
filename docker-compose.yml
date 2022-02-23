@@ -1,12 +1,21 @@
 version: "3.5"
-services: 
+volumes:
+  postgres_data:
+
+networks:
+  data_net:
+    external: false
+    name: data_net
+
+services:
   recommender:
+    container_name: "recommender"
     image: procare_re:1.0
     restart: always
     networks:
         - data_net
     build:
-      context: . 
+      context: .
       dockerfile: Dockerfile
     ports:
       - "5005:5005"
@@ -27,10 +36,3 @@ services:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
-      
-volumes:
-  postgres_data:
-
-networks:
-  data_net:
-    driver: overlay

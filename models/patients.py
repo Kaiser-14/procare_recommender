@@ -43,11 +43,12 @@ class RecommenderPatients(db.Model, UserMixin):
 	def par_notification(self):
 		notification = Notifications(par_notifications[str(self.par_day)])
 		self.notification.append(notification)
+		# TODO: This part should only trigger after readStatus endpoint, so remove
 		if self.par_day in [10, 15, 25, 30, 35, 40]:
 			category, sitting_minutes = self.par_analysis()
 			category = RecommenderPatients.get_color_category(category)
 			analysis_notification = Notifications(
-				"activity_level_color: ,\ninactivity_minutes: ".format(category, str(sitting_minutes)))
+				"activity_level_color: ,\ninactivity_minutes: ".format(category, sitting_minutes))
 			self.notification.append(analysis_notification)
 			analysis_notification.send()
 		self.par_day = (self.par_day + 1) % 41
@@ -346,7 +347,6 @@ class Notifications(db.Model, UserMixin):
 		logger.debug(body)
 
 		headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
-
 		notification_response = requests.post(
 			config.rmq_url + "/notification/sendNotifications",
 			data=json.dumps(body), headers=headers
@@ -441,6 +441,9 @@ class Notifications(db.Model, UserMixin):
 		pass
 
 	@staticmethod
-	def check_notification(ref):
-		# TODO: Define function
-		pass
+	def check_par_notification(msg):
+		par = False
+		if msg in par_notifications:
+			par = True
+		return par
+
