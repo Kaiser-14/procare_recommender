@@ -109,7 +109,7 @@ def notification_read():
 		notification = Notifications.get_by_id(ref)
 		par = Notifications.check_par_notification(notification.msg)
 
-		patient = notification.patient
+		patient = RecommenderPatients.get_by_ccdr_ref(notification.patient)
 		category, sitting_minutes = patient.par_analysis()
 		category = RecommenderPatients.get_color_category(category)
 
@@ -124,7 +124,7 @@ def notification_read():
 				}
 			else:
 				return {
-					"activity_level_color": str(category),
+					"activity_level_color": category,
 					"inactivity_minutes": sitting_minutes
 				}
 		else:

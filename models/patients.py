@@ -155,25 +155,25 @@ class RecommenderPatients(db.Model, UserMixin):
 				total_met_value = vigorous_met + moderate_met + walk_met
 
 				if vigorous_days >= 3 and vigorous_time >= 20:
-					category = 1  # Minimally active
+					category = 2  # Minimally active
 					if vigorous_met >= 1500:
-						category = 2  # HEPA Active
+						category = 3  # HEPA Active
 					else:
 						if walk_days + moderate_days + vigorous_days >= 7 and total_met_value >= 3000:
-							category = 2  # HEPA Active
+							category = 3  # HEPA Active
 				else:
 					if moderate_days + walk_days >= 5:
 						if moderate_time + walk_time >= 30:
-							category = 1  # Minimally active
+							category = 2  # Minimally active
 						else:
 							if walk_days + moderate_days + vigorous_days >= 5 and total_met_value >= 600:
-								category = 1  # Minimally active
+								category = 2  # Minimally active
 							else:
-								category = 0  # Inactive
+								category = 1  # Inactive
 					else:
-						category = 0  # Inactive
+						category = 1  # Inactive
 				# return category+1, variables
-		return category+1, variables
+		return category, variables
 
 	@staticmethod
 	def get_patients_db():
