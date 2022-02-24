@@ -409,12 +409,14 @@ class Notifications(db.Model, UserMixin):
 	@staticmethod
 	def check_notification_status(notification_id):
 		notification = Notifications.get_by_id(notification_id)
-		par = Notifications.check_par_notification(notification.msg)
 
 		if notification:
+			par = Notifications.check_par_notification(notification.msg)
+
 			notification.read = True
 			notification.time_read = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
 			notification.save_notification()
+
 			if not par:
 				return {
 					"status": "OK",
