@@ -1,6 +1,5 @@
 # import dependencies
 import json
-import os
 from flask import Flask, request
 from apscheduler.schedulers.background import BackgroundScheduler
 
@@ -104,34 +103,10 @@ def daily_par():
 @app.route("/notification/readStatus", methods=['POST'])
 def notification_read():
 	content = request.get_json()
-	ref = content.get("messageId")
-	if ref:
-		notification = Notifications.get_by_id(ref)
-		par = Notifications.check_par_notification(notification.msg)
+	notification_id = content.get("messageId")
 
-		patient = RecommenderPatients.get_by_ccdr_ref(notification.patient)
-		category, sitting_minutes = patient.par_analysis()
-		category = RecommenderPatients.get_color_category(category)
-
-		# TODO: Is it returned to the backend or need a request
-		if notification:
-			if not par:
-				notification.read = True
-				notification.save()
-				return {
-					"status": "OK",
-					"statusCode": 0
-				}
-			else:
-				return {
-					"activity_level_color": category,
-					"inactivity_minutes": sitting_minutes
-				}
-		else:
-			return {
-				"status": "Reference not found",
-				"statusCode": 2
-			}
+	if notification_id:
+		return Notifications.check_notification_status(notification_id)
 	else:
 		return {
 			"status": "Bad request",
@@ -169,11 +144,11 @@ def get_notifications():
 		patient = RecommenderPatients.get_by_ccdr_ref(patient_reference)
 		if patient:
 			for notification in patient.get_notifications():
+				# TODO: Filter notification between start and end dates
 				notification_dict = notification.get_dict()
 				body = {
 					"message": notification_dict["msg"],
-					# TODO: Return date
-					# "date": "25-02-2022 02:31:29",
+					"date": notification_dict["time_sent"],
 					"isReadStatus": notification_dict["read"],
 					"user": patient_reference
 				}

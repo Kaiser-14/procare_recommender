@@ -52,8 +52,8 @@ class RecommenderPatients(db.Model, UserMixin):
 			self.notification.append(analysis_notification)
 			analysis_notification.send()
 		self.par_day = (self.par_day + 1) % 41
-		db.session.commit()
 		notification.send()
+		db.session.commit()
 
 	def get_notifications(self):
 		return self.notification
@@ -197,7 +197,6 @@ class RecommenderPatients(db.Model, UserMixin):
 	@staticmethod
 	def par_notifications_round():
 		patient_references, patients_total = RecommenderPatients.get_patients_db()
-		# reference_patients, patients_total = RecommenderPatients.get_patients()
 		patient_count = 0
 
 		for patient in patient_references:
@@ -328,12 +327,16 @@ class Notifications(db.Model, UserMixin):
 	id = db.Column(db.String, primary_key=True)
 	read = db.Column(db.Boolean, nullable=False)
 	msg = db.Column(db.String, nullable=False)
+	time_sent = db.Column(db.String, nullable=True)
+	time_read = db.Column(db.String, nullable=True)
 	patient = db.Column(db.String, db.ForeignKey('RecommenderPatients.ccdr_reference'))
 
 	def __init__(self, msg):
 		self.id = str(uuid4())
 		self.msg = msg
 		self.read = False
+		self.time_sent = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+		self.time_read = None
 
 	def send(self):
 		body = {
@@ -361,37 +364,17 @@ class Notifications(db.Model, UserMixin):
 		destination = "patient"
 		Notifications.check_response(destination, notification_response, body)
 
-	# Previous version
-	# @staticmethod
-	# def send(body, destination):
-	# 	logger.debug(body)
-	#
-	# 	headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
-	# 	if destination == 'patient':
-	# 		notification_response = requests.post(
-	# 			config.rmq_url + "/notification/sendNotifications",
-	# 			data=json.dumps(body), headers=headers
-	# 		)
-	# 	elif destination == 'professional':
-	# 		# The receiving device should always be web notification
-	# 		body["receiver_device_type"] = "web"
-	# 		notification_response = requests.post(
-	# 			config.rmq_url + "/notification/sendNotificationToMedicalProfessionalByPatient",
-	# 			data=json.dumps(body), headers=headers
-	# 		)
-	# 	else:
-	# 		notification_response = None
-	# 	Notifications.check_response(destination, notification_response, body)
-
 	def get_dict(self):
 		return {
 			"id": self.id,
 			"msg": self.msg,
-			"read": self.read
+			"read": self.read,
+			"time_sent": self.time_sent,
+			"time_read": self.time_read
 		}
 
-	def save(self):
-		if self.id and self.msg and self.read and self.patient:
+	def save_notification(self):
+		if self.id and self.msg and self.read and self.patient and self.time_sent:
 			db.session.add(self)
 			logger.debug("Notification " + str(self.id) + " saved")
 		else:
@@ -424,21 +407,33 @@ class Notifications(db.Model, UserMixin):
 			logger.debug('No response.')
 
 	@staticmethod
-	def retrieve_notifications(patient, organization, date):
+	def check_notification_status(notification_id):
+		notification = Notifications.get_by_id(notification_id)
+		par = Notifications.check_par_notification(notification.msg)
 
-		# TODO: Login to retrieve notifications.
+		if notification:
+			notification.read = True
+			notification.time_read = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+			notification.save_notification()
+			if not par:
+				return {
+					"status": "OK",
+					"statusCode": 0
+				}
+			else:
+				patient = RecommenderPatients.get_by_ccdr_ref(notification.patient)
+				category, sitting_minutes = patient.par_analysis()
+				category = RecommenderPatients.get_color_category(category)
 
-		headers = {
-			"Content-type": "application/json",
-			"Accept": "application/json",
-			"Authorization": "Bearer MYREALLYLONGTOKENIGOT"}
-		# client_type = "web"
-		# notification_response = requests.get(
-		# 	config.backend_url + client_type + "/getNotificationQueueKey",
-		# 	data=json.dumps(body), headers=headers
-		# )
-
-		pass
+				return {
+					"activity_level_color": category,
+					"inactivity_minutes": sitting_minutes
+				}
+		else:
+			return {
+				"status": "Reference not found",
+				"statusCode": 2
+			}
 
 	@staticmethod
 	def check_par_notification(msg):
