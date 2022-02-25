@@ -327,16 +327,16 @@ class Notifications(db.Model, UserMixin):
 	id = db.Column(db.String, primary_key=True)
 	read = db.Column(db.Boolean, nullable=False)
 	msg = db.Column(db.String, nullable=False)
-	time_sent = db.Column(db.String, nullable=True)
-	time_read = db.Column(db.String, nullable=True)
+	datetime_sent = db.Column(db.String, nullable=True)
+	datetime_read = db.Column(db.String, nullable=True)
 	patient = db.Column(db.String, db.ForeignKey('RecommenderPatients.ccdr_reference'))
 
 	def __init__(self, msg):
 		self.id = str(uuid4())
 		self.msg = msg
 		self.read = False
-		self.time_sent = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
-		self.time_read = None
+		self.datetime_sent = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+		self.datetime_read = None
 
 	def send(self):
 		body = {
@@ -369,12 +369,12 @@ class Notifications(db.Model, UserMixin):
 			"id": self.id,
 			"msg": self.msg,
 			"read": self.read,
-			"time_sent": self.time_sent,
-			"time_read": self.time_read
+			"datetime_sent": self.datetime_sent,
+			"datetime_read": self.datetime_read
 		}
 
 	def save_notification(self):
-		if self.id and self.msg and self.read and self.patient and self.time_sent:
+		if self.id and self.msg and self.read and self.patient and self.datetime_sent:
 			db.session.add(self)
 			logger.debug("Notification " + str(self.id) + " saved")
 		else:
@@ -414,7 +414,7 @@ class Notifications(db.Model, UserMixin):
 			par = Notifications.check_par_notification(notification.msg)
 
 			notification.read = True
-			notification.time_read = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+			notification.datetime_read = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
 			notification.save_notification()
 
 			if not par:
@@ -444,3 +444,15 @@ class Notifications(db.Model, UserMixin):
 			par = True
 		return par
 
+	@staticmethod
+	def check_timestamp(dates):
+		for i, date in enumerate(dates):
+			date = ''.join(filter(str.isdigit, date[:10]))
+			date = datetime.strptime(date, "%d%m%Y")
+			date = datetime.timestamp(date)
+			dates[i] = date
+
+		if dates[2] >= dates[0] >= dates[1]:
+			return True
+		else:
+			return False

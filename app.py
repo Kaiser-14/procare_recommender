@@ -144,15 +144,17 @@ def get_notifications():
 		patient = RecommenderPatients.get_by_ccdr_ref(patient_reference)
 		if patient:
 			for notification in patient.get_notifications():
-				# TODO: Filter notification between start and end dates
-				notification_dict = notification.get_dict()
-				body = {
-					"message": notification_dict["msg"],
-					"date": notification_dict["time_sent"],
-					"isReadStatus": notification_dict["read"],
-					"user": patient_reference
-				}
-				notifications.append(body)
+				dates = [notification.datetime_sent, date_start, date_end]
+				notification_range = Notifications.check_timestamp(dates)
+				if notification_range:
+					notification_dict = notification.get_dict()
+					body = {
+						"message": notification_dict["msg"],
+						"date": notification_dict["datetime_sent"],
+						"isReadStatus": notification_dict["read"],
+						"user": patient_reference
+					}
+					notifications.append(body)
 			return str(notifications), 200
 		else:
 			return "Patient not found", 404
