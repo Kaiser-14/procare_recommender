@@ -45,22 +45,6 @@ def update():
 	return json.dumps(response, indent=3)
 
 
-@app.route("/recommender/get_notifications_of_patient", methods=['GET'])
-def get_notifications_of_patient():
-	notifications = []
-	ref = request.args["ref"]
-	if ref:
-		patient = RecommenderPatients.get_by_ccdr_ref(ref)
-		if patient:
-			for notification in patient.get_notifications():
-				notifications.append(notification.get_dict())
-			return str(notifications)
-		else:
-			return "Reference not found", 404
-	else:
-		return "Reference needed", 400
-
-
 scheduler = BackgroundScheduler()
 with app.app_context():
 	logger.info("First database update")
@@ -114,19 +98,7 @@ def notification_read():
 		}
 
 
-# HTTP request about IPAQ analysis
-# TODO: To be tested once deployed
-@app.route("/notification/activity_level", methods=['POST'])
-def notification_par():
-	data = request.get_json()
-	patient = data.get("identity_management_key")
-
-	response = RecommenderPatients.par_notification(patient)
-
-	return 'Patient: {}. PA notification: {}.'.format(patient, response.status_code)
-
-
-# This method is used to receive all the notification that have been sent to the patients in a specific organization,
+# This method is used to receive all the notification that have been sent to a patient in a specific organization,
 # as well as the read status of these notifications.
 @app.route("/notification/getNotifications", methods=['POST'])
 def get_notifications():
