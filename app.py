@@ -71,18 +71,31 @@ def create_recommendation():
 	return 'Notification sent for patient {}: {}'.format(patient_reference, par_notification)
 
 
+# Notifications calls
+
+# Daily notification par
 @scheduler.scheduled_job('cron', id='update_and_par', day='*', hour='12', minute='13')
 @app.route("/notification/daily_par", methods=['GET'])
 def daily_par():
 	logger.info("Running daily PAR round")
 	with app.app_context():
 		update()
-		RecommenderPatients.par_notifications_round()
+		RecommenderPatients.par_notifications_round(True)
 
 	return "Finished."
 
 
-# Notifications calls
+# Weekly IPAQ questionnaire reminder
+@scheduler.scheduled_job('cron', id='weekly_ipaq', day='7', hour='18', minute='05')
+@app.route("/notification/weekly_ipaq", methods=['GET'])
+def daily_par():
+	logger.info("Running weekly IPAQ round")
+	with app.app_context():
+		update()
+		RecommenderPatients.par_notifications_round(False)
+
+	return "Finished."
+
 
 # Send to the backend the unique identifier of the notification message when the user reads the notification
 @app.route("/notification/readStatus", methods=['POST'])

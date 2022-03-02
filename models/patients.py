@@ -47,6 +47,13 @@ class RecommenderPatients(db.Model, UserMixin):
 		notification.send()
 		db.session.commit()
 
+	def ipaq_notification(self):
+		message = "Your weekly questionnaire is available. If you have not answered, please, fill the form into the app."
+		notification = Notifications(message)
+		self.notification.append(notification)
+		notification.send()
+		db.session.commit()
+
 	def get_notifications(self):
 		return self.notification
 
@@ -182,7 +189,7 @@ class RecommenderPatients(db.Model, UserMixin):
 		return idm_response, number_of_patients
 
 	@staticmethod
-	def par_notifications_round():
+	def par_notifications_round(daily):
 		patient_references, patients_total = RecommenderPatients.get_patients_db()
 		patient_count = 0
 
@@ -190,7 +197,10 @@ class RecommenderPatients(db.Model, UserMixin):
 			patient_count = patient_count + 1
 			logger.info('Par notification: Patient {}/{}'.format(patient_count, patients_total))
 			patient = RecommenderPatients.get_by_ccdr_ref(patient_reference)
-			patient.par_notification()
+			if daily:
+				patient.par_notification()
+			else:
+				patient.ipaq_notification()
 
 	@staticmethod
 	def update_db():
