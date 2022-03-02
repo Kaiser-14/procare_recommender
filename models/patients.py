@@ -50,30 +50,25 @@ class RecommenderPatients(db.Model, UserMixin):
 	def get_notifications(self):
 		return self.notification
 
-	# @staticmethod
+	@staticmethod
 	def get_by_ccdr_ref(ref):
 		return RecommenderPatients.query.filter_by(ccdr_reference=ref).first()
 
-	@staticmethod
-	def recommendation(patient, date):
-		category, variables = RecommenderPatients.par_analysis(patient)
-		scores, deviations = RecommenderPatients.scores_injection_patient(patient, date)
+	def recommendation(self, date):
 
-		notification_key = "1"
+		category, sitting_minutes = self.par_analysis()
+		scores, deviations = self.scores_injection_patient(date)
+
+		notification_key = "2"
 		par_notification = par_notifications[str(notification_key)]
 
-		msg = {
-			"identity_management_key": patient,
-			"message_body": par_notification,
-			"message_unique_identifier": '1234',  # TODO: Change to UUID: str(uuid4())
-			"sender_unique_identifier": "recommendLib",
-			"receiver_device_type": 'game',  # TODO: Change to corresponding service: web mobile or game
-		}
-		Notifications.send(msg, destination='patient')
+		notification = Notifications(par_notification)
+		self.notification.append(notification)
+		notification.send()
+		db.session.commit()
 
 		return par_notification
 
-	# @staticmethod
 	def par_analysis(self):
 		logger.info("Evaluating activity for patient " + self.ccdr_reference)
 		body = {
@@ -191,9 +186,10 @@ class RecommenderPatients(db.Model, UserMixin):
 		patient_references, patients_total = RecommenderPatients.get_patients_db()
 		patient_count = 0
 
-		for patient in patient_references:
+		for patient_reference in patient_references:
 			patient_count = patient_count + 1
 			logger.info('Par notification: Patient {}/{}'.format(patient_count, patients_total))
+			patient = RecommenderPatients.get_by_ccdr_ref(patient_reference)
 			patient.par_notification()
 
 	@staticmethod
@@ -233,14 +229,15 @@ class RecommenderPatients(db.Model, UserMixin):
 			end_dates = ["25-08-2021", "25-08-2021"]
 
 		patient_count = 0
-		for patient in patients:
+		for patient_reference in patients:
 			period_count = 0
 			patient_count = patient_count + 1
-			logger.info("Processing patient " + patient + "....\n")
+			logger.info("Processing patient " + patient_reference + "....\n")
 			for start_date, end_date in zip(start_dates, end_dates):
 				period_count = period_count + 1
 				date = [start_date, end_date]
-				actionlib_response, fusionlib_response = RecommenderPatients.calculate_scores(patient, date)
+				patient = RecommenderPatients.get_by_ccdr_ref(patient_reference)
+				actionlib_response, fusionlib_response = patient.calculate_scores(date)
 
 				logger.info("Completed data injection " + str(period_count) + "/" + str(
 					len(start_dates)) + " for " + patient + " between " + start_date + " and " + end_date +
@@ -258,22 +255,21 @@ class RecommenderPatients(db.Model, UserMixin):
 
 		logger.info("Data injection completed")
 
-	@staticmethod
-	def scores_injection_patient(patient, date):
-		logger.info("Processing patient " + patient + "....\n")
+	def scores_injection_patient(self, date):
+		logger.info("Processing patient " + self.ccdr_reference + "....\n")
 
-		actionlib_response, fusionlib_response = RecommenderPatients.calculate_scores(patient, date)
+		actionlib_response, fusionlib_response = self.calculate_scores(date)
 
 		scores = actionlib_response.json()['scores']
 		deviations = fusionlib_response.json()['deviations']
 
-		logger.info('Scores: {}\nDeviations: {}\n'.format(scores, deviations))
+		logger.info("Scores: {}".format(scores))
+		logger.info("Deviations: {}".format(deviations))
 
 		return scores, deviations
 
 	# Run both ActionLib (HBR) scores and FusionLib (MMF) deviation for specific patient and date
-	@staticmethod
-	def calculate_scores(patient, date):
+	def calculate_scores(self, date):
 		# today = datetime.today()
 		# week_ago = today - timedelta(weeks=1)
 		body = {
@@ -281,7 +277,7 @@ class RecommenderPatients(db.Model, UserMixin):
 			"organization": "000",
 			"role": "system",
 			"scenario": "data_injection",
-			"patient_identity_management_key": patient,
+			"patient_identity_management_key": self.ccdr_reference,
 			"measurements_start_date": date[0],
 			"measurements_end_date": date[1],
 		}
@@ -336,7 +332,7 @@ class Notifications(db.Model, UserMixin):
 			"message_body": self.msg,
 			"message_unique_identifier": self.id,
 			"sender_unique_identifier": "recommendLib",
-			"receiver_device_type": 'game',  # TODO: Change to mobile
+			"receiver_device_type": 'game',  # FIXME: Change to mobile
 		}
 
 		logger.debug(body)

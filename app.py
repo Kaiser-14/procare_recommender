@@ -62,12 +62,13 @@ def schedule_scores_injection():
 def create_recommendation():
 	data = request.get_json()
 
-	patient = data.get('identity_management_key')
+	patient_reference = data.get('identity_management_key')
 	date = [data.get('start_date')[0], data.get('end_date')[0]]
 
-	par_notification = RecommenderPatients.recommendation(patient, date)
+	patient = RecommenderPatients.get_by_ccdr_ref(patient_reference)
+	par_notification = patient.recommendation(date)
 
-	return 'Notification sent for patient {}: {}'.format(patient, par_notification)
+	return 'Notification sent for patient {}: {}'.format(patient_reference, par_notification)
 
 
 @scheduler.scheduled_job('cron', id='update_and_par', day='*', hour='12', minute='13')
@@ -108,7 +109,6 @@ def get_notifications():
 	organization = data.get("organization_code")
 	date_start = data.get("date_start")
 	date_end = data.get("date_end")
-	date = [date_start, date_end]
 
 	notifications = []
 
