@@ -88,13 +88,23 @@ def daily_par():
 # Weekly IPAQ questionnaire reminder
 @scheduler.scheduled_job('cron', id='weekly_ipaq', day='7', hour='18', minute='05')
 @app.route("/notification/weekly_ipaq", methods=['GET'])
-def daily_par():
+def weekly_ipaq():
 	logger.info("Running weekly IPAQ round")
 	with app.app_context():
 		update()
 		RecommenderPatients.par_notifications_round(False)
 
 	return "Finished."
+
+
+# Check weekly IPAQ questionnaire filled
+@scheduler.scheduled_job('cron', id='weekly_check_ipaq', day='1', hour='18', minute='05')
+@app.route("/notification/weekly_check_ipaq", methods=['GET'])
+def weekly_check_ipaq():
+	logger.info("Checking weekly IPAQ notifications")
+	Notifications.check_ipaq()
+
+	return "Finished weekly IPAQ checks"
 
 
 # Send to the backend the unique identifier of the notification message when the user reads the notification

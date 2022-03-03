@@ -5,7 +5,7 @@ from uuid import uuid4
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
 from flask_login import UserMixin
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 
 from helper.utils import logger, par_notifications
 from helper import config
@@ -179,6 +179,7 @@ class RecommenderPatients(db.Model, UserMixin):
 	@staticmethod
 	def get_patients():
 		headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
+		#FIXME: Remove test flag
 		if not test_flag:
 			idm_response = requests.get(
 				config.idm_url + "/getAllPacientKeys", headers=headers)
@@ -193,11 +194,15 @@ class RecommenderPatients(db.Model, UserMixin):
 		patient_references, patients_total = RecommenderPatients.get_patients_db()
 		patient_count = 0
 
-		for patient_reference in patient_references:
+		patient_reference = "98284945"
+		patients_total = 1
+		patient_references = [RecommenderPatients.get_by_ccdr_ref(patient_reference)]
+
+		for patient in patient_references:
 			patient_count = patient_count + 1
-			logger.info('Par notification: Patient {}/{}'.format(patient_count, patients_total))
-			patient = RecommenderPatients.get_by_ccdr_ref(patient_reference)
+			# patient = RecommenderPatients.get_by_ccdr_ref(patient_reference)
 			if daily:
+				logger.info('Par notification: Patient {}/{}'.format(patient_count, patients_total))
 				patient.par_notification()
 			else:
 				patient.ipaq_notification()
@@ -205,6 +210,7 @@ class RecommenderPatients(db.Model, UserMixin):
 	@staticmethod
 	def update_db():
 		try:
+			# TODO: Check it
 			response = requests.get(config.ccdr_url + "/api/v1/mobile/patient").json()
 			for patient in response:
 				ccdr_ref = patient["identity_management_key"]
@@ -221,8 +227,10 @@ class RecommenderPatients(db.Model, UserMixin):
 	@staticmethod
 	def scores_injection():
 		# patients, total = RecommenderPatients.get_patients_db()
+		# TODO: Check it
 		patients, patients_total = RecommenderPatients.get_patients()
 
+		# FIXME: Remove test flag
 		if not test_flag:
 			start_dates = [
 				"01-11-2021", "08-11-2021", "15-11-2021", "22-11-2021", "29-11-2021",
@@ -454,3 +462,20 @@ class Notifications(db.Model, UserMixin):
 			return True
 		else:
 			return False
+
+	@staticmethod
+	def check_ipaq():
+		patients, total = RecommenderPatients.get_patients_db()
+
+		for patient in patients:
+			notifications = patient.get_notifications()
+
+			for notification in notifications:
+				today = date.today()
+				yesterday = today - timedelta(days=1)
+				dates = [notification.datetime_sent, yesterday.strftime("%d-%m-%Y"), today.strftime("%d-%m-%Y")]
+
+				if notification.msg.startswith("Your") and not notification.read and Notifications.check_timestamp(dates):
+					logger.info("Sending reminder for IPAQ notification to patient {}".format(patient.ccdr_reference))
+					patient.ipaq_notification()
+					break
