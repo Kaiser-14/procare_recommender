@@ -41,15 +41,14 @@ class RecommenderPatients(db.Model, UserMixin):
 		db.session.commit()
 
 	def par_notification(self):
-		notification = Notifications(par_notifications[str(self.par_day)])
+		notification = Notifications(self.ccdr_reference, par_notifications[str(self.par_day)])
 		self.notification.append(notification)
 		self.par_day = (self.par_day + 1) % 41
 		notification.send()
-		db.session.commit()
 
 	def ipaq_notification(self):
 		message = "Your weekly questionnaire is available. If you have not answered, please, fill the form into the app."
-		notification = Notifications(message)
+		notification = Notifications(self.ccdr_reference, message)
 		self.notification.append(notification)
 		notification.send()
 		db.session.commit()
@@ -69,7 +68,7 @@ class RecommenderPatients(db.Model, UserMixin):
 		notification_key = "2"
 		par_notification = par_notifications[str(notification_key)]
 
-		notification = Notifications(par_notification)
+		notification = Notifications(self.ccdr_reference, par_notification)
 		self.notification.append(notification)
 		notification.send()
 		db.session.commit()
@@ -194,13 +193,8 @@ class RecommenderPatients(db.Model, UserMixin):
 		patient_references, patients_total = RecommenderPatients.get_patients_db()
 		patient_count = 0
 
-		patient_reference = "98284945"
-		patients_total = 1
-		patient_references = [RecommenderPatients.get_by_ccdr_ref(patient_reference)]
-
 		for patient in patient_references:
 			patient_count = patient_count + 1
-			# patient = RecommenderPatients.get_by_ccdr_ref(patient_reference)
 			if daily:
 				logger.info('Par notification: Patient {}/{}'.format(patient_count, patients_total))
 				patient.par_notification()
@@ -337,12 +331,13 @@ class Notifications(db.Model, UserMixin):
 	datetime_read = db.Column(db.String, nullable=True)
 	patient = db.Column(db.String, db.ForeignKey('RecommenderPatients.ccdr_reference'))
 
-	def __init__(self, msg):
+	def __init__(self, ccdr_reference, msg):
 		self.id = str(uuid4())
 		self.msg = msg
 		self.read = False
 		self.datetime_sent = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
 		self.datetime_read = None
+		self.patient = ccdr_reference
 
 	def send(self):
 		body = {
@@ -370,17 +365,20 @@ class Notifications(db.Model, UserMixin):
 		destination = "patient"
 		Notifications.check_response(destination, notification_response, body)
 
+		self.save_notification()
+
 	def get_dict(self):
 		return {
 			"id": self.id,
 			"msg": self.msg,
 			"read": self.read,
 			"datetime_sent": self.datetime_sent,
-			"datetime_read": self.datetime_read
+			"datetime_read": self.datetime_read,
+			"patient": self.patient,
 		}
 
 	def save_notification(self):
-		if self.id and self.msg and self.read and self.patient and self.datetime_sent:
+		if self.id and self.msg and self.patient and self.datetime_sent:
 			db.session.add(self)
 			logger.debug("Notification " + str(self.id) + " saved")
 		else:
