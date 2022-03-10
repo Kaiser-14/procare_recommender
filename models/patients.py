@@ -45,7 +45,8 @@ class RecommenderPatients(db.Model, UserMixin):
 		self.notification.append(notification)
 
 		if self.par_day in [7, 14, 21, 28, 35]:
-			message = "Your weekly questionnaire is available. If you have not answered, please, fill the form into the app."
+			message = "Your weekly questionnaire is available. " \
+				"If you have not answered, please, fill the form into the app."
 			ipaq_notification = Notifications(self.ccdr_reference, message)
 			self.notification.append(ipaq_notification)
 			ipaq_notification.send(receiver="game")  # FIXME: Change to mobile after testing
