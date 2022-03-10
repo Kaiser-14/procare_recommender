@@ -80,19 +80,18 @@ def daily_par():
 	logger.info("Running daily PAR round")
 	with app.app_context():
 		update()
-		RecommenderPatients.notifications_round(receiver="mobile", daily=True)
+		RecommenderPatients.notifications_round(receiver="mobile")
 
 	return "Finished."
 
 
-# Weekly IPAQ questionnaire reminder
-@scheduler.scheduled_job('cron', id='weekly_ipaq', day='7', hour='18', minute='05')
-@app.route("/notification/weekly_ipaq", methods=['GET'])
-def weekly_ipaq():
-	logger.info("Running weekly IPAQ round")
+@scheduler.scheduled_job('cron', id='game_notifications', day='*', hour='19', minute='15')
+@app.route("/notification/gameNotifications", methods=['GET'])
+def game_notifications():
+	logger.info("Running daily game round")
 	with app.app_context():
 		update()
-		RecommenderPatients.notifications_round(receiver="mobile", daily=False)
+		RecommenderPatients.notifications_round(receiver="game")
 
 	return "Finished."
 
@@ -158,17 +157,6 @@ def get_notifications():
 			"status": "ERR",
 			"statusCode": 1000
 		}
-
-
-@scheduler.scheduled_job('cron', id='game_notifications', day='*', hour='19', minute='15')
-@app.route("/notification/gameNotifications", methods=['POST'])
-def game_notifications():
-	logger.info("Running daily game round")
-	with app.app_context():
-		update()
-		RecommenderPatients.notifications_round(receiver="game")
-
-	return "Finished."
 
 
 scheduler.start()

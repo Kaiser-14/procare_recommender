@@ -43,15 +43,15 @@ class RecommenderPatients(db.Model, UserMixin):
 	def par_notification(self):
 		notification = Notifications(self.ccdr_reference, par_notifications[str(self.par_day)])
 		self.notification.append(notification)
+
+		if self.par_day in [7, 14, 21, 28, 35]:
+			message = "Your weekly questionnaire is available. If you have not answered, please, fill the form into the app."
+			ipaq_notification = Notifications(self.ccdr_reference, message)
+			self.notification.append(ipaq_notification)
+			ipaq_notification.send(receiver="game")  # FIXME: Change to mobile after testing
+
 		self.par_day = (self.par_day + 1) % 41
 		notification.send(receiver="game")  # FIXME: Change to mobile after testing
-
-	def ipaq_notification(self):
-		message = "Your weekly questionnaire is available. If you have not answered, please, fill the form into the app."
-		notification = Notifications(self.ccdr_reference, message)
-		self.notification.append(notification)
-		notification.send(receiver="game")  # FIXME: Change to mobile after testing
-		db.session.commit()
 
 	def game_notification(self):
 		body = {
@@ -211,18 +211,15 @@ class RecommenderPatients(db.Model, UserMixin):
 		return idm_response, number_of_patients
 
 	@staticmethod
-	def notifications_round(receiver, daily=None):
+	def notifications_round(receiver):
 		patient_references, patients_total = RecommenderPatients.get_patients_db()
 		patient_count = 0
 
 		for patient in patient_references:
 			patient_count = patient_count + 1
 			if receiver == "mobile":
-				if daily:
-					logger.info('Par notification: Patient {}/{}'.format(patient_count, patients_total))
-					patient.par_notification()
-				else:
-					patient.ipaq_notification()
+				logger.info('Par notification: Patient {}/{}'.format(patient_count, patients_total))
+				patient.par_notification()
 			elif receiver == "game":
 				patient.game_notification()
 
