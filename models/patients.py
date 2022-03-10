@@ -44,14 +44,36 @@ class RecommenderPatients(db.Model, UserMixin):
 		notification = Notifications(self.ccdr_reference, par_notifications[str(self.par_day)])
 		self.notification.append(notification)
 		self.par_day = (self.par_day + 1) % 41
-		notification.send()
+		notification.send(receiver="game")  # FIXME: Change to mobile after testing
 
 	def ipaq_notification(self):
 		message = "Your weekly questionnaire is available. If you have not answered, please, fill the form into the app."
 		notification = Notifications(self.ccdr_reference, message)
 		self.notification.append(notification)
-		notification.send()
+		notification.send(receiver="game")  # FIXME: Change to mobile after testing
 		db.session.commit()
+
+	def game_notification(self):
+		body = {
+			"identity_management_key": self.ccdr_reference,
+			# "organization": "000",
+			"role": "patient",
+			"date": "09-03-2022",
+		}
+		response = requests.post(
+			config.ccdr_url + "/api/v1/game/getSummarization", json=body).json()
+
+		game_score = response["session_info"][0]["metric_global"]
+		game_clicks = response["session_info"][0]["nclicks_total"]
+
+		message = None
+		if game_score > 0.5:
+			message = "Change the game."
+
+		if message:
+			notification = Notifications(self.ccdr_reference, message)
+			self.notification.append(notification)
+			notification.send(receiver="game")
 
 	def get_notifications(self):
 		return self.notification
@@ -189,17 +211,20 @@ class RecommenderPatients(db.Model, UserMixin):
 		return idm_response, number_of_patients
 
 	@staticmethod
-	def par_notifications_round(daily):
+	def notifications_round(receiver, daily=None):
 		patient_references, patients_total = RecommenderPatients.get_patients_db()
 		patient_count = 0
 
 		for patient in patient_references:
 			patient_count = patient_count + 1
-			if daily:
-				logger.info('Par notification: Patient {}/{}'.format(patient_count, patients_total))
-				patient.par_notification()
-			else:
-				patient.ipaq_notification()
+			if receiver == "mobile":
+				if daily:
+					logger.info('Par notification: Patient {}/{}'.format(patient_count, patients_total))
+					patient.par_notification()
+				else:
+					patient.ipaq_notification()
+			elif receiver == "game":
+				patient.game_notification()
 
 	@staticmethod
 	def update_db():
@@ -339,13 +364,13 @@ class Notifications(db.Model, UserMixin):
 		self.datetime_read = None
 		self.patient = ccdr_reference
 
-	def send(self):
+	def send(self, receiver):
 		body = {
 			"identity_management_key": self.patient,
 			"message_body": self.msg,
 			"message_unique_identifier": self.id,
 			"sender_unique_identifier": "recommendLib",
-			"receiver_device_type": 'game',  # FIXME: Change to mobile
+			"receiver_device_type": receiver,
 		}
 
 		logger.debug(body)
