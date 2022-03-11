@@ -1,4 +1,5 @@
 import json
+import time
 
 import requests
 from uuid import uuid4
@@ -307,28 +308,41 @@ class RecommenderPatients(db.Model, UserMixin):
 	def calculate_scores(self, date):
 		# today = datetime.today()
 		# week_ago = today - timedelta(weeks=1)
+
+		actionlib_response = None
+		fusionlib_response = None
+
 		body = {
 			"identity_management_key": str(uuid4()),
-			"organization": "000",
+			"organization": "000",  # TODO: Chasnge to self.organization
 			"role": "system",
 			"scenario": "data_injection",
 			"patient_identity_management_key": self.ccdr_reference,
-			"measurements_start_date": date[0],
+			"measurements_start_date": date[0],  # FIXME: This should be end date - 7 days
 			"measurements_end_date": date[1],
 		}
 
-		# logger("Request: {}\n".format(str(body)))
-
+		# FIXME: Uncomment once tested in server
+		# In test server: RiskAssesment/ActionLib and Diagnostic/FusionLib
+		# Generate scores into the platform
 		headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
+		# actionlib_response = requests.post(
+		# 	config.actionlib_url + "/generate_scores", data=json.dumps(body), headers=headers)
+		# fusionlib_response = requests.post(
+		# 	config.fusionlib_url + "/generate_deviations", data=json.dumps(body), headers=headers)
+
 		actionlib_response = requests.post(
 			config.actionlib_url + "/calculate_scores", data=json.dumps(body), headers=headers)
-		fusionlib_response = requests.post(
-			config.fusionlib_url + "/calculate_deviations", data=json.dumps(body), headers=headers)
 
-		if actionlib_response.status_code != 200:
+		# If there is no response from actionLib, we can skip the fusionLib request and save time
+		# FIXME: Control this situation in postman and test. 200 for test on calculate_scores / 204 for generateScores
+		if actionlib_response.status_code != 204:
 			logger.error(actionlib_response.text)
-		if fusionlib_response.status_code != 200:
-			logger.error(fusionlib_response.text)
+		else:
+			fusionlib_response = requests.post(
+				config.fusionlib_url + "/calculate_deviations", data=json.dumps(body), headers=headers)
+			if fusionlib_response.status_code != 204:
+				logger.error(fusionlib_response.text)
 
 		return actionlib_response, fusionlib_response
 
