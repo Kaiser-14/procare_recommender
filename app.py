@@ -86,7 +86,7 @@ def daily_par():
 
 
 @scheduler.scheduled_job('cron', id='game_notifications', day='*', hour='19', minute='15')
-@app.route("/notification/gameNotifications", methods=['GET'])
+@app.route("/notification/game_notifications", methods=['GET'])
 def game_notifications():
 	logger.info("Running daily game round")
 	with app.app_context():
