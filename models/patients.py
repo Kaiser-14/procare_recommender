@@ -339,13 +339,13 @@ class RecommenderPatients(db.Model, UserMixin):
 			config.actionlib_url + "/calculate_scores", data=json.dumps(body), headers=headers)
 
 		# If there is no response from actionLib, we can skip the fusionLib request and save time
-		# FIXME: Control this situation in postman and test. 200 for test on calculate_scores / 204 for generateScores
-		if actionlib_response.status_code != 204:
+		# FIXME: Control this situation. 200 for test on calculate_scores / 204 for generateScores
+		if actionlib_response.status_code != 200:
 			logger.error(actionlib_response.text)
 		else:
 			fusionlib_response = requests.post(
 				config.fusionlib_url + "/calculate_deviations", data=json.dumps(body), headers=headers)
-			if fusionlib_response.status_code != 204:
+			if fusionlib_response.status_code != 200:
 				logger.error(fusionlib_response.text)
 
 		return actionlib_response, fusionlib_response
