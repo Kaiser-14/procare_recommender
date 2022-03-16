@@ -10,7 +10,7 @@ networks:
 services:
   recommender:
     container_name: "recommender-procare"
-    image: procare_re:1.0
+    image: procare-recommender
     restart: always
     networks:
         - data-repo-net
