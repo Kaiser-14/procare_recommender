@@ -2,6 +2,8 @@ import os
 
 testing_mode = os.environ['TESTING'] if "TESTING" in os.environ else "no"
 
+platform = "local"  # local, test, production
+
 if os.getenv("FLASK_HOST") is not None:
     flask_host = os.getenv("FLASK_HOST")
 else:
@@ -43,35 +45,46 @@ if os.getenv("POSTGRES_DB") is not None:
 else:
     postgres_db = "procare"
 
+if os.getenv("PROCARE_URL") is not None:
+    procare_url = os.getenv("PROCARE_URL")
+else:
+    if platform == "local":
+        procare_url = "http://195.82.130.203"
+    else:
+        if platform == "test":
+            procare_url = "http://172.18.0.1"
+        else:  # "production"
+            procare_url = "http://172.19.0.1"
+
 if os.getenv("CCDR_URL") is not None:
     ccdr_url = os.getenv("CCDR_URL")
 else:
-    ccdr_url = "http://195.82.130.203:8086"
+    ccdr_url = procare_url + ":8086"
 
 if os.getenv("ACTIONLIB_URL") is not None:
     actionlib_url = os.getenv("ACTIONLIB_URL")
 else:
-    actionlib_url = "http://195.82.130.203:8090"
+    actionlib_url = procare_url + ":8090"
 
 if os.getenv("FUSIONLIB_URL") is not None:
     fusionlib_url = os.getenv("FUSIONLIB_URL")
 else:
-    fusionlib_url = "http://195.82.130.203:8091"
+    fusionlib_url = procare_url + ":8091"
 
 if os.getenv("IDM_URL") is not None:
     idm_url = os.getenv("IDM_URL")
 else:
-    idm_url = "http://195.82.130.203:8085"
+    idm_url = procare_url + ":8085"
 
 if os.getenv("RMQ_URL") is not None:
     rmq_url = os.getenv("RMQ_URL")
 else:
-    rmq_url = "http://195.82.130.203:8092"
+    rmq_url = procare_url + ":8092"
 
 if os.getenv("BACKEND_URL") is not None:
     backend_url = os.getenv("BACKEND_URL")
 else:
-    backend_url = "http://195.82.130.203:8081"
+    backend_url = procare_url + ":8081"
 
 if os.getenv("DROP_TABLES") is not None:
     drop_tables = os.getenv("DROP_TABLES")
