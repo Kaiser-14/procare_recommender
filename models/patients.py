@@ -23,16 +23,19 @@ class RecommenderPatients(db.Model, UserMixin):
 
 	ccdr_reference = db.Column(db.String, primary_key=True)
 	par_day = db.Column(db.Integer, nullable=False)
+	organization = db.Column(db.Integer, nullable=False)
 	notification = relationship("Notifications", backref="RecommenderPatient")
 
-	def __init__(self, ccdr_reference, par_day=1):
+	def __init__(self, ccdr_reference, organization, par_day=1,):
 		self.ccdr_reference = ccdr_reference
 		self.par_day = par_day
+		self.organization = organization
 
 	def get_dict(self):
 		return {
 			"ccdr_reference": self.ccdr_reference,
-			"par_day": self.par_day
+			"par_day": self.par_day,
+			"organization": self.organization,
 		}
 
 	def save(self):
@@ -50,15 +53,15 @@ class RecommenderPatients(db.Model, UserMixin):
 				"If you have not answered, please, fill the form into the app."
 			ipaq_notification = Notifications(self.ccdr_reference, message)
 			self.notification.append(ipaq_notification)
-			ipaq_notification.send(receiver="game")  # FIXME: Change to mobile after testing
+			ipaq_notification.send(receiver="mobile")
 
 		self.par_day = (self.par_day + 1) % 41
-		notification.send(receiver="game")  # FIXME: Change to mobile after testing
+		notification.send(receiver="mobile")
 
 	def game_notification(self):
 		body = {
 			"identity_management_key": self.ccdr_reference,
-			# "organization": "000",
+			"organization": self.organization,
 			"role": "patient",
 			"date": "09-03-2022",
 		}
@@ -228,7 +231,6 @@ class RecommenderPatients(db.Model, UserMixin):
 	@staticmethod
 	def update_db():
 		try:
-			# TODO: Check it
 			response = requests.get(config.ccdr_url + "/api/v1/mobile/patient").json()
 			for patient in response:
 				ccdr_ref = patient["identity_management_key"]
@@ -314,7 +316,7 @@ class RecommenderPatients(db.Model, UserMixin):
 
 		body = {
 			"identity_management_key": str(uuid4()),
-			"organization": "000",  # TODO: Chasnge to self.organization
+			"organization": self.organization,
 			"role": "system",
 			"scenario": "data_injection",
 			"patient_identity_management_key": self.ccdr_reference,
