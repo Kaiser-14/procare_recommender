@@ -3,17 +3,17 @@ volumes:
   postgres_data:
 
 networks:
-  data_net:
+  data-repo-net:
     external: false
-    name: data_net
+    name: data-repo-net
 
 services:
   recommender:
-    container_name: "recommender"
+    container_name: "recommender-procare"
     image: procare_re:1.0
     restart: always
     networks:
-        - data_net
+        - data-repo-net
     build:
       context: .
       dockerfile: Dockerfile
@@ -22,13 +22,12 @@ services:
     depends_on:
       - db
   db:
-    container_name: "db"
+    container_name: "dbpostgresql-rec"
     image: postgres
     restart: always
     networks:
-        - data_net
+        - data-repo-net
     environment:
-#      - POSTGRES_HOST_AUTH_METHOD=trust
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=procare
       - POSTGRES_DB=procare
