@@ -148,7 +148,7 @@ def get_notifications():
 						"user": patient_reference
 					}
 					notifications.append(body)
-			return str(notifications), 200
+			return json.dumps(notifications, indent=3), 200
 		else:
 			return "Patient not found", 404
 	else:
