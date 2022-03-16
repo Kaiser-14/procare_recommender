@@ -23,10 +23,10 @@ class RecommenderPatients(db.Model, UserMixin):
 
 	ccdr_reference = db.Column(db.String, primary_key=True)
 	par_day = db.Column(db.Integer, nullable=False)
-	organization = db.Column(db.Integer, nullable=False)
+	organization = db.Column(db.String, nullable=False)
 	notification = relationship("Notifications", backref="RecommenderPatient")
 
-	def __init__(self, ccdr_reference, organization, par_day=1,):
+	def __init__(self, ccdr_reference, organization, par_day=0):
 		self.ccdr_reference = ccdr_reference
 		self.par_day = par_day
 		self.organization = organization
@@ -44,19 +44,23 @@ class RecommenderPatients(db.Model, UserMixin):
 			logger.debug(self.ccdr_reference)
 		db.session.commit()
 
-	def par_notification(self):
-		notification = Notifications(self.ccdr_reference, par_notifications[str(self.par_day)])
-		self.notification.append(notification)
+	def par_notification(self, ipaq=False):
+		if not ipaq:
+			self.par_day = (self.par_day + 1) % 41
+			notification = Notifications(self.ccdr_reference, par_notifications[str(self.par_day)])
+			self.notification.append(notification)
 
-		if self.par_day in [7, 14, 21, 28, 35]:
+
+			notification.send(receiver="mobile")
+
+		if self.par_day in [8, 15, 22, 29, 36] or ipaq:
 			message = "Your weekly questionnaire is available. " \
 				"If you have not answered, please, fill the form into the app."
 			ipaq_notification = Notifications(self.ccdr_reference, message)
 			self.notification.append(ipaq_notification)
 			ipaq_notification.send(receiver="mobile")
 
-		self.par_day = (self.par_day + 1) % 41
-		notification.send(receiver="mobile")
+
 
 	def game_notification(self):
 		body = {
@@ -197,23 +201,12 @@ class RecommenderPatients(db.Model, UserMixin):
 
 	@staticmethod
 	def get_patients_db():
-		list_of_services = RecommenderPatients.query.all()
+		if not test_flag:
+			list_of_services = RecommenderPatients.query.all()
+		else:
+			list_of_services = [RecommenderPatients.query.filter_by(ccdr_reference="98284945").first()]
 		total = len(list_of_services)
 		return list_of_services, total
-
-	# Get all patient unique identifiers from the identity management API
-	@staticmethod
-	def get_patients():
-		headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
-		#FIXME: Remove test flag
-		if not test_flag:
-			idm_response = requests.get(
-				config.idm_url + "/getAllPacientKeys", headers=headers)
-		else:
-			idm_response = ["98284945", "98284945"]
-
-		number_of_patients = len(idm_response)
-		return idm_response, number_of_patients
 
 	@staticmethod
 	def notifications_round(receiver):
@@ -234,9 +227,10 @@ class RecommenderPatients(db.Model, UserMixin):
 			response = requests.get(config.ccdr_url + "/api/v1/mobile/patient").json()
 			for patient in response:
 				ccdr_ref = patient["identity_management_key"]
+				organization = patient["organization_code"]
 				rec_patient = RecommenderPatients.get_by_ccdr_ref(ccdr_ref)
 				if not rec_patient:
-					rec_patient = RecommenderPatients(ccdr_ref)
+					rec_patient = RecommenderPatients(ccdr_ref, organization)
 					rec_patient.save()
 			return RecommenderPatients.get_patients_db()
 
@@ -246,52 +240,24 @@ class RecommenderPatients(db.Model, UserMixin):
 
 	@staticmethod
 	def scores_injection():
-		# patients, total = RecommenderPatients.get_patients_db()
-		# TODO: Check it
-		patients, patients_total = RecommenderPatients.get_patients()
-
-		# FIXME: Remove test flag
-		if not test_flag:
-			start_dates = [
-				"01-11-2021", "08-11-2021", "15-11-2021", "22-11-2021", "29-11-2021",
-				"06-12-2021", "13-12-2021", "20-12-2021", "27-12-2021", "03-01-2022",
-				"10-01-2022", "17-01-2022", "24-01-2022", "31-01-2022", "07-02-2022"
-			]
-			end_dates = [
-				"07-11-2021", "14-11-2021", "21-11-2021", "28-11-2021", "05-12-2021",
-				"12-12-2021", "19-12-2021", "26-12-2021", "02-01-2022", "09-01-2022",
-				"16-01-2022", "23-01-2022", "30-01-2022", "06-02-2022", "13-02-2022"
-			]
-		else:
-			start_dates = ["25-08-2021", "25-08-2021"]
-			end_dates = ["25-08-2021", "25-08-2021"]
+		patients, total = RecommenderPatients.get_patients_db()
 
 		patient_count = 0
-		for patient_reference in patients:
+		for patient in patients:
 			period_count = 0
 			patient_count = patient_count + 1
-			logger.info("Processing patient " + patient_reference + "....\n")
-			for start_date, end_date in zip(start_dates, end_dates):
-				period_count = period_count + 1
-				date = [start_date, end_date]
-				patient = RecommenderPatients.get_by_ccdr_ref(patient_reference)
-				actionlib_response, fusionlib_response = patient.calculate_scores(date)
+			logger.info("Processing patient " + patient.ccdr_reference + "....\n")
 
-				logger.info("Completed data injection " + str(period_count) + "/" + str(
-					len(start_dates)) + " for " + patient + " between " + start_date + " and " + end_date +
-					" ActionLib: " + str(actionlib_response.status_code) + " FusionLib: " + str(
-					fusionlib_response.status_code))
+			actionlib_response, fusionlib_response = patient.calculate_scores()
 
-				logger.debug("ActionLib Response:\nStatus: {}\nContent: {}\n".format(
-					str(actionlib_response.status_code), str(actionlib_response.content)))
-				logger.debug("FusionLib Response:\nStatus: {}\nContent: {}\n".format(
-					str(actionlib_response.status_code), str(actionlib_response.content)))
-				logger.info("--------------")
-
-			logger.info("\nInjection completed. Patient: {}/{}\n".format(str(patient_count), str(patients_total)))
+			logger.debug("ActionLib Response:\nStatus: {}\nContent: {}\n".format(
+				str(actionlib_response.status_code), str(actionlib_response.content)))
+			logger.debug("FusionLib Response:\nStatus: {}\nContent: {}\n".format(
+				str(actionlib_response.status_code), str(actionlib_response.content)))
 			logger.info("--------------")
 
-		logger.info("Data injection completed")
+		logger.info("Injection completed. Patient: {}/{}\n".format(str(patient_count), str(total)))
+		logger.info("--------------")
 
 	def scores_injection_patient(self):
 		logger.info("Processing patient " + self.ccdr_reference + "....\n")
@@ -516,5 +482,5 @@ class Notifications(db.Model, UserMixin):
 
 				if notification.msg.startswith("Your") and not notification.read and Notifications.check_timestamp(dates):
 					logger.info("Sending reminder for IPAQ notification to patient {}".format(patient.ccdr_reference))
-					patient.ipaq_notification()
+					patient.par_notification(True)
 					break
