@@ -87,10 +87,10 @@ class RecommenderPatients(db.Model, UserMixin):
 	def get_by_ccdr_ref(ref):
 		return RecommenderPatients.query.filter_by(ccdr_reference=ref).first()
 
-	def recommendation(self, date):
+	def recommendation(self):
 
 		category, sitting_minutes = self.par_analysis()
-		scores, deviations = self.scores_injection_patient(date)
+		scores, deviations = self.scores_injection_patient()
 
 		notification_key = "2"
 		par_notification = par_notifications[str(notification_key)]
@@ -293,10 +293,10 @@ class RecommenderPatients(db.Model, UserMixin):
 
 		logger.info("Data injection completed")
 
-	def scores_injection_patient(self, date):
+	def scores_injection_patient(self):
 		logger.info("Processing patient " + self.ccdr_reference + "....\n")
 
-		actionlib_response, fusionlib_response = self.calculate_scores(date)
+		actionlib_response, fusionlib_response = self.calculate_scores()
 
 		scores = actionlib_response.json()['scores']
 		deviations = fusionlib_response.json()['deviations']
@@ -307,12 +307,14 @@ class RecommenderPatients(db.Model, UserMixin):
 		return scores, deviations
 
 	# Run both ActionLib (HBR) scores and FusionLib (MMF) deviation for specific patient and date
-	def calculate_scores(self, date):
+	def calculate_scores(self):
 		# today = datetime.today()
 		# week_ago = today - timedelta(weeks=1)
 
 		actionlib_response = None
 		fusionlib_response = None
+
+		today = datetime.today()
 
 		body = {
 			"identity_management_key": str(uuid4()),
@@ -320,8 +322,8 @@ class RecommenderPatients(db.Model, UserMixin):
 			"role": "system",
 			"scenario": "data_injection",
 			"patient_identity_management_key": self.ccdr_reference,
-			"measurements_start_date": date[0],  # FIXME: This should be end date - 7 days
-			"measurements_end_date": date[1],
+			"measurements_start_date": (today - timedelta(days=7)).strftime("%d-%m-%Y"),
+			"measurements_end_date": today.strftime("%d-%m-%Y"),
 		}
 
 		# FIXME: Uncomment once tested in server

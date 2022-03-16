@@ -63,10 +63,9 @@ def create_recommendation():
 	data = request.get_json()
 
 	patient_reference = data.get('identity_management_key')
-	date = [data.get('start_date')[0], data.get('end_date')[0]]
 
 	patient = RecommenderPatients.get_by_ccdr_ref(patient_reference)
-	par_notification = patient.recommendation(date)
+	par_notification = patient.recommendation()
 
 	return 'Notification sent for patient {}: {}'.format(patient_reference, par_notification)
 
