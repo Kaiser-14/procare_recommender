@@ -13,10 +13,6 @@ from helper import config
 
 db = SQLAlchemy()
 
-# Flags
-test_flag = True
-debug_requests = True
-
 
 class RecommenderPatients(db.Model, UserMixin):
 	__tablename__ = 'RecommenderPatients'
@@ -204,7 +200,7 @@ class RecommenderPatients(db.Model, UserMixin):
 
 	@staticmethod
 	def get_patients_db():
-		if not test_flag:
+		if not config.test_flag:
 			list_of_services = RecommenderPatients.query.all()
 		else:
 			list_of_services = [RecommenderPatients.query.filter_by(ccdr_reference="98284945").first()]

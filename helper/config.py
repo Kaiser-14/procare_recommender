@@ -3,6 +3,9 @@ import os
 testing_mode = os.environ['TESTING'] if "TESTING" in os.environ else "no"
 
 platform = "local"  # local, test, production
+test_flag = True
+if platform == "production":
+    test_flag = False
 
 if os.getenv("FLASK_HOST") is not None:
     flask_host = os.getenv("FLASK_HOST")
