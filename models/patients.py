@@ -47,20 +47,23 @@ class RecommenderPatients(db.Model, UserMixin):
 	def par_notification(self, ipaq=False):
 		if not ipaq:
 			self.par_day = (self.par_day + 1) % 41
-			notification = Notifications(self.ccdr_reference, par_notifications[str(self.par_day)])
-			self.notification.append(notification)
+			if self.par_day == 0:
+				self.par_day = 1
+			message = par_notifications[str(self.par_day)]
+			if message:
+				notification = Notifications(self.ccdr_reference, message)
+				self.notification.append(notification)
 
+				notification.send(receiver="mobile")
 
-			notification.send(receiver="mobile")
-
-		if self.par_day in [8, 15, 22, 29, 36] or ipaq:
+		if self.par_day in [7, 14, 21, 28, 35] or ipaq:
 			message = "Your weekly questionnaire is available. " \
 				"If you have not answered, please, fill the form into the app."
 			ipaq_notification = Notifications(self.ccdr_reference, message)
 			self.notification.append(ipaq_notification)
 			ipaq_notification.send(receiver="mobile")
 
-
+		db.session.commit()
 
 	def game_notification(self):
 		body = {
