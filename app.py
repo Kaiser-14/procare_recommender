@@ -54,8 +54,13 @@ with app.app_context():
 @scheduler.scheduled_job('cron', id='scores_injection', day='*', hour='12', minute='12')
 @app.route("/recommender/scores_injection", methods=['GET'])
 def schedule_scores_injection():
-	RecommenderPatients.scores_injection()
-	return 'Scores injected'
+	response = {
+		"patients": None
+	}
+	patient_count = RecommenderPatients.scores_injection()
+	if patient_count:
+		response["patients"] = patient_count
+	return json.dumps(response, indent=3), 200
 
 
 @app.route("/recommender/create_recommendation", methods=['POST'])
@@ -77,22 +82,34 @@ def create_recommendation():
 @app.route("/notification/daily_par", methods=['GET'])
 def daily_par():
 	logger.info("Running daily PAR round")
+	response = {
+		"patients": None
+	}
+
 	with app.app_context():
 		update()
-		RecommenderPatients.notifications_round(receiver="mobile")
+		patients = RecommenderPatients.notifications_round(receiver="mobile")
+		if patients:
+			response["patients"] = patients
 
-	return "Finished."
+	return json.dumps(response, indent=3), 200
 
 
 @scheduler.scheduled_job('cron', id='game_notifications', day='*', hour='19', minute='15')
 @app.route("/notification/game_notifications", methods=['GET'])
 def game_notifications():
 	logger.info("Running daily game round")
+	response = {
+		"patients": None
+	}
+
 	with app.app_context():
 		update()
-		RecommenderPatients.notifications_round(receiver="game")
+		patients = RecommenderPatients.notifications_round(receiver="game")
+		if patients:
+			response["patients"] = patients
 
-	return "Finished."
+	return json.dumps(response, indent=3), 200
 
 
 # Check weekly IPAQ questionnaire filled
@@ -100,9 +117,15 @@ def game_notifications():
 @app.route("/notification/weekly_check_ipaq", methods=['GET'])
 def weekly_check_ipaq():
 	logger.info("Checking weekly IPAQ notifications")
-	Notifications.check_ipaq()
+	response = {
+		"patients": None
+	}
 
-	return "Finished weekly IPAQ checks"
+	patients = Notifications.check_ipaq()
+	if patients:
+		response["patients"] = patients
+
+	return json.dumps(response, indent=3), 200
 
 
 # Send to the backend the unique identifier of the notification message when the user reads the notification

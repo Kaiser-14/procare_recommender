@@ -224,6 +224,8 @@ class RecommenderPatients(db.Model, UserMixin):
 			elif receiver == "game":
 				patient.game_notification()
 
+		return patient_count
+
 	@staticmethod
 	def update_db():
 		try:
@@ -261,6 +263,8 @@ class RecommenderPatients(db.Model, UserMixin):
 
 		logger.info("Injection completed. Patient: {}/{}\n".format(str(patient_count), str(total)))
 		logger.info("--------------")
+
+		return patient_count
 
 	def scores_injection_patient(self):
 		logger.info("Processing patient " + self.ccdr_reference + "....\n")
@@ -474,6 +478,7 @@ class Notifications(db.Model, UserMixin):
 	@staticmethod
 	def check_ipaq():
 		patients, total = RecommenderPatients.get_patients_db()
+		patient_count = 0
 
 		for patient in patients:
 			notifications = patient.get_notifications()
@@ -486,4 +491,7 @@ class Notifications(db.Model, UserMixin):
 				if notification.msg.startswith("Your") and not notification.read and Notifications.check_timestamp(dates):
 					logger.info("Sending reminder for IPAQ notification to patient {}".format(patient.ccdr_reference))
 					patient.par_notification(True)
+					patient_count = patient_count + 1
 					break
+
+		return patient_count
