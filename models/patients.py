@@ -476,18 +476,27 @@ class Notifications(db.Model, UserMixin):
 		patients, total = RecommenderPatients.get_patients_db()
 		patient_count = 0
 
+		today = date.today()
+		yesterday = today - timedelta(days=1)
+
 		for patient in patients:
-			notifications = patient.get_notifications()
+			ipaq_response = requests.post(
+				config.ccdr_url + "/api/v1/mobile/surveys/get_response/7.2?identity_management_key=" +
+				patient.ccdr_reference).json()
 
-			for notification in notifications:
-				today = date.today()
-				yesterday = today - timedelta(days=1)
-				dates = [notification.datetime_sent, yesterday.strftime("%d-%m-%Y"), today.strftime("%d-%m-%Y")]
+			ipaq_datetime = datetime.strptime(
+				ipaq_response[-1]["date"][4:].replace("UTC ", ""), '%b %d %H:%M:%S %Y').strftime("%d-%m-%Y")
 
-				if notification.msg.startswith("Your") and not notification.read and Notifications.check_timestamp(dates):
-					logger.info("Sending reminder for IPAQ notification to patient {}".format(patient.ccdr_reference))
-					patient.par_notification(True)
-					patient_count = patient_count + 1
-					break
+			if not ipaq_response and ipaq_datetime in [yesterday, today]:
+				notifications = patient.get_notifications()
+
+				for notification in notifications:
+					dates = [notification.datetime_sent, yesterday.strftime("%d-%m-%Y"), today.strftime("%d-%m-%Y")]
+
+					if notification.msg.startswith("Your") and not notification.read and Notifications.check_timestamp(dates):
+						logger.info("Sending reminder for IPAQ notification to patient {}".format(patient.ccdr_reference))
+						patient.par_notification(True)
+						patient_count = patient_count + 1
+						break
 
 		return patient_count
