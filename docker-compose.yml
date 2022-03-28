@@ -1,6 +1,7 @@
 version: "3.5"
 volumes:
-  postgres_data:
+  dbpostgresql-rec:
+    external: false
 
 networks:
   data-repo-net:
@@ -10,7 +11,7 @@ networks:
 services:
   recommender:
     container_name: "recommender-procare"
-    image: procare-recommender
+    image: kaiser1414/procare-recommender:latest
     restart: always
     networks:
         - data-repo-net
@@ -32,6 +33,6 @@ services:
       - POSTGRES_PASSWORD=procare
       - POSTGRES_DB=procare
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - dbpostgresql-rec:/var/lib/postgresql/data
     ports:
       - "5432:5432"
