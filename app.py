@@ -39,7 +39,7 @@ def update():
 	patients, total = RecommenderPatients.update_db()
 	if total:
 		response["total"] = total
-	if patients:
+
 		for patient in patients:
 			response["rec_patients"].append(patient.get_dict())
 	return json.dumps(response, indent=3)

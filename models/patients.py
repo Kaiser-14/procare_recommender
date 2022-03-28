@@ -66,22 +66,25 @@ class RecommenderPatients(db.Model, UserMixin):
 			"identity_management_key": self.ccdr_reference,
 			"organization": self.organization,
 			"role": "patient",
-			"date": "09-03-2022",
+			"date": datetime.now().strftime("%d-%m-%Y"),
 		}
-		response = requests.post(
-			config.ccdr_url + "/api/v1/game/getSummarization", json=body).json()
+		try:
+			response = requests.post(
+				config.ccdr_url + "/api/v1/game/getSummarization", json=body).json()
 
-		game_score = response["session_info"][0]["metric_global"]
-		game_clicks = response["session_info"][0]["nclicks_total"]
+			game_score = response["session_info"][0]["metric_global"]
+			game_clicks = response["session_info"][0]["nclicks_total"]
 
-		message = None
-		if game_score > 0.5:
-			message = "Change the game."
+			message = None
+			if game_score > 0.5:
+				message = "Change the game."
 
-		if message:
-			notification = Notifications(self.ccdr_reference, message)
-			self.notification.append(notification)
-			notification.send(receiver="game")
+			if message:
+				notification = Notifications(self.ccdr_reference, message)
+				self.notification.append(notification)
+				notification.send(receiver="game")
+		except requests.exceptions.RequestException as e:
+			logger.error("Error in game_notification. No connection.")
 
 	def get_notifications(self):
 		return self.notification
@@ -117,85 +120,89 @@ class RecommenderPatients(db.Model, UserMixin):
 
 		today = datetime.today()
 		week_ago = today - timedelta(weeks=1)
-		response = requests.post(
-			config.ccdr_url + "/api/v1/web/questionnaire/getPatientQuestionnairesResponses", json=body).json()
+		try:
+			response = requests.post(
+				config.ccdr_url + "/api/v1/web/questionnaire/getPatientQuestionnairesResponses", json=body).json()
 
-		valid_quests = []
-		if response:
-			for quest in response.json():
-				survey_id = quest["survey_id"].split(".")[0]
-				if survey_id == "7":
-					# test = "Mon Jun 28 09:07:16 UTC 2021".replace(" UTC ", " ")
-					survey_datetime = datetime.strptime(quest["date"].replace(" UTC ", " "), '%a %b %d %H:%M:%S %Y')
-					if today > survey_datetime > week_ago:
-						valid_quests.append(quest)
-						logger.debug(quest)
-		else:
-			logger.debug('No questionnaire for patient {}'.format(self.ccdr_reference))
+			valid_quests = []
+			if response:
+				for quest in response.json():
+					survey_id = quest["survey_id"].split(".")[0]
+					if survey_id == "7":
+						# test = "Mon Jun 28 09:07:16 UTC 2021".replace(" UTC ", " ")
+						survey_datetime = datetime.strptime(quest["date"].replace(" UTC ", " "), '%a %b %d %H:%M:%S %Y')
+						if today > survey_datetime > week_ago:
+							valid_quests.append(quest)
+							logger.debug(quest)
+			else:
+				logger.debug('No questionnaire for patient {}'.format(self.ccdr_reference))
 
-		if valid_quests:
-			final_quest = valid_quests[0]
-			vigorous_days, vigorous_hours, vigorous_minutes, moderate_days, moderate_hours, moderate_minutes, \
-				walk_days, walk_hours, walk_minutes, sitting_hours, sitting_minutes = (None,) * 11
-			for answer in final_quest["answers"]:
-				question_id = answer["question_id"]
-				if question_id == 0:
-					vigorous_days = int(answer["text_input_value"])
-				if question_id == 1:
-					vigorous_hours = int(answer["text_input_value"])
-				if question_id == 2:
-					vigorous_minutes = int(answer["text_input_value"])
-				if question_id == 3:
-					moderate_days = int(answer["text_input_value"])
-				if question_id == 4:
-					moderate_hours = int(answer["text_input_value"])
-				if question_id == 5:
-					moderate_minutes = int(answer["text_input_value"])
-				if question_id == 6:
-					walk_days = int(answer["text_input_value"])
-				if question_id == 7:
-					walk_hours = int(answer["text_input_value"])
-				if question_id == 8:
-					walk_minutes = int(answer["text_input_value"])
-				if question_id == 9:
-					sitting_hours = int(answer["text_input_value"])
-				if question_id == 10:
-					sitting_minutes = int(answer["text_input_value"])
+			if valid_quests:
+				final_quest = valid_quests[0]
+				vigorous_days, vigorous_hours, vigorous_minutes, moderate_days, moderate_hours, moderate_minutes, \
+					walk_days, walk_hours, walk_minutes, sitting_hours, sitting_minutes = (None,) * 11
+				for answer in final_quest["answers"]:
+					question_id = answer["question_id"]
+					if question_id == 0:
+						vigorous_days = int(answer["text_input_value"])
+					if question_id == 1:
+						vigorous_hours = int(answer["text_input_value"])
+					if question_id == 2:
+						vigorous_minutes = int(answer["text_input_value"])
+					if question_id == 3:
+						moderate_days = int(answer["text_input_value"])
+					if question_id == 4:
+						moderate_hours = int(answer["text_input_value"])
+					if question_id == 5:
+						moderate_minutes = int(answer["text_input_value"])
+					if question_id == 6:
+						walk_days = int(answer["text_input_value"])
+					if question_id == 7:
+						walk_hours = int(answer["text_input_value"])
+					if question_id == 8:
+						walk_minutes = int(answer["text_input_value"])
+					if question_id == 9:
+						sitting_hours = int(answer["text_input_value"])
+					if question_id == 10:
+						sitting_minutes = int(answer["text_input_value"])
 
-			variables = vigorous_days, vigorous_hours, vigorous_minutes, moderate_days, moderate_hours, \
-				moderate_minutes, walk_days, walk_hours, walk_minutes, sitting_hours, sitting_minutes
+				variables = vigorous_days, vigorous_hours, vigorous_minutes, moderate_days, moderate_hours, \
+					moderate_minutes, walk_days, walk_hours, walk_minutes, sitting_hours, sitting_minutes
 
-			if None not in variables:
-				vigorous_met_value = 8.0
-				moderate_met_value = 4.0
-				walk_met_value = 3.3
-				vigorous_time = vigorous_minutes + (60 * vigorous_hours)
-				moderate_time = moderate_minutes + (60 * moderate_hours)
-				walk_time = walk_minutes + (60 * walk_hours)
-				vigorous_met = vigorous_met_value * vigorous_days * vigorous_time
-				moderate_met = moderate_met_value * moderate_days * moderate_time
-				walk_met = walk_met_value * walk_days * walk_time
-				total_met_value = vigorous_met + moderate_met + walk_met
+				if None not in variables:
+					vigorous_met_value = 8.0
+					moderate_met_value = 4.0
+					walk_met_value = 3.3
+					vigorous_time = vigorous_minutes + (60 * vigorous_hours)
+					moderate_time = moderate_minutes + (60 * moderate_hours)
+					walk_time = walk_minutes + (60 * walk_hours)
+					vigorous_met = vigorous_met_value * vigorous_days * vigorous_time
+					moderate_met = moderate_met_value * moderate_days * moderate_time
+					walk_met = walk_met_value * walk_days * walk_time
+					total_met_value = vigorous_met + moderate_met + walk_met
 
-				if vigorous_days >= 3 and vigorous_time >= 20:
-					category = 2  # Minimally active
-					if vigorous_met >= 1500:
-						category = 3  # HEPA Active
-					else:
-						if walk_days + moderate_days + vigorous_days >= 7 and total_met_value >= 3000:
+					if vigorous_days >= 3 and vigorous_time >= 20:
+						category = 2  # Minimally active
+						if vigorous_met >= 1500:
 							category = 3  # HEPA Active
-				else:
-					if moderate_days + walk_days >= 5:
-						if moderate_time + walk_time >= 30:
-							category = 2  # Minimally active
 						else:
-							if walk_days + moderate_days + vigorous_days >= 5 and total_met_value >= 600:
+							if walk_days + moderate_days + vigorous_days >= 7 and total_met_value >= 3000:
+								category = 3  # HEPA Active
+					else:
+						if moderate_days + walk_days >= 5:
+							if moderate_time + walk_time >= 30:
 								category = 2  # Minimally active
 							else:
-								category = 1  # Inactive
-					else:
-						category = 1  # Inactive
-				# return category+1, variables
+								if walk_days + moderate_days + vigorous_days >= 5 and total_met_value >= 600:
+									category = 2  # Minimally active
+								else:
+									category = 1  # Inactive
+						else:
+							category = 1  # Inactive
+		except requests.exceptions.ConnectionError as e:
+			logger.error("Error in par_analysis. No connection to CCDR.")
+			category = None
+			variables = None
 		return category, variables
 
 	@staticmethod
@@ -236,7 +243,7 @@ class RecommenderPatients(db.Model, UserMixin):
 			return RecommenderPatients.get_patients_db()
 
 		except requests.exceptions.RequestException as e:
-			logger.error("Getting all patients from CCDR error", exc_info=True)
+			logger.error("Getting all patients from CCDR.")
 			return str(e), 0
 
 	@staticmethod
@@ -251,11 +258,12 @@ class RecommenderPatients(db.Model, UserMixin):
 
 			actionlib_response, fusionlib_response = patient.calculate_scores()
 
-			logger.debug("ActionLib Response:\nStatus: {}\nContent: {}\n".format(
-				str(actionlib_response.status_code), str(actionlib_response.content)))
-			logger.debug("FusionLib Response:\nStatus: {}\nContent: {}\n".format(
-				str(actionlib_response.status_code), str(actionlib_response.content)))
-			logger.info("--------------")
+			if actionlib_response == "OK" and fusionlib_response == "OK":
+				logger.debug("ActionLib Response:\nStatus: {}\nContent: {}\n".format(
+					str(actionlib_response.status_code), str(actionlib_response.content)))
+				logger.debug("FusionLib Response:\nStatus: {}\nContent: {}\n".format(
+					str(actionlib_response.status_code), str(actionlib_response.content)))
+				logger.info("--------------")
 
 		logger.info("Injection completed. Patient: {}/{}\n".format(str(patient_count), str(total)))
 		logger.info("--------------")
@@ -304,18 +312,22 @@ class RecommenderPatients(db.Model, UserMixin):
 		# fusionlib_response = requests.post(
 		# 	config.fusionlib_url + "/generate_deviations", data=json.dumps(body), headers=headers)
 
-		actionlib_response = requests.post(
-			config.actionlib_url + "/calculate_scores", data=json.dumps(body), headers=headers)
+		try:
+			actionlib_response = requests.post(
+				config.actionlib_url + "/calculate_scores", data=json.dumps(body), headers=headers)
 
-		# If there is no response from actionLib, we can skip the fusionLib request and save time
-		# FIXME: Control this situation. 200 for test on calculate_scores / 204 for generateScores
-		if actionlib_response.status_code != 200:
-			logger.error(actionlib_response.text)
-		else:
-			fusionlib_response = requests.post(
-				config.fusionlib_url + "/calculate_deviations", data=json.dumps(body), headers=headers)
-			if fusionlib_response.status_code != 200:
-				logger.error(fusionlib_response.text)
+			# If there is no response from actionLib, we can skip the fusionLib request and save time
+			# FIXME: Control this situation. 200 for test on calculate_scores / 204 for generateScores
+			if actionlib_response.status_code != 200:
+				logger.error(actionlib_response.text)
+			else:
+				fusionlib_response = requests.post(
+					config.fusionlib_url + "/calculate_deviations", data=json.dumps(body), headers=headers)
+				if fusionlib_response.status_code != 200:
+					logger.error(fusionlib_response.text)
+
+		except requests.exceptions.RequestException as e:
+			logger.error("Calculating scores for patient {}".format(self.ccdr_reference))
 
 		return actionlib_response, fusionlib_response
 
@@ -360,11 +372,17 @@ class Notifications(db.Model, UserMixin):
 
 		logger.debug(body)
 
-		headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
-		notification_response = requests.post(
-			config.rmq_url + "/notification/sendNotifications",
-			data=json.dumps(body), headers=headers
-		)
+		try:
+			headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
+			notification_response = requests.post(
+				config.rmq_url + "/notification/sendNotifications",
+				data=json.dumps(body), headers=headers
+			)
+
+			destination = "patient"
+			Notifications.check_response(destination, notification_response, body)
+
+			self.save_notification()
 
 		# TODO: Control to send notifications to professionals (always receiver via web)
 		# notification_response = requests.post(
@@ -372,10 +390,8 @@ class Notifications(db.Model, UserMixin):
 		# 	data=json.dumps(body), headers=headers
 		# )
 
-		destination = "patient"
-		Notifications.check_response(destination, notification_response, body)
-
-		self.save_notification()
+		except requests.exceptions.ConnectionError as e:
+			logger.error("Sending notification.")
 
 	def get_dict(self):
 		return {
@@ -480,23 +496,26 @@ class Notifications(db.Model, UserMixin):
 		yesterday = today - timedelta(days=1)
 
 		for patient in patients:
-			ipaq_response = requests.post(
-				config.ccdr_url + "/api/v1/mobile/surveys/get_response/7.2?identity_management_key=" +
-				patient.ccdr_reference).json()
+			try:
+				ipaq_response = requests.post(
+					config.ccdr_url + "/api/v1/mobile/surveys/get_response/7.2?identity_management_key=" +
+					patient.ccdr_reference).json()
 
-			ipaq_datetime = datetime.strptime(
-				ipaq_response[-1]["date"][4:].replace("UTC ", ""), '%b %d %H:%M:%S %Y').strftime("%d-%m-%Y")
+				ipaq_datetime = datetime.strptime(
+					ipaq_response[-1]["date"][4:].replace("UTC ", ""), '%b %d %H:%M:%S %Y').strftime("%d-%m-%Y")
 
-			if not ipaq_response and ipaq_datetime in [yesterday, today]:
-				notifications = patient.get_notifications()
+				if not ipaq_response and ipaq_datetime in [yesterday, today]:
+					notifications = patient.get_notifications()
 
-				for notification in notifications:
-					dates = [notification.datetime_sent, yesterday.strftime("%d-%m-%Y"), today.strftime("%d-%m-%Y")]
+					for notification in notifications:
+						dates = [notification.datetime_sent, yesterday.strftime("%d-%m-%Y"), today.strftime("%d-%m-%Y")]
 
-					if notification.msg.startswith("Your") and not notification.read and Notifications.check_timestamp(dates):
-						logger.info("Sending reminder for IPAQ notification to patient {}".format(patient.ccdr_reference))
-						patient.par_notification(True)
-						patient_count = patient_count + 1
-						break
+						if notification.msg.startswith("Your") and not notification.read and Notifications.check_timestamp(dates):
+							logger.info("Sending reminder for IPAQ notification to patient {}".format(patient.ccdr_reference))
+							patient.par_notification(True)
+							patient_count = patient_count + 1
+							break
+			except requests.exceptions.ConnectionError:
+				logger.error("Connection error.")
 
 		return patient_count
