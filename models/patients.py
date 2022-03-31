@@ -497,24 +497,32 @@ class Notifications(db.Model, UserMixin):
 
 		for patient in patients:
 			try:
-				ipaq_response = requests.post(
-					config.ccdr_url + "/api/v1/mobile/surveys/get_response/7.2?identity_management_key=" +
-					patient.ccdr_reference).json()
+				# Get patient notifications
+				notifications = patient.get_notifications()
 
-				ipaq_datetime = datetime.strptime(
-					ipaq_response[-1]["date"][4:].replace("UTC ", ""), '%b %d %H:%M:%S %Y').strftime("%d-%m-%Y")
+				for notification in notifications:
+					dates = [notification.datetime_sent, yesterday.strftime("%d-%m-%Y"), today.strftime("%d-%m-%Y")]
 
-				if not ipaq_response and ipaq_datetime in [yesterday, today]:
-					notifications = patient.get_notifications()
+					# IPAQ notifications always start with "IPAQ"
+					if notification.msg.startswith("Your") and Notifications.check_timestamp(dates):
+						ipaq_response = requests.post(
+							config.ccdr_url + "/api/v1/mobile/surveys/get_response/7.2?identity_management_key=" +
+							patient.ccdr_reference).json()
 
-					for notification in notifications:
-						dates = [notification.datetime_sent, yesterday.strftime("%d-%m-%Y"), today.strftime("%d-%m-%Y")]
+						if ipaq_response:
+							ipaq_datetime = datetime.strptime(
+								ipaq_response[-1]["date"][4:].replace("UTC ", ""),
+								'%b %d %H:%M:%S %Y').strftime("%d-%m-%Y")
 
-						if notification.msg.startswith("Your") and not notification.read and Notifications.check_timestamp(dates):
+						# Send notification if the survey is not present or if the last survey is not from yesterday
+						if not ipaq_response or ipaq_datetime not in [yesterday, today]:
 							logger.info("Sending reminder for IPAQ notification to patient {}".format(patient.ccdr_reference))
+
 							patient.par_notification(True)
 							patient_count = patient_count + 1
 							break
+			# except Exception as e:
+			# 	logger.error("Error checking IPAQ for patient {}: {}".format(patient.ccdr_reference, e))
 			except requests.exceptions.ConnectionError:
 				logger.error("Connection error.")
 
