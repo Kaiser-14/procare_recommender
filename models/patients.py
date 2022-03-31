@@ -521,8 +521,6 @@ class Notifications(db.Model, UserMixin):
 							patient.par_notification(True)
 							patient_count = patient_count + 1
 							break
-			# except Exception as e:
-			# 	logger.error("Error checking IPAQ for patient {}: {}".format(patient.ccdr_reference, e))
 			except requests.exceptions.ConnectionError:
 				logger.error("Connection error.")
 
