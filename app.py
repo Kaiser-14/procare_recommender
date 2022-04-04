@@ -166,7 +166,8 @@ def get_notifications():
 					notification_dict = notification.get_dict()
 					body = {
 						"message": notification_dict["msg"],
-						"date": notification_dict["datetime_sent"],
+						"date_sent": notification_dict["datetime_sent"],
+						"date_read": notification_dict["datetime_read"],
 						"isReadStatus": notification_dict["read"],
 						"user": patient_reference
 					}
