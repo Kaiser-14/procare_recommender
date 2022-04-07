@@ -7,6 +7,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
 from flask_login import UserMixin
 from datetime import datetime, timedelta, date
+from random import sample
 
 from helper.utils import logger, par_notifications
 from helper import config
@@ -65,6 +66,10 @@ class RecommenderPatients(db.Model, UserMixin):
 	def game_notification(self):
 		if self.par_day in [7, 14, 21, 28, 35]:
 			messages = evaluation.game_evaluation(self.ccdr_reference)
+
+			# Select randomly a message if there are more than two notifications
+			if len(messages) > 2:
+				messages = sample(messages, 2)
 
 			for message in messages:
 				notification = Notifications(self.ccdr_reference, message)
