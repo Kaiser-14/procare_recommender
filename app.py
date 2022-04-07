@@ -51,7 +51,7 @@ with app.app_context():
 	update()
 
 
-@scheduler.scheduled_job('cron', id='scores_injection', day='*', hour='12', minute='12')
+# @scheduler.scheduled_job('cron', id='scores_injection', day='*', hour='12', minute='12')
 @app.route("/recommender/scores_injection", methods=['GET'])
 def schedule_scores_injection():
 	response = {
