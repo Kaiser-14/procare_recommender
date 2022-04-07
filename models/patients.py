@@ -10,6 +10,7 @@ from datetime import datetime, timedelta, date
 
 from helper.utils import logger, par_notifications
 from helper import config
+from models import evaluation
 
 db = SQLAlchemy()
 
@@ -62,29 +63,13 @@ class RecommenderPatients(db.Model, UserMixin):
 		db.session.commit()
 
 	def game_notification(self):
-		body = {
-			"identity_management_key": self.ccdr_reference,
-			"organization": self.organization,
-			"role": "patient",
-			"date": datetime.now().strftime("%d-%m-%Y"),
-		}
-		try:
-			response = requests.post(
-				config.ccdr_url + "/api/v1/game/getSummarization", json=body).json()
+		if self.par_day in [7, 14, 21, 28, 35]:
+			messages = evaluation.game_evaluation(self.ccdr_reference)
 
-			game_score = response["session_info"][0]["metric_global"]
-			game_clicks = response["session_info"][0]["nclicks_total"]
-
-			message = None
-			if game_score > 0.5:
-				message = "Change the game."
-
-			if message:
+			for message in messages:
 				notification = Notifications(self.ccdr_reference, message)
 				self.notification.append(notification)
 				notification.send(receiver="game")
-		except requests.exceptions.RequestException as e:
-			logger.error("Error in game_notification. No connection.")
 
 	def get_notifications(self):
 		return self.notification
