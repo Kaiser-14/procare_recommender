@@ -3,6 +3,7 @@ import requests
 import numpy as np
 from datetime import datetime, timedelta
 
+from helper.utils import logger
 from helper import config
 
 
@@ -37,7 +38,7 @@ def game_evaluation(patient_reference):
 				"1": [], "2": [], "3": [], "4": [], "5": [], "6": [], "7": [],
 			},
 			"type": {  # Games played per type of game
-				"1": [], "2": [], "3": [], "4": [], "5": [], "6": []
+				"1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0
 			},
 		},
 		"stats": {
@@ -89,6 +90,7 @@ def game_evaluation(patient_reference):
 				# print(session)
 				game_summarization["games"]["global"].append(session["id"][-1:])
 				game_summarization["games"]["specific"][str(day+1)].append(session["id"][-1:])
+				game_summarization["games"]["type"][session["id"][-1:]] += 1
 
 				game_summarization["stats"]["categories"]["global"].append(session["category"])
 				if session["category"]:
@@ -123,11 +125,6 @@ def game_evaluation(patient_reference):
 			game_summarization["stats"]["started"].append(0)
 			game_summarization["stats"]["restarted"].append(0)
 
-	# Summarize other useful data
-	unique, counts = np.unique(game_summarization["games"]["global"], return_counts=True)
-	for game_type, count in zip(unique, counts):
-		game_summarization["games"]["type"][str(game_type)[-1:]] = count
-
 	# Recommendation 1:
 	# Use frequently cognitive game app
 	if game_summarization["days_played"] < 3:
@@ -135,6 +132,7 @@ def game_evaluation(patient_reference):
 
 	# Recommendation 2:
 	# Start a different game. Check the games played and compare with the whole list of 6 games
+	unique, counts = np.unique(game_summarization["games"]["global"], return_counts=True)
 	list_diff = np.setdiff1d(["1", "2", "3", "4", "5", "6"], list(unique))
 	if len(list_diff) > 0:
 		messages.append("Start a different game.")
@@ -170,8 +168,8 @@ def game_evaluation(patient_reference):
 	game_levels_neg = []
 	for game in ["1", "5", "6"]:
 		unique, counts = np.unique(game_summarization["stats"]["level"]["type"][game], return_counts=True)
-		if len(unique) > 0:
-			if len(unique) == 1:
+		if 0 < len(unique) == 1:
+			if game_summarization["metrics"]["type"]["global"][game]:
 				if np.mean(game_summarization["metrics"]["type"]["global"][game]) > 0.5:
 					game_levels_pos.append(game)
 				else:
@@ -190,13 +188,18 @@ def game_evaluation(patient_reference):
 	score_mean = []
 	time_mean = []
 	for game in range(6):
-		global_mean.append(np.mean(game_summarization["metrics"]["type"]["global"][str(game+1)]))
-		score_mean.append(np.mean(game_summarization["metrics"]["type"]["score"][str(game+1)]))
-		time_mean.append(np.mean(game_summarization["metrics"]["type"]["time"][str(game+1)]))
+		if game_summarization["metrics"]["type"]["global"][str(game + 1)]:
+			global_mean.append(np.mean(game_summarization["metrics"]["type"]["global"][str(game+1)]))
+			score_mean.append(np.mean(game_summarization["metrics"]["type"]["score"][str(game+1)]))
+			time_mean.append(np.mean(game_summarization["metrics"]["type"]["time"][str(game+1)]))
+		else:
+			global_mean.append(None)
+			score_mean.append(None)
+			time_mean.append(None)
 
 	# Get games with values less than 0.5
 	for param in [global_mean, score_mean, time_mean]:
-		values = [value for value in param if value < 0.5]
+		values = [value for value in param if value if value < 0.5]
 
 		if values:
 			messages.append("Read game information carefully before playing.")
@@ -217,19 +220,20 @@ def game_evaluation(patient_reference):
 	# Check if len of appended values are more than 30% of the games completed and send notification if metrics are low
 	if len(avg_clicks_values_lower) / len(game_summarization["stats"]["time_between_clicks"]) < 0.3:
 		for idx, game_mean in enumerate(global_mean):
-			if game_mean < 0.5:
-				# TODO: Check it
-				messages.append("Play game {} more slowly and accurately".format(idx + 1))
+			if game_mean:
+				if game_mean < 0.5:
+					# TODO: Check it
+					messages.append("Play game {} more slowly and accurately".format(idx + 1))
 
 	# Recommendation 9:
 	# Extract mean global metric and send notification based on results
-	mean_score_global = np.mean(game_summarization["metrics"]["total"]["global"])
-	# print(mean_score_global)
-	if mean_score_global > 0.8:
-		messages.append("You are doing great!")
-	elif 0.5 < mean_score_global < 0.8:
-		messages.append("Keep it up. You're doing it right.")
-	else:
-		messages.append("Keep trying to improve your results.")
+	if game_summarization["metrics"]["total"]["global"]:
+		mean_score_global = np.nanmean(np.array(game_summarization["metrics"]["total"]["global"], dtype=np.float64))
+		if mean_score_global > 0.8:
+			messages.append("You are doing great!")
+		elif 0.5 < mean_score_global < 0.8:
+			messages.append("Keep it up. You're doing it right.")
+		else:
+			messages.append("Keep trying to improve your results.")
 
 	return messages
