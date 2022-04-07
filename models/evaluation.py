@@ -143,8 +143,7 @@ def game_evaluation(patient_reference):
 		uniques = np.unique(game_summarization["personalization"][key])
 
 		if not len(uniques) > 1:
-			# TODO: Send properly formatted notification (1,2 instead of [1,2])
-			messages.append("Customize the app.")
+			messages.append("You can customize the app in the settings (language, style and text size).")
 
 	# Recommendation 4:
 	# Change game category
@@ -159,8 +158,8 @@ def game_evaluation(patient_reference):
 				game_categories.append(game)
 
 	if game_categories:
-		# TODO: Send properly formatted notification (1,2 instead of [1,2])
-		messages.append("Change game categories for games {}".format(game_categories))
+		game_categories = ",".join([str(item) for item in game_categories])
+		messages.append("Change game categories for games {}.".format(game_categories))
 
 	# Recommendation 5:
 	# Change game level
@@ -175,12 +174,13 @@ def game_evaluation(patient_reference):
 				else:
 					game_levels_neg.append(game)
 
-	# TODO: Send messages in string format (games 1 and 2), not list (game [1,2])
 	if game_levels_pos:
-		messages.append("Increase the level for game {}".format(game_levels_pos))
+		game_levels_pos = ",".join([str(item) for item in game_levels_pos])
+		messages.append("Increase the level for game {}.".format(game_levels_pos))
 	if game_levels_neg:
+		game_levels_neg = ",".join([str(item) for item in game_levels_neg])
 		messages.append(
-			"Remember that you can decrease the level for games. Test it on game {}".format(game_levels_neg))
+			"Remember that you can decrease the level for games. Test it on game {}.".format(game_levels_neg))
 
 	# Recommendation 6:
 	# Read carefully game information
@@ -218,12 +218,14 @@ def game_evaluation(patient_reference):
 	avg_clicks_values_lower = [value for value in game_summarization["stats"]["time_between_clicks"] if value < 5]
 
 	# Check if len of appended values are more than 30% of the games completed and send notification if metrics are low
+	games_notification = []
 	if len(avg_clicks_values_lower) / len(game_summarization["stats"]["time_between_clicks"]) < 0.3:
 		for idx, game_mean in enumerate(global_mean):
-			if game_mean:
-				if game_mean < 0.5:
-					# TODO: Check it
-					messages.append("Play game {} more slowly and accurately".format(idx + 1))
+			if game_mean and game_mean < 0.5:
+				games_notification.append(idx + 1)
+	if games_notification:
+		games_notification = ",".join([str(item) for item in games_notification])
+		messages.append("Play games {} more slowly and accurately.".format(str(games_notification)))
 
 	# Recommendation 9:
 	# Extract mean global metric and send notification based on results
