@@ -1,8 +1,10 @@
-flask
-colorlog~=5.0.1
-requests~=2.26.0
+flask~=2.1.1
+Werkzeug==2.0.3
+colorlog~=6.6.0
+requests~=2.27.1
 Flask-SQLAlchemy~=2.5.1
-flask_login~=0.5.0
-psycopg2~=2.8.6
-apscheduler~=3.7.0
+flask_login~=0.6.0
+psycopg2~=2.9.3
+apscheduler~=3.9.1
 sqlalchemy~=1.4.22
+numpy~=1.22.3
