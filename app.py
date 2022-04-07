@@ -113,10 +113,10 @@ def game_notifications():
 
 
 # Check weekly IPAQ questionnaire filled
-@scheduler.scheduled_job('cron', id='weekly_check_ipaq', day='1', hour='18', minute='05')
-@app.route("/notification/weekly_check_ipaq", methods=['GET'])
+@scheduler.scheduled_job('cron', id='daily_check_ipaq', day='*', hour='18', minute='05')
+@app.route("/notification/daily_check_ipaq", methods=['GET'])
 def weekly_check_ipaq():
-	logger.info("Checking weekly IPAQ notifications")
+	logger.info("Checking daily IPAQ notifications")
 	response = {
 		"patients": None
 	}
