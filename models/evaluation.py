@@ -69,12 +69,13 @@ def game_evaluation(patient_reference):
 		},
 		"metrics": {
 			"total": {  # Total metrics per session
-				"global": [], "score": [], "time": []
+				"global": [], "score": [], "time": [], "interaction": []
 			},
 			"type": {  # Metrics per game
 				"global": {"1": [], "2": [], "3": [], "4": [], "5": [], "6": []},
 				"score": {"1": [], "2": [], "3": [], "4": [], "5": [], "6": []},
 				"time": {"1": [], "2": [], "3": [], "4": [], "5": [], "6": []},
+				"interaction": {"1": [], "2": [], "3": [], "4": [], "5": [], "6": []},
 			}
 		}
 	}
@@ -109,10 +110,13 @@ def game_evaluation(patient_reference):
 				game_summarization["metrics"]["total"]["global"].append(session["metric_global"])
 				game_summarization["metrics"]["total"]["score"].append(session["metric_score"])
 				game_summarization["metrics"]["total"]["time"].append(session["metric_time"])
+				game_summarization["metrics"]["total"]["interaction"].append(session["metric_interaction"])
 
 				game_summarization["metrics"]["type"]["global"][session["id"][-1:]].append(session["metric_global"])
 				game_summarization["metrics"]["type"]["score"][session["id"][-1:]].append(session["metric_score"])
 				game_summarization["metrics"]["type"]["time"][session["id"][-1:]].append(session["metric_time"])
+				game_summarization["metrics"]["type"]["interaction"][session["id"][-1:]].append(
+					session["metric_interaction"])
 
 				game_summarization["stats"]["time_between_clicks"].append(session["avg_time_between_clicks"])
 
@@ -187,18 +191,21 @@ def game_evaluation(patient_reference):
 	global_mean = []
 	score_mean = []
 	time_mean = []
+	interaction_mean = []
 	for game in range(6):
 		if game_summarization["metrics"]["type"]["global"][str(game + 1)]:
 			global_mean.append(np.mean(game_summarization["metrics"]["type"]["global"][str(game+1)]))
 			score_mean.append(np.mean(game_summarization["metrics"]["type"]["score"][str(game+1)]))
 			time_mean.append(np.mean(game_summarization["metrics"]["type"]["time"][str(game+1)]))
+			interaction_mean.append(np.mean(game_summarization["metrics"]["type"]["interaction"][str(game+1)]))
 		else:
 			global_mean.append(None)
 			score_mean.append(None)
 			time_mean.append(None)
+			interaction_mean.append(None)
 
 	# Get games with values less than 0.5
-	for param in [global_mean, score_mean, time_mean]:
+	for param in [global_mean, score_mean, time_mean, interaction_mean]:
 		values = [value for value in param if value if value < 0.5]
 
 		if values:
@@ -208,8 +215,6 @@ def game_evaluation(patient_reference):
 	# Recommendation 7:
 	# Complete the games
 	if len(game_summarization["games"]["global"]) < sum(game_summarization["stats"]["started"]) / 2:
-		print("Send notification recommendation 7. Complete the games")
-		print("-------")
 		messages.append("Complete the games.")
 
 	# Recommendation 8
