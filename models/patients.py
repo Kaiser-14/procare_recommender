@@ -9,7 +9,7 @@ from flask_login import UserMixin
 from datetime import datetime, timedelta, date
 from random import sample
 
-from helper.utils import logger, par_notifications
+from helper.utils import logger, par_notifications, ieq_notifications
 from helper import config
 from models import evaluation
 
@@ -47,13 +47,23 @@ class RecommenderPatients(db.Model, UserMixin):
 			self.par_day = (self.par_day + 1) % 41
 			if self.par_day == 0:
 				self.par_day = 1
+
+			# Daily notifications
 			message = par_notifications[str(self.par_day)]
 			if message:
 				notification = Notifications(self.ccdr_reference, message)
 				self.notification.append(notification)
-
 				notification.send(receiver="mobile")
 
+			# IEQ notifications
+			if self.par_day in [10, 15, 25, 30, 35, 40]:
+				message = ieq_notifications[str(self.par_day)]
+				if message:
+					notification = Notifications(self.ccdr_reference, message)
+					self.notification.append(notification)
+					notification.send(receiver="mobile")
+
+		# IPAQ notification
 		if self.par_day in [7, 14, 21, 28, 35] or ipaq:
 			message = "Your weekly questionnaire is available. " \
 				"If you have not answered, please, fill the form into the app."

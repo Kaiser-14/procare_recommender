@@ -105,10 +105,16 @@ if testing_mode == "yes":
 else:
 	logger = init_logger(__name__, testing_logger=False)
 
-
+# Par notifications
 script_dir = os.path.dirname(__file__)  # <-- absolute dir the script is in
-rel_path = "../par/par_notifications.json"
-abs_file_path = os.path.join(script_dir, rel_path)
 
-with open(abs_file_path) as json_file:
+rel_path_par = "../par/par_notifications.json"
+abs_file_path_par = os.path.join(script_dir, rel_path_par)
+
+rel_path_ieq = "../par/ieq_notifications.json"
+abs_file_path_ieq = os.path.join(script_dir, rel_path_ieq)
+
+with open(abs_file_path_par) as json_file:
 	par_notifications = json.load(json_file)
+with open(abs_file_path_ieq) as json_file:
+	ieq_notifications = json.load(json_file)
