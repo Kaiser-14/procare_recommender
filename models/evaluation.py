@@ -30,9 +30,6 @@ def game_evaluation(patient_reference):
 
 	summarization_list = requests.post(config.ccdr_url + "/api/v1/game/getSummarizationList", json=body)
 
-	# Extract only 7 items from the list, to avoid if multiple sessions are present
-	summarization_list = summarization_list[:7]
-
 	game_summarization = {
 		"days_played": 0,
 		"games": {
@@ -45,8 +42,12 @@ def game_evaluation(patient_reference):
 			},
 		},
 		"stats": {
-			"started": [],  # Games started
-			"restarted": [],  # Games restarted
+			"started": {  # Games started
+				"1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0
+			},
+			"restarted": {  # Games restarted
+				"1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0
+			},
 			"categories": {
 				"global": [],  # Total list of categories
 				"specific": {  # List of categories per day
@@ -83,27 +84,35 @@ def game_evaluation(patient_reference):
 		}
 	}
 
+	date = None
+	day = 0
+
 	# Loop over general list, being one item per day. Assign data based on parameters obtained.
-	for day, summarization_day in enumerate(summarization_list.json()):
+	for summarization_day in summarization_list.json():
+		# Filter duplicate dates
+		if date != summarization_day["date"]:
+			day += 1
+			date = summarization_day["date"]
+			if summarization_day["session_info"]:
+				game_summarization["days_played"] += 1
+
 		# Days not played are returned as None in session_info
 		if summarization_day["session_info"]:
-			game_summarization["days_played"] += 1
-
 			# Loop through every session of the day and save the games played
 			for session in summarization_day["session_info"]:
 				# print(session)
 				game_summarization["games"]["global"].append(session["id"][-1:])
-				game_summarization["games"]["specific"][str(day+1)].append(session["id"][-1:])
+				game_summarization["games"]["specific"][str(day)].append(session["id"][-1:])
 				game_summarization["games"]["type"][session["id"][-1:]] += 1
 
 				game_summarization["stats"]["categories"]["global"].append(session["category"])
 				if session["category"]:
-					game_summarization["stats"]["categories"]["specific"][str(day+1)].append(session["category"])
+					game_summarization["stats"]["categories"]["specific"][str(day)].append(session["category"])
 					game_summarization["stats"]["categories"]["type"][session["id"][-1:]].append(session["category"])
 
 				game_summarization["stats"]["level"]["global"].append(session["level"])
 				if session["level"]:
-					game_summarization["stats"]["level"]["specific"][str(day+1)].append(session["level"])
+					game_summarization["stats"]["level"]["specific"][str(day)].append(session["level"])
 					game_summarization["stats"]["level"]["type"][session["id"][-1:]].append(session["level"])
 
 				game_summarization["personalization"]["language"].append(session["app_language"])
@@ -123,14 +132,10 @@ def game_evaluation(patient_reference):
 
 				game_summarization["stats"]["time_between_clicks"].append(session["avg_time_between_clicks"])
 
-			game_summarization["stats"]["started"].append(
-				summarization_day["session_interaction_results"]["nclicks_game_start"])
-			game_summarization["stats"]["restarted"].append(
-				summarization_day["session_interaction_results"]["nclicks_game_restart"])
-
-		else:
-			game_summarization["stats"]["started"].append(0)
-			game_summarization["stats"]["restarted"].append(0)
+			game_summarization["stats"]["started"][str(day)] += summarization_day["session_interaction_results"][
+				"nclicks_game_start"]
+			game_summarization["stats"]["restarted"][str(day)] += summarization_day["session_interaction_results"][
+				"nclicks_game_restart"]
 
 	# Recommendation 1:
 	# Use frequently cognitive game app
@@ -217,7 +222,7 @@ def game_evaluation(patient_reference):
 
 	# Recommendation 7:
 	# Complete the games
-	if len(game_summarization["games"]["global"]) < sum(game_summarization["stats"]["started"]) / 2:
+	if len(game_summarization["games"]["global"]) < sum(game_summarization["stats"]["started"].values()) / 2:
 		messages.append("Complete the games.")
 
 	# Recommendation 8
