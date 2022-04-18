@@ -30,6 +30,9 @@ def game_evaluation(patient_reference):
 
 	summarization_list = requests.post(config.ccdr_url + "/api/v1/game/getSummarizationList", json=body)
 
+	# Extract only 7 items from the list, to avoid if multiple sessions are present
+	summarization_list = summarization_list[:7]
+
 	game_summarization = {
 		"days_played": 0,
 		"games": {
