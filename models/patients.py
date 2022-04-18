@@ -453,8 +453,8 @@ class Notifications(db.Model, UserMixin):
 				}
 		else:
 			return {
-				"status": "Reference not found",
-				"statusCode": 2
+				"status": "Id doesn’t exist",
+				"statusCode": 1011
 			}
 
 	@staticmethod

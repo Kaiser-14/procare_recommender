@@ -138,8 +138,8 @@ def notification_read():
 		return Notifications.check_notification_status(notification_id)
 	else:
 		return {
-			"status": "Bad request",
-			"statusCode": 1
+			"status": "Field can’t be null",
+			"statusCode": 1010
 		}
 
 
@@ -147,37 +147,47 @@ def notification_read():
 # as well as the read status of these notifications.
 @app.route("/notification/getNotifications", methods=['POST'])
 def get_notifications():
-	data = request.get_json()
+	try:
+		data = request.get_json()
 
-	patient_reference = data.get("patient_identity_management_key")
-	organization = data.get("organization_code")
-	date_start = data.get("date_start")
-	date_end = data.get("date_end")
+		patient_reference = data.get("patient_identity_management_key")
+		organization = data.get("organization_code")
+		date_start = data.get("date_start")
+		date_end = data.get("date_end")
 
-	notifications = []
+		notifications = []
 
-	if patient_reference:
-		patient = RecommenderPatients.get_by_ccdr_ref(patient_reference)
-		if patient:
-			for notification in patient.get_notifications():
-				dates = [notification.datetime_sent, date_start, date_end]
-				notification_range = Notifications.check_timestamp(dates)
-				if notification_range:
-					notification_dict = notification.get_dict()
-					body = {
-						"message": notification_dict["msg"],
-						"date_sent": notification_dict["datetime_sent"],
-						"date_read": notification_dict["datetime_read"],
-						"isReadStatus": notification_dict["read"],
-						"user": patient_reference
-					}
-					notifications.append(body)
-			return json.dumps(notifications, indent=3), 200
+		if patient_reference:
+			patient = RecommenderPatients.get_by_ccdr_ref(patient_reference)
+			if patient:
+				for notification in patient.get_notifications():
+					dates = [notification.datetime_sent, date_start, date_end]
+					notification_range = Notifications.check_timestamp(dates)
+					if notification_range:
+						notification_dict = notification.get_dict()
+						body = {
+							"message": notification_dict["msg"],
+							"date_sent": notification_dict["datetime_sent"],
+							"date_read": notification_dict["datetime_read"],
+							"isReadStatus": notification_dict["read"],
+							"user": patient_reference
+						}
+						notifications.append(body)
+				return json.dumps(notifications, indent=3), 200
+			else:
+				return {
+					"status": "User doesn’t exist",
+					"statusCode": 1007
+				}
 		else:
-			return "Patient not found", 404
-	else:
+			return {
+				"status": "Field can’t be null",
+				"statusCode": 1010
+			}
+	except Exception as e:
+		logger.error(e)
 		return {
-			"status": "ERR",
+			"status": "Error occurred",
 			"statusCode": 1000
 		}
 
