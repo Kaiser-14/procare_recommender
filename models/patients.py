@@ -511,7 +511,7 @@ class Notifications(db.Model, UserMixin):
 	@staticmethod
 	def check_par_notification(msg):
 		par = False
-		if msg in par_notifications.values():
+		if any(msg in day.values() for day in par_notifications.values()):
 			par = True
 		return par
 
