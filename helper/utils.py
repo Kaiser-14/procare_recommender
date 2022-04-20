@@ -114,7 +114,7 @@ abs_file_path_par = os.path.join(script_dir, rel_path_par)
 rel_path_ieq = "../par/ieq_notifications.json"
 abs_file_path_ieq = os.path.join(script_dir, rel_path_ieq)
 
-with open(abs_file_path_par) as json_file:
+with open(abs_file_path_par, encoding='utf-8') as json_file:
 	par_notifications = json.load(json_file)
-with open(abs_file_path_ieq) as json_file:
+with open(abs_file_path_ieq, encoding='utf-8') as json_file:
 	ieq_notifications = json.load(json_file)
