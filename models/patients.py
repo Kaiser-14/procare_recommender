@@ -342,6 +342,33 @@ class RecommenderPatients(db.Model, UserMixin):
 		else:
 			return None
 
+	# Map the organization code to the country code
+	def organization_mapping(self):
+		if self.organization == "001":
+			return "pt"  # Portugal
+		elif self.organization == "002":
+			return "es"  # Spain
+		elif self.organization == "003":
+			return "it"  # Italy
+		elif self.organization in ["004", "005"]:
+			return "ro"  # Romania
+		elif self.organization == "006":
+			return "de"  # Germany
+		else:
+			return "en"  # Default English
+
+	# Map the diagnosis code to the disease code
+	@staticmethod
+	def diagnosis_mapping(diagnosis):
+		if diagnosis in ["3", "4", "5", "6"]:
+			return 0  # Dementia
+		elif diagnosis == "0":
+			return 1  # Parkinson's
+		elif diagnosis in ["1", "2"]:
+			return 2  # Alzheimer's
+		else:
+			return None  # Default
+
 
 class Notifications(db.Model, UserMixin):
 	__tablename__ = 'Notifications'
