@@ -1,42 +1,355 @@
 {
-  "1": "Did you know, that regular physical activity improves your physical abilities.",
-  "2": "Did you know, that regular physical activity reduces your risk of fall.",
-  "3": "Did you know, that insufficient physical activity can be a reason for depressive mood and loneliness.",
-  "4": "Did you know, that regular physical activity helps you to manage stress.",
-  "5": "Did you know, that regular physical activity improves your sleeping patterns.",
-  "6": "Did you know, that insufficient physical activity increases your risk for joint and back pain.",
-  "7": "Did you know, that regular physical activity improves your mobility and balance.",
-  "8": "Did you know, that regular physical activity improves your heart and respiratory performance.",
-  "9": "Did you know, that insufficient physical activity is one of the indirect leading factors for death worldwide.",
-  "10": "Did you know, that regular physical activity improves your quality of life.",
-  "11": "One of the five golden rules for physical activity is to try be as physically active as your abilities and conditions allow.",
-  "12": "One of the five golden rules for physical activity is to try to perform activities in short bouts of 10 minutes duration. ",
-  "13": "One of the five golden rules for physical activity is to reduce your sitting time with regular standing up breaks every 30 minutes.",
-  "14": "One of the five golden rules for physical activity is to include physical activity in your daily life activities based on the recommended values.",
-  "15": "One of the five golden rules for physical activity is to know that every minute of activity counts.",
-  "16": "The Rate of Perceived Exertion Scale is a measure of subjective perceived exertion during physical activity with different ranges.",
-  "17": "The Rate of Perceived Exertion Scale varies from very light activity (1), light activity (2-3), moderate activity (4-5) to vigorous activity (5-6).",
-  "18": "The Rate of Perceived Exertion Scale defines very light activity (1) as any activity other than complete rest.",
-  "19": "The Rate of Perceived Exertion Scale defines light activity (2-3) as it feels like you can maintain it for hours while easily breathing.",
-  "20": "The Rate of Perceived Exertion Scale defines moderate activity (4-5) as you can hold short conversations while exercising.",
-  "21": "The Rate of Perceived Exertion Scale defines vigorous activity (6-7) as feels like you on the verge of uncomfortable with short of breath.",
-  "22": "The Rate of Perceived Exertion Scale Includes as very light activities for example: Folding laundry or washing dishes.",
-  "23": "The Rate of Perceived Exertion Scale includes as light activities for example: Walking slowly or vacuuming.",
-  "24": "The Rate of Perceived Exertion Scale includes as moderate activities for example: Walking briskly or swimming.",
-  "25": "The Rate of Perceived Exertion Scale includes as vigorous activities for example: Jogging or carrying heavy loads.",
-  "26": "The World Health Organisation recommends to perform three activity-forms per week: Aerobic, muscle strength and balance training.",
-  "27": "The World Health Organisation recommends to conduct aerobic exercises, for example swimming, 150-300 minutes per week. ",
-  "28": "The World Health Organisation recommends to conduct muscle strength exercises, for example lifting weights, on 2 days per week.",
-  "29": "The World Health Organisation recommends to conduct balance exercises, for example heel raises, on 3 days per week.",
-  "30": "The World Health Organisation recommends to combine aerobic, muscle strength and balance exercises in your physical activity weekly routine.",
-  "31": "Here is a practical tip to be active: Walking in the fresh air can be a mood buster, it improves your mind and body.",
-  "32": "Here is a practical tip to be active: Household activities, like vacuum cleaning or wiping keep you fit and independent.",
-  "33": "Here is a practical tip to be active: Conducting yard work, like pulling out weed, will make your arm muscles stronger. Practicing this regularly, carrying groceries can be easier.",
-  "34": "Here is a practical tip to be active: Performing heel raises while holding on to a chair back can help you to improve your balance. Practicing this regularly, it can prevent falls.",
-  "35": "Here is a practical tip to be active: Going up and down the stairs, by holding on the rail, will make your leg muscles stronger. Practicing regularly, sitting down and standing up will be easier for you.",
-  "36": "Try this link out for further information to physical activity.",
-  "37": "",
-  "38": "Reminder to check the provided links ",
-  "39": "",
-  "40": "Thank you very much for participating in the pilot. Remember that you have the final questionnaire available."
+    "1":{
+        "en":"Benefits of regular and consequences of insufficient physical activity: Regular physical activity improves your physical abilities.",
+        "de":"Nutzen regelmäßiger und Folgen unzureichender Aktivität: Regelmäßige körperliche Aktivität verbessert ihre körperliche Leistungsfähigkeit.",
+        "es":"Beneficios de una actividad regular y consecuencias de una actividad insuficiente: La actividad física regular mejora su capacidad física.",
+        "it":"Benefici di un'attività regolare e conseguenze di un'attività insufficiente: L'attività fisica regolare migliora le tue capacità fisiche.",
+        "pt":"Benefícios da atividade regular e consequências da atividade insuficiente: A atividade física regular melhora a capacidade física.",
+        "ro":"Beneficiile activității fizice regulate și consecințele activității insuficiente: Activitatea fizică regulată vă îmbunătățește abilitățile fizice."
+    },
+    "2":{
+        "en":"Benefits of regular and consequences of insufficient physical activity: Regular physical activity reduces your risk of fall.",
+        "de":"Nutzen regelmäßiger und Folgen unzureichender Aktivität: Regelmäßige körperliche Aktivität verringert ihr Sturzrisiko.",
+        "es":"Beneficios de una actividad regular y consecuencias de una actividad insuficiente: La actividad física regular reduce el riesgo de caídas.",
+        "it":"Benefici di un'attività regolare e conseguenze di un'attività insufficiente: L'attività fisica regolare riduce il rischio di caduta.",
+        "pt":"Benefícios da atividade regular e consequências da atividade insuficiente: A atividade física regular reduz o risco de queda.",
+        "ro":"Beneficiile activității fizice regulate și consecințele activității insuficiente: Activitatea fizică regulată vă reduce riscul de cădere."
+    },
+    "3":{
+        "en":"Benefits of regular and consequences of insufficient physical activity: Insufficient physical activity can be a reason for depressive mood and loneliness.",
+        "de":"Nutzen regelmäßiger und Folgen unzureichender Aktivität: Mangelnde körperliche Aktivität kann ein Grund für depressive Verstimmungen und Einsamkeit sein.",
+        "es":"Beneficios de una actividad regular y consecuencias de una actividad insuficiente: La actividad física insuficiente puede contribuir a un estado de ánimo depresivo y soledad.",
+        "it":"Benefici di un'attività regolare e conseguenze di un'attività insufficiente: Un'attività fisica insufficiente può essere motivo di umore depresso e solitudine.",
+        "pt":"Benefícios da atividade regular e consequências da atividade insuficiente: A atividade física insuficiente pode contribuir para o humor depressivo e a solidão.",
+        "ro":"Beneficiile activității fizice regulate și consecințele activității insuficiente: Activitatea fizică insuficientă poate fi un motiv pentru starea de spirit depresivă și singurătate."
+    },
+    "4":{
+        "en":"Benefits of regular and consequences of insufficient physical activity: Regular physical activity helps you to manage stress.",
+        "de":"Nutzen regelmäßiger und Folgen unzureichender Aktivität: Regelmäßige körperliche Aktivität hilft Ihnen, Stress zu bewältigen.",
+        "es":"Beneficios de una actividad regular y consecuencias de una actividad insuficiente: La actividad física regular le ayuda a controlar el estrés.",
+        "it":"Benefici di un'attività regolare e conseguenze di un'attività insufficiente: L'attività fisica regolare aiuta a gestire lo stress.",
+        "pt":"Benefícios da atividade regular e consequências da atividade insuficiente: A atividade física regular ajuda a controlar o stress.",
+        "ro":"Beneficiile activității fizice regulate și consecințele activității insuficiente: Activitatea fizică regulată vă ajută să gestionați stresul."
+    },
+    "5":{
+        "en":"Benefits of regular and consequences of insufficient physical activity: Regular physical activity improves your sleeping patterns.",
+        "de":"Nutzen regelmäßiger und Folgen unzureichender Aktivität: Regelmäßige körperliche Aktivität verbessert ihr Schlafverhalten.",
+        "es":"Beneficios de una actividad regular y consecuencias de una actividad insuficiente: La actividad física regular mejora su patrón de sueño.",
+        "it":"Benefici di un'attività regolare e conseguenze di un'attività insufficiente: L'attività fisica regolare migliora le caratteristiche del sonno.",
+        "pt":"Benefícios da atividade regular e consequências da atividade insuficiente: A atividade física regular melhora o seu padrão de sono.",
+        "ro":"Beneficiile activității fizice regulate și consecințele activității insuficiente: Activitatea fizică regulată vă îmbunătățește somnul."
+    },
+    "6":{
+        "en":"Benefits of regular and consequences of insufficient physical activity: Insufficient physical activity increases your risk for joint and back pain.",
+        "de":"Nutzen regelmäßiger und Folgen unzureichender Aktivität: Mangelnde körperliche Aktivität erhöht ihr Risiko für Gelenk- und Rückenschmerzen.",
+        "es":"Beneficios de una actividad regular y consecuencias de una actividad insuficiente: La actividad física insuficiente aumenta el riesgo de sufrir dolores de espalda y articulaciones.",
+        "it":"Benefici di un'attività regolare e conseguenze di un'attività insufficiente: Un'attività fisica insufficiente aumenta il rischio di dolori articolari e alla schiena.",
+        "pt":"Benefícios da atividade regular e consequências da atividade insuficiente: A atividade física insuficiente aumenta o risco de dores nas articulações e nas costas.",
+        "ro":"Beneficiile activității fizice regulate și consecințele activității insuficiente: Activitatea fizică insuficientă vă crește riscul de dureri articulare și de spate."
+    },
+    "7":{
+        "en":"Benefits of regular and consequences of insufficient physical activity: Regular physical activity improves your mobility and balance.",
+        "de":"Nutzen regelmäßiger und Folgen unzureichender Aktivität: Regelmäßige körperliche Aktivität verbessert Ihre Mobilität und Ihr Gleichgewicht.",
+        "es":"Beneficios de una actividad regular y consecuencias de una actividad insuficiente: La actividad física regular mejora su movilidad y equilibrio.",
+        "it":"Benefici di un'attività regolare e conseguenze di un'attività insufficiente: L'attività fisica regolare migliora la mobilità e l'equilibrio.",
+        "pt":"Benefícios da atividade regular e consequências da atividade insuficiente: A atividade física regular melhora  a mobilidade e o equilíbrio.",
+        "ro":"Beneficiile activității fizice regulate și consecințele activității insuficiente: Activitatea fizică regulată vă îmbunătățește mobilitatea și echilibrul."
+    },
+    "8":{
+        "en":"Benefits of regular and consequences of insufficient physical activity: Regular physical activity improves your heart and respiratory performance.",
+        "de":"Nutzen regelmäßiger und Folgen unzureichender Aktivität: Regelmäßige körperliche Aktivität verbessert die Leistungsfähigkeit von Herz und Lunge.",
+        "es":"Beneficios de una actividad regular y consecuencias de una actividad insuficiente: La actividad física regular mejora el rendimiento cardíaco y respiratorio.",
+        "it":"Benefici di un'attività regolare e conseguenze di un'attività insufficiente: L'attività fisica regolare migliora le prestazioni cardiache e respiratorie.",
+        "pt":"Benefícios da atividade regular e consequências da atividade insuficiente: A atividade física regular melhora o desempenho cardíaco e respiratório.",
+        "ro":"Beneficiile activității fizice regulate și consecințele activității insuficiente: Activitatea fizică regulată vă îmbunătățește performanța cardiacă și respiratorie."
+    },
+    "9":{
+        "en":"Benefits of regular and consequences of insufficient physical activity: Insufficient physical activity is one of the indirect leading factors for death worldwide.",
+        "de":"Nutzen regelmäßiger und Folgen unzureichender Aktivität: Mangelnde körperliche Aktivität ist einer der indirekt führenden Faktoren für Todesfälle weltweit.",
+        "es":"Beneficios de una actividad regular y consecuencias de una actividad insuficiente: La actividad física insuficiente es uno de los principales factores indirectos de muerte en todo el mundo.",
+        "it":"Benefici di un'attività regolare e conseguenze di un'attività insufficiente: L'insufficiente attività fisica è uno dei principali fattori indiretti di morte in tutto il mondo.",
+        "pt":"Benefícios da atividade regular e consequências da atividade insuficiente: A atividade física insuficiente é um dos principais fatores indiretos de morte em todo o mundo.",
+        "ro":"Beneficiile activității fizice regulate și consecințele activității insuficiente: Activitatea fizică insuficientă este unul dintre factorii principali indirecți de deces la nivel mondial."
+    },
+    "10":{
+        "en":"Benefits of regular and consequences of insufficient physical activity: Regular physical activity improves your quality of life.",
+        "de":"Nutzen regelmäßiger und Folgen unzureichender Aktivität: Regelmäßige körperliche Aktivität verbessert ihre Lebensqualität.",
+        "es":"Beneficios de una actividad regular y consecuencias de una actividad insuficiente: La actividad física regular mejora su calidad de vida.",
+        "it":"Benefici di un'attività regolare e conseguenze di un'attività insufficiente: L'attività fisica regolare migliora la qualità della vita.",
+        "pt":"Benefícios da atividade regular e consequências da atividade insuficiente: A atividade física regular melhora a qualidade de vida.",
+        "ro":"Beneficiile activității fizice regulate și consecințele activității insuficiente: Activitatea fizică regulată vă îmbunătățește calitatea vieții."
+    },
+    "11":{
+        "en":"Five golden rules of physical activity: 1) Try be as physically active as your abilities and conditions allow.",
+        "de":"Fünf goldene Regeln zur körperlichen Aktivität: 1) Versuchen Sie, so körperlich aktiv zu sein, wie es Ihre Fähigkeiten und Ihr Zustand erlauben.",
+        "es":"Cinco reglas de oro para la actividad física: Trate de ser tan activo físicamente como lo permita su capacidad física.",
+        "it":"Cinque regole d'oro per l'attività fisica: 1) Cerca di essere fisicamente attivo quanto le tue capacità e condizioni lo consentono.",
+        "pt":"Cinco regras de ouro para a atividade física: 1) Tente estar  tão fisicamente ativo quanto a sua capacidade física e  o permitirem.",
+        "ro":"Cinci reguli de aur privind activitatea fizică: 1. Încercați să fiți atât de activ fizic  cât vă permit abilitațile și situația dvs."
+    },
+    "12":{
+        "en":"Five golden rules of physical activity: 2) Try to perform activities in short bouts of 10 minutes duration.",
+        "de":"Fünf goldene Regeln zur körperlichen Aktivität: 2) Versuchen Sie, Aktivitäten in kurzen Einheiten von 10 Minuten durchzuführen.",
+        "es":"Cinco reglas de oro para la actividad física: Intente realizar actividades en periodos cortos de 10 minutos de duración.",
+        "it":"Cinque regole d'oro per l'attività fisica: 2) Prova a svolgere attività in brevi periodi della durata di 10 minuti.",
+        "pt":"Cinco regras de ouro para a atividade física: 2) Tente realizar atividades em sessões curtas de 10 minutos de duração.",
+        "ro":"Cinci reguli de aur privind activitatea fizică: 2. Încercați să faceți activitati fizice în episoade cu durată de cel puțin 10 minute."
+    },
+    "13":{
+        "en":"Five golden rules of physical activity: 3) Reduce your sitting time with regular standing up breaks every 30 minutes.",
+        "de":"Fünf goldene Regeln zur körperlichen Aktivität: 3) Reduzieren Sie die Zeit des Sitzens durch regelmäßige Stehpausen, alle 30 Minuten.",
+        "es":"Cinco reglas de oro para la actividad física: Reduzca el tiempo que pasa sentado poniéndose de pie cada 30 minutos.",
+        "it":"Cinque regole d'oro per l'attività fisica: 3) Riduci il tuo tempo seduto con pause regolari in piedi ogni 30 minuti.",
+        "pt":"Cinco regras de ouro para a atividade física: 3) Reduza o  tempo sentado com intervalos regulares para se levantar a cada 30 minutos.",
+        "ro":"Cinci reguli de aur privind activitatea fizică: 3. Reduceți sedentarismul ridicându-vă în picioare la fiecare 30 de minute."
+    },
+    "14":{
+        "en":"Five golden rules of physical activity: 4) Include physical activity in your daily life activities based on the recommended values.",
+        "de":"Fünf goldene Regeln zur körperlichen Aktivität: 4) Versuchen Sie, körperliche Aktivität, basierend auf den empfohlenen Richtwerten, in Ihre täglichen Lebensaktivitäten einzubauen.",
+        "es":"Cinco reglas de oro para la actividad física: Incluya la actividad física en sus actividades de la vida diaria teniendo en cuenta los valores recomendados.",
+        "it":"Cinque regole d'oro per l'attività fisica: 4) Includi l'attività fisica nelle attività della vita quotidiana in base ai valori raccomandati.",
+        "pt":"Cinco regras de ouro para a atividade física: 4) Inclua a atividade física nas suas atividades de vida diária tendo em conta os valores recomendados.",
+        "ro":"Cinci reguli de aur privind activitatea fizică: 4. Includeți activitatea fizică în rutina zilnică, ținând cont de parametrii recomandați."
+    },
+    "15":{
+        "en":"Five golden rules of physical activity: 5) Know that every minute of activity counts.",
+        "de":"Fünf goldene Regeln zur körperlichen Aktivität: 5) Jede Minute Aktivität zählt.",
+        "es":"Cinco reglas de oro para la actividad física: Sepa que cada minuto de actividad cuenta.",
+        "it":"Cinque regole d'oro per l'attività fisica: 5) Sappi che ogni minuto di attività conta.",
+        "pt":"Cinco regras de ouro para a atividade física: 5) Saiba que cada minuto de atividade conta.",
+        "ro":"Cinci reguli de aur privind activitatea fizică: 5. Fiți convins/ă că fiecare minut de activitate conteaza."
+    },
+    "16":{
+        "en":"The Rate of Perceived Exertion Scale: Is a measure of subjective perceived exertion during physical activity with different ranges.",
+        "de":"Die Skala der wahrgenommenen Anstrengung: Ist ein Maß für die subjektiv wahrgenommene Anstrengung während körperlicher Aktivität.",
+        "es":"La escala de  esfuerzo percibido: Es una medida subjetiva del esfuerzo percibido durante la actividad física con diferentes rangos.",
+        "it":"La scala del tasso di sforzo percepito: È una misura dello sforzo soggettivo percepito durante l'attività fisica con intervalli diversi.",
+        "pt":"A Escala de Percepção de Esforço: É uma medida subjectiva do esforço percebido durante a atividade física, com diferentes intervalos.",
+        "ro":"Scala de percepție a efortului: Este o măsură a percepției subiective a efortului  în timpul activității fizice de intensități diferite."
+    },
+    "17":{
+        "en":"The Rate of Perceived Exertion Scale: Varies from very light activity (1), light activity (2-3), moderate activity (4-5) to vigorous activity (5-6).",
+        "de":"Die Skala der wahrgenommenen Anstrengung: Variiert von sehr leichter Aktivität (1), leichter Aktivität (2-3), moderater Aktivität (4-5) bis hin zu schwerer Aktivität (6-7).",
+        "es":"La escala de  esfuerzo percibido: Varía entre actividad muy ligera (1), actividad ligera (2-3), actividad moderada (4-5) y actividad vigorosa (5-6).",
+        "it":"La scala del tasso di sforzo percepito: Varia da un'attività molto leggera (1), un'attività leggera (2-3), un'attività moderata (4-5) a un'attività vigorosa (5-6).",
+        "pt":"A Escala de Percepção de Esforço: Varia entre atividade muito leve (1), atividade leve (2-3), atividade moderada (4-5) e atividade vigorosa (5-6).",
+        "ro":"Scala de percepție a efortului: Variază de la activitate foarte ușoară (1), activitate ușoară (2-3), activitate moderată (4-5) la activitate intensă (5-6)."
+    },
+    "18":{
+        "en":"The Rate of Perceived Exertion Scale: Defines “very light activity (1)” as any activity other than complete rest.",
+        "de":"Die Skala der wahrgenommenen Anstrengung: Definiert “sehr leichte Aktivität (1)” als jede Aktivität, die keine vollständige körperliche Ruhestellung darstellt.",
+        "es":"La escala de  esfuerzo percibido: Define “actividad muy ligera (1)” como cualquier actividad que no sea el descanso completo.",
+        "it":"La scala del tasso di sforzo percepito: Definisce “attività molto leggera (1)” qualsiasi attività diversa dal riposo completo.",
+        "pt":"A Escala de Percepção de Esforço: Define-se “atividade muito leve (1)” como qualquer atividade que não seja o repouso completo.",
+        "ro":"Scala de percepție a efortului: Definește „activitate foarte ușoară (1)” ca orice activitate alta decât odihna completă."
+    },
+    "19":{
+        "en":"The Rate of Perceived Exertion Scale: Defines “light activity (2-3)” as it feels like you can maintain it for hours while easily breathing.",
+        "de":"Die Skala der wahrgenommenen Anstrengung: Definiert “leichte Aktivität (2-3)” als ein Körpergefühl, das Sie stundenlang beibehalten können, während Sie problemlos atmen.",
+        "es":"La escala de  esfuerzo percibido: Define “actividad ligera (2-3)”, como actividad que es capaz de  mantener durante horas mientras respira con facilidad.",
+        "it":"La scala del tasso di sforzo percepito: Definisce “attività leggera (2-3)” in quanto sembra di poterla mantenere per ore respirando facilmente.",
+        "pt":"A Escala de Percepção de Esforço: Define-se “atividade leve (2-3)”, como atividade que é capaz de manter por várias horas, respirando com facilidade.",
+        "ro":"Scala de percepție a efortului: Definește „activitate ușoară (2-3)” acea activitate ce poate fi făcută ore întregi cu efort respirator ușor."
+    },
+    "20":{
+        "en":"The Rate of Perceived Exertion Scale: Defines “moderate activity (4-5)” as you can hold short conversations while exercising.",
+        "de":"Die Skala der wahrgenommenen Anstrengung: Definiert “moderate Aktivität (4-5)” als eine Tätigkeit, bei der Sie kurze Gespräche führen können, während Sie trainieren.",
+        "es":"La escala de  esfuerzo percibido: Define “actividad moderada (4-5)”, como el ejercicio que puede hacer mientras mantiene conversaciones breves.",
+        "it":"La scala del tasso di sforzo percepito: Definisce “attività moderata (4-5)” poiché puoi tenere brevi conversazioni durante l'esercizio.",
+        "pt":"A Escala de Percepção de Esforço: Define-se “atividade moderada (4-5)”, como o exercício que é fazer enquanto mantém uma conversa curta.",
+        "ro":"Scala de percepție a efortului: Definește „activitate moderată (4-5)” acea activitate în timpul căreia poți purta scurte conversații."
+    },
+    "21":{
+        "en":"The Rate of Perceived Exertion Scale: Defines “vigorous activity (6-7)” as feels like you on the verge of uncomfortable with short of breath.",
+        "de":"Die Skala der wahrgenommenen Anstrengung: Definiert “schwere Aktivität (6-7)” als einen Körperzustand, der sich anfühlt, als ob Sie sich am Rande des Unwohlseins befinden und kurzatmig sind.",
+        "es":"La escala de  esfuerzo percibido: Define “actividad vigorosa (6-7)” como actividad límite antes de sentir incomodidad y falta de aire.",
+        "it":"La scala del tasso di sforzo percepito: Definisce “attività vigorosa (6-7)” come ti senti sull'orlo del disagio con il respiro corto.",
+        "pt":"A Escala de Percepção de Esforço: Define-se “atividade vigorosa (6-7)” como o limite de atividade antes de se sentir desconfortável com falta de ar.",
+        "ro":"Scala de percepție a efortului: Definește „activitate intensă (6-7)” acea activitate ce induce disconfort respirator."
+    },
+    "22":{
+        "en":"The Rate of Perceived Exertion Scale: Includes as “very light activities” for example: Folding laundry or washing dishes.",
+        "de":"Die Skala der wahrgenommenen Anstrengung: Beispiele von sehr leichter Aktivität (1): Wäsche falten oder Geschirr spülen.",
+        "es":"La escala de  esfuerzo percibido: Incluye como “actividades muy ligeras” por ejemplo: Doblar la ropa o lavar los platos.",
+        "it":"La scala del tasso di sforzo percepito: Include come “attività molto leggere”, ad esempio: piegare il bucato o lavare i piatti.",
+        "pt":"A Escala de Percepção de Esforço: As “atividades muito leves” incluem por exemplo dobrar roupa ou lavar louça.",
+        "ro":"Scala de percepție a efortului: Include ca „activități foarte ușoare”, de exemplu: împăturirea rufelor sau spălatul vaselor."
+    },
+    "23":{
+        "en":"The Rate of Perceived Exertion Scale: Includes as “light activities” for example: Walking slowly or vacuuming.",
+        "de":"Die Skala der wahrgenommenen Anstrengung: Beispiele von leichter Aktivität (2-3): Langsames Gehen, Instrumente spielen und Staubsaugen.",
+        "es":"La escala de  esfuerzo percibido: Incluye como “actividades ligeras”, por ejemplo: Caminar despacio o pasar la aspiradora.",
+        "it":"La scala del tasso di sforzo percepito: Include come “attività leggere”, ad esempio: camminare lentamente o passare l'aspirapolvere.",
+        "pt":"A Escala de Percepção de Esforço: As “atividades leves” incluem por exemplo caminhar devagar ou aspirar.",
+        "ro":"Scala de percepție a efortului: Include ca „activități ușoare” de exemplu: mersul la pas sau datul cu aspiratorul."
+    },
+    "24":{
+        "en":"The Rate of Perceived Exertion Scale: Includes as “moderate activities” for example: Walking briskly or swimming.",
+        "de":"Die Skala der wahrgenommenen Anstrengung: Beispiele von moderater Aktivität (4-5): Zügiges Gehen, Schwimmen und Golfen.",
+        "es":"La escala de  esfuerzo percibido: Incluye como “actividades moderadas”, por ejemplo: Caminar rápidamente o nadar.",
+        "it":"La scala del tasso di sforzo percepito: Include come “attività moderate”, ad esempio: camminare a passo svelto o nuotare.",
+        "pt":"A Escala de Percepção de Esforço: As “atividades moderadas” incluem por exemplo caminhar rapidamente ou nadar.",
+        "ro":"Scala de percepție a efortului: Include drept „activități moderate” de exemplu: mersul în pas alert sau înotul."
+    },
+    "25":{
+        "en":"The Rate of Perceived Exertion Scale: Includes as “vigorous activities” for example: Jogging or carrying heavy loads.",
+        "de":"Die Skala der wahrgenommenen Anstrengung: Beispiele von schwerer Aktivität (6-7): Joggen und das Tragen schwerer Lasten.",
+        "es":"La escala de  esfuerzo percibido: Incluye como “actividades vigorosas” por ejemplo: Trotar o llevar cargas pesadas.",
+        "it":"La scala del tasso di sforzo percepito: Include come “attività vigorose”, ad esempio: fare jogging o trasportare carichi pesanti.",
+        "pt":"A Escala de Percepção de Esforço: As “atividades vigorosas” incluem por exemplo Correr ou carregar cargas pesadas. ",
+        "ro":"Scala de percepție a efortului: Include ca „activități intense”, de exemplu: alergatul sau căratul de greutăți."
+    },
+    "26":{
+        "en":"Physical Activity Guidelines from the World Health Organisation: Perform three activity-forms per week: Aerobic, muscle strength and balance training.",
+        "de":"Richtlinien für körperliche Aktivität der Weltgesundheitsorganisation: Empfohlen wird, drei verschiedene Formen von Aktivität pro Woche durchzuführen: Ausdauerübungen, Muskelkräftigungsübungen und Gleichgewichtsübungen.",
+        "es":"Directrices de la Organización Mundial de la Salud sobre la actividad física: Se recomienda realizar tres tipos diferentes de actividad por semana: ejercicio aeróbico, de fortalecimiento muscular y de equilibrio.",
+        "it":"Linee guida sull'attività fisica dell'Organizzazione Mondiale della Sanità: Si raccomanda di eseguire tre forme diverse di attività alla settimana:  aerobica, forza muscolare e allenamento dell'equilibrio.",
+        "pt":"Directrizes da Organização Mundial de Saúde para a Actividade Física: Recomenda-se a realização de três formas diferentes de exercício por semana: exercício aeróbio, de fortalecimento muscular e equilíbrio.",
+        "ro":"Îndrumările Organizației Mondiale a Sănătății privind activitatea fizică: Se recomandă să faceți trei forme diferite de activitate pe săptămână: Aerobic, forță musculară și menținerea echilibrului."
+    },
+    "27":{
+        "en":"Physical Activity Guidelines from the World Health Organisation: Conduct aerobic exercises, for example walking, 150-300 minutes per week.",
+        "de":"Richtlinien für körperliche Aktivität der Weltgesundheitsorganisation: Eine Ausdauerübung ist zum Beispiel Walken, empfohlen werden 150-300 Minuten pro Woche.",
+        "es":"Directrices de la Organización Mundial de la Salud sobre la actividad física: Un ejercicio aeróbico es, por ejemplo, caminar. Se recomienda entre 150 y 300 minutos por semana.",
+        "it":"Linee guida sull'attività fisica dell'Organizzazione Mondiale della Sanità: Si raccomanda di eseguire esercizio aerobico, ad esempio, camminare, 150-300 minuti a settimana.",
+        "pt":"Directrizes da Organização Mundial de Saúde para a Actividade Física: Um exercício de aeróbio é, por exemplo, caminhar. Recomenda-se 150-300 minutos por semana.",
+        "ro":"Îndrumările Organizației Mondiale a Sănătății privind activitatea fizică: Se recomandă exerciții aerobice precum mersul pe jos, cu durată de 150-300 de minute pe săptămână."
+    },
+    "28":{
+        "en":"Physical Activity Guidelines from the World Health Organisation: Conduct muscle strength exercises, for example lifting weights, on 2 days per week.",
+        "de":"Richtlinien für körperliche Aktivität der Weltgesundheitsorganisation: Eine Muskelkräftigungsübung ist zum Beispiel Gewichte heben, empfohlen werden zwei Tage die Woche.",
+        "es":"Directrices de la Organización Mundial de la Salud sobre la actividad física: Un ejercicio de fortalecimiento muscular es, por ejemplo, el levantamiento de pesas. Se recomienda dos días a la semana.",
+        "it":"Linee guida sull'attività fisica dell'Organizzazione Mondiale della Sanità: Si raccomanda di eseguire esercizi di forza muscolare, per esempio sollevamento pesi, 2 giorni a settimana.",
+        "pt":"Directrizes da Organização Mundial de Saúde para a Actividade Física: Um exercício de fortalecimento muscular é, por exemplo, levantar pesos.  Recomenda-se dois dias por semana.",
+        "ro":"Îndrumările Organizației Mondiale a Sănătății privind activitatea fizică: Se recomadă exerciții de întărire a musculaturii precum ridicarea greutăților de două ori pe săptămână."
+    },
+    "29":{
+        "en":"Physical Activity Guidelines from the World Health Organisation: Conduct balance exercises, for example heel raises, on 3 days per week.",
+        "de":"Richtlinien für körperliche Aktivität der Weltgesundheitsorganisation: Eine Gleichgewichtsübung ist zum Beispiel der Einbeinstand, empfohlen werden drei Tage pro Woche.",
+        "es":"Directrices de la Organización Mundial de la Salud sobre la actividad física: Un ejercicio de equilibrio es, por ejemplo, estar de pie sobre una pierna. Se recomienda tres días a la semana.",
+        "it":"Linee guida sull'attività fisica dell'Organizzazione Mondiale della Sanità: Si raccomanda di eseguire esercizi di equilibrio, per esempio sollevamento dei talloni, 3 giorni alla settimana.",
+        "pt":"Directrizes da Organização Mundial de Saúde para a Actividade Física: Um exercício de equilíbrio é, por exemplo, colocar todo o peso do corpo numa perna, levantando a perna contrária. Recomenda-se três dias por semana.",
+        "ro":"Îndrumările Organizației Mondiale a Sănătății privind activitatea fizică: Se recomandă exerciții de menținere a echilibrului precum statul pe vârfuri trei zile pe săptămână."
+    },
+    "30":{
+        "en":"Physical Activity Guidelines from the World Health Organisation: Combine aerobic, muscle strength and balance exercises in your physical activity weekly routine.",
+        "de":"Richtlinien für körperliche Aktivität der Weltgesundheitsorganisation: Empfohlen wird, Ausdauerübungen, Muskelkräftigungsübungen und Gleichgewichtsübungen in Ihrer wöchentlichen Bewegungsroutine zu kombinieren.",
+        "es":"Directrices de la Organización Mundial de la Salud sobre la actividad física: Se recomienda combinar ejercicios aeróbicos, ejercicios de fortalecimiento muscular y ejercicios de equilibrio en su rutina semanal de ejercicios.",
+        "it":"Linee guida sull'attività fisica dell'Organizzazione Mondiale della Sanità: Combina esercizi aerobici, di forza muscolare ed equilibrio nella tua routine settimanale di attività fisica.",
+        "pt":"Directrizes da Organização Mundial de Saúde para a Actividade Física: É recomendado combinar exercícios aeróbios, de fortalecimento muscular e de equilíbrio na sua rotina de exercícios semanais.",
+        "ro":"Îndrumările Organizației Mondiale a Sănătății privind activitatea fizică: Se recomandă să combinați în rutina dvs. de activitate fizică săptămânală exercițiile aerobice, de forță musculară și de menținere a echilibrului."
+    },
+    "31":{
+        "en":"Here is a practical tip to be active: Walking in the fresh air can be a mood buster, it improves your mind and body.",
+        "de":"Praktische Tipps zur körperlichen Aktivität: Ein Spaziergang an der frischen Luft kann ein Stimmungsaufheller sein, er verbessert Ihre mentale und körperliche Verfassung.",
+        "es":"Consejos prácticos para la actividad física: Caminar al aire libre puede mejorar el estado de ánimo, potencia la mente y el cuerpo.",
+        "it":"Consigli pratici per l'attività fisica: Camminare all'aria aperta può migliorare l'umore, migliora la mente e il corpo.",
+        "pt":"Dicas práticas para a actividade física: Caminhar ao ar livre pode melhorar o humor, pois potencia a mente e o corpo.",
+        "ro":"Sfaturi practice pentru activitatea fizică: Mersul în aer curat poate fi revigorant, ducând la îmbunătățirea stării de spirit și a stării fizice."
+    },
+    "32":{
+        "en":"Here is a practical tip to be active: Household activities, like vacuum cleaning or wiping keep you fit and independent.",
+        "de":"Praktische Tipps zur körperlichen Aktivität: Haushaltsaktivitäten, wie Staubsaugen oder Wischen, halten Sie fit und unabhängig.",
+        "es":"Consejos prácticos para la actividad física: Las actividades del hogar, como aspirar o limpiar, lo mantienen en forma e independiente.",
+        "it":"Consigli pratici per l'attività fisica: Le attività domestiche, come l'aspirapolvere o la pulizia, ti mantengono in forma e indipendente.",
+        "pt":"Dicas práticas para a actividade física: As atividades domésticas, como aspirar ou limpar, mantêm-no em forma e independente.",
+        "ro":"Sfaturi practice pentru activitatea fizică: Activitățile casnice, precum datul cu aspiratorul sau curățitul , vă mențin în formă și independenți."
+    },
+    "33":{
+        "en":"Here is a practical tip to be active: Conducting yard work, like pulling out weed, will make your arm muscles stronger. Practicing this regularly, carrying groceries can be easier.",
+        "de":"Praktische Tipps zur körperlichen Aktivität: Gartenarbeit, wie Unkraut herausziehen macht Ihre Armmuskeln stärker. Bei regelmäßiger Übung fällt auch das Tragen von Einkäufen leichter.",
+        "es":"Consejos prácticos para la actividad física: Realizar jardinería y arrancar la maleza, fortalecerá los músculos de sus brazos. Practicado con regularidad, puede ayudar en tareas como realizar la compra con mayor facilidad.",
+        "it":"Consigli pratici per l'attività fisica: Svolgere lavori in giardino, come estrarre l'erba, renderà i muscoli delle braccia più forti. Praticandolo regolarmente, portare la spesa può essere più facile.",
+        "pt":"Dicas práticas para a actividade física: Fazer jardinagem, como arrancar ervas daninhas, pode ajudar a fortalecer os músculos do braço mais fortes. Praticado de forma regular, pode ajudar em tarefas como carregar as compras.",
+        "ro":"Sfaturi practice pentru activitatea fizică: Activitățile de grădinărit, cum ar fi smulgerea buruienilor, vă vor întări mușchii brațului. Dacă practicați acest lucru în mod regulat, atunci căratul cumpărăturilor poate deveni mai ușor."
+    },
+    "34":{
+        "en":"Here is a practical tip to be active: Performing heel raises while holding on to a chair back can help you to improve your balance. Practicing this regularly, it can prevent falls.",
+        "de":"Praktische Tipps zur körperlichen Aktivität: Das Durchführen von Fersenanhebungen indem Sie sich an einer Stuhllehne festhalten, kann Ihnen helfen, Ihr Gleichgewicht zu verbessern. Wenn Sie dies regelmäßig üben, können Sie Stürze vorbeugen.",
+        "es":"Consejos prácticos para la actividad física: Elevar los talones mientras se sujeta al respaldo de una silla puede ayudarle a mejorar su equilibrio. Practicado con regularidad, puede ayudarle a prevenir caídas.",
+        "it":"Consigli pratici per l'attività fisica: L'esecuzione del sollevamento del tallone mentre ti aggrappi allo schienale di una sedia può aiutarti a migliorare il tuo equilibrio. Praticare questo regolarmente, può prevenire le cadute.",
+        "pt":"Dicas práticas para a actividade física: Elevar os calcanhares apoiado nas costas de uma cadeira pesada pode ajudá-lo a melhorar o equilíbrio. Praticar isso regularmente pode ajudar a prevenir quedas.",
+        "ro":"Sfaturi practice pentru activitatea fizică: Statul pe vârfuri în timp ce vă sprijiniți de spătarul unui  scaun vă poate ajuta să vă îmbunătățiți echilibrul. Dacă practicați acest lucru în mod regulat, puteți preveni căderile."
+    },
+    "35":{
+        "en":"Here is a practical tip to be active: Going up and down the stairs, by holding on the rail, will make your leg muscles stronger. Practicing regularly, sitting down and standing up will be easier for you.",
+        "de":"Praktische Tipps zur körperlichen Aktivität: Wenn Sie die Treppe hinauf- und herunter gehen, während Sie sich am Geländer festhalten, wird Ihre Beinmuskulatur gestärkt. Wenn Sie regelmäßig üben, wird Ihnen das Hinsetzen und Aufstehen leichter fallen.",
+        "es":"Consejos prácticos para la actividad física: Subir y baja escaleras, sujetándose a la barandilla, fortalecerá los músculos de las piernas. Practicado con regularidad, puede ayudarle a sentarse y pararse con mayor facilidad.",
+        "it":"Consigli pratici per l'attività fisica: Salire e scendere le scale, tenendosi alla ringhiera, rafforzerà i muscoli delle gambe. Esercitarti regolarmente, sederti e alzarti sarà più facile per te.",
+        "pt":"Dicas práticas para a actividade física: Subir e descer escadas, agarrado ao corrimão, tornará os músculos das pernas mais fortes. Praticar regularmente, sentar e levantar será mais fácil para você.",
+        "ro":"Sfaturi practice pentru activitatea fizică: Urcarea și coborârea scărilor, ținându-vă de bară, vă vor întări mușchii picioarelor. Dacă practicați acest lucru în mod regulat, vă va fi mai ușor să vă așezați sau să vă ridicați."
+    },
+    "36":{
+        "en":"Try this link out for further information to physical activity.",
+        "de":[
+            "Weiterführende Links: https://actimentia.org/aerobic-level-choice-2/",
+            "Weiterführende Links: https://www.uni-muenster.de/ProjectWhole/de/category/physical-activity/exercise/"
+        ],
+        "es":"Otros enlaces: https://www.youtube.com/playlist?list=PLbhb5o1R0MHJLh51AIGZzSbw99hDQMSFo",
+        "it":[
+            "Ulteriori link: https://www.youtube.com/watch?v=RlJ_ek9onZk",
+            "Ulteriori link: https://www.bing.com/videos/search?q=demenza+movimento&view=detail&mid=95873F7AF94DED585DA195873F7AF94DED585DA1&FORM=VIRE"
+        ],
+        "pt":[
+            "Mais ligações: https://www.youtube.com/watch?v=68Zo8CJglnc&list=PLnCF0pgPfAqmOW4CmkhEdvSHuOkrBKJ61",
+            "Mais ligações: https://www.youtube.com/watch?v=hoNBYL2v4x4&list=PLnCF0pgPfAqkJrmH1Uq55Jx-SqorHmIk2"
+        ],
+        "ro":[
+            "Accesați aceste link-uri pentru mai multe informații privind activitatea fizică: https://www.youtube.com/watch?v=9nDBY2tH3lI",
+            "Accesați aceste link-uri pentru mai multe informații privind activitatea fizică: https://www.youtube.com/watch?v=Mo1oKLEudpg"
+        ]
+    },
+    "37":{
+        "en":"",
+        "de":[
+            "Weiterführende Links: https://actimentia.org/partners-level-choice/",
+            "Weiterführende Links: https://www.uni-muenster.de/ProjectWhole/de/category/physical-activity/exercise/"
+        ],
+        "es":"",
+        "it":[
+            "Ulteriori link: https://www.youtube.com/watch?v=OheRgh5Oy-c",
+            ""
+        ],
+        "pt":[
+            "Mais ligações: https://www.youtube.com/watch?v=iFdw42qIy1s",
+            "Mais ligações: https://www.youtube.com/watch?v=68Zo8CJglnc&list=PLnCF0pgPfAqmOW4CmkhEdvSHuOkrBKJ61"
+        ],
+        "ro":[
+            "",
+            "Accesați aceste link-uri pentru mai multe informații privind activitatea fizică: https://www.youtube.com/watch?v=fo5HjRLsadU"
+        ]
+    },
+    "38":{
+        "en":"",
+        "de":[
+            "Weiterführende Links: https://actimentia.org/move-swing-2021/",
+            ""
+        ],
+        "es":"Otros enlaces: https://www.youtube.com/playlist?list=PLbhb5o1R0MHJLh51AIGZzSbw99hDQMSFo",
+        "it":"",
+        "pt":"",
+        "ro":[
+            "",
+            "Accesați aceste link-uri pentru mai multe informații privind activitatea fizică: https://www.movementdisorders.org/MDS-Files1/Education/Patient-Education/Exercise-for-Parkinsons-Disease/pat-Handouts-Exercise-PD-Romanian-v1.pdf"
+        ]
+    },
+    "39":{
+        "en":"",
+        "de":[
+            "Weiterführende Links: https://actimentia.org/waehlen-sie-avatar-exergames/?lang=de",
+            "Weiterführende Links: https://www.uni-muenster.de/ProjectWhole/de/benefits-of-physical-activity/"
+        ],
+        "es":"",
+        "it":"",
+        "pt":"",
+        "ro":""
+    },
+    "40":{
+        "en":"Thank you very much for participating in the pilot. Remember that you have the final questionnaire available.",
+        "de":"",
+        "es":"Otros enlaces: https://www.youtube.com/playlist?list=PLbhb5o1R0MHJLh51AIGZzSbw99hDQMSFo",
+        "it":"",
+        "pt":"",
+        "ro":""
+    }
 }
