@@ -9,7 +9,7 @@ from flask_login import UserMixin
 from datetime import datetime, timedelta, date
 from random import sample
 
-from helper.utils import logger, par_notifications, ieq_notifications
+from helper.utils import logger, par_notifications, ieq_notifications, ipaq_notifications
 from helper import config
 from models import evaluation
 
@@ -79,8 +79,8 @@ class RecommenderPatients(db.Model, UserMixin):
 
 		# IPAQ notification
 		if self.par_day in [7, 14, 21, 28, 35] or ipaq:
-			message = "Your weekly questionnaire is available. " \
-				"If you have not answered, please, fill the form into the app."
+			country_code = self.organization_mapping()
+			message = ipaq_notifications[country_code]
 			ipaq_notification = Notifications(self.ccdr_reference, message)
 			self.notification.append(ipaq_notification)
 			ipaq_notification.send(receiver="mobile")
@@ -545,7 +545,7 @@ class Notifications(db.Model, UserMixin):
 					dates = [notification.datetime_sent, yesterday.strftime("%d-%m-%Y"), today.strftime("%d-%m-%Y")]
 
 					# IPAQ notifications always start with "IPAQ"
-					if notification.msg.startswith("Your") and Notifications.check_timestamp(dates):
+					if notification.msg in ipaq_notifications.values() and Notifications.check_timestamp(dates):
 						ipaq_response = requests.post(
 							config.ccdr_url + "/api/v1/mobile/surveys/get_response/7.2?identity_management_key=" +
 							patient.ccdr_reference).json()
