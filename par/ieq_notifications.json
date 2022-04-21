@@ -1,8 +1,50 @@
 {
-  "10": "IEQ1:How would you rate the information about benefits of regular and consequences insufficient physical activity which were delivered to you during the last 10 days?",
-  "15": "IEQ2:How would you rate the five golden rules of physical activity which were delivered to you during the last 5 days?",
-  "25": "IEQ3:How would you rate the information about Perceived Exertion Scale which were delivered to you during the last 10 days?",
-  "30": "IEQ4:How would you rate the Physical Activity Guidelines from the World Health Organisation which were delivered to you during the last 5 days?",
-  "35": "IEQ5:How would you rate these practical tips to be active which were delivered to you during the last 5 days?",
-  "40": "IEQ6:How would you rate the content of the links which were delivered to you during the last 5 days?"
+    "10":{
+        "en":"IEQ1:How would you rate the information about benefits of regular and consequences insufficient physical activity which were delivered to you during the last 10 days?",
+        "de":"IEQ1:Wie würden Sie die Informationen über den Nutzen regelmäßiger und Folgen unzureichender körperlicher Aktivität bewerten, die Ihnen in den letzten 10 Tagen übermittelt wurden?",
+        "es":"IEQ1:¿Cómo calificaría la información sobre los beneficios de la actividad física regular y las consecuencias de la insuficiente actividad física que le fueron entregadas durante los últimos 10 días?",
+        "it":"IEQ1:Come valuteresti le informazioni sui benefici di un'attività fisica regolare e sulle conseguenze di un'insufficiente attività fisica che ti sono state fornite negli ultimi 10 giorni?",
+        "pt":"IEQ1:Como classifica as informações sobre os benefícios da atividade física regular e as consequências da sua ausência, que foram enviadas nos últimos 10 dias?",
+        "ro":"IEQ1:Cum ați evalua informațiile despre beneficiile activității fizice regulate și consecințele activității insuficiente pe care le-ați primit în ultimele 10 zile?"
+    },
+    "15":{
+        "en":"IEQ2:How would you rate the five golden rules of physical activity which were delivered to you during the last 5 days?",
+        "de":"IEQ2:Wie würden Sie die fünf goldenen Regeln zur körperlichen Aktivität bewerten, die Ihnen in den letzten 5 Tagen übermittelt wurden?",
+        "es":"IEQ2:¿Cómo calificaría las cinco reglas de oro de la actividad física que le fueron entregadas durante los últimos 5 días?",
+        "it":"IEQ2:Come valuteresti le cinque regole d'oro dell'attività fisica che ti sono state insegnate negli ultimi 5 giorni?",
+        "pt":"IEQ2:Como avalia as cinco regras de ouro da atividade física que lhe foram enviadas nos últimos 5 dias?",
+        "ro":"IEQ2:Cum ati evalua cele cinci reguli de aur privind activitatea fizică care v-au fost prezentate in ultimele 5 zile?"
+    },
+    "25":{
+        "en":"IEQ3:How would you rate the information about the Perceived Exertion Scale which were delivered to you during the last 10 days?",
+        "de":"IEQ3:Wie würden Sie die Information über die Skala der wahrgenommenen Anstrengung einschätzen, die Ihnen in den letzten 10 Tagen übermittelt wurden?",
+        "es":"IEQ3:¿Cómo calificaría la información sobre la Escala de Esfuerzo Percibido que se le entregó durante los últimos 10 días?",
+        "it":"IEQ3:Come valuteresti le informazioni sulla scala dello sforzo percepito che ti sono state fornite negli ultimi 10 giorni?",
+        "pt":"IEQ3:Como classifica as informações sobre a Escala de Percepção de Esforço que lhe foi enviadas nos últimos 10 dias?",
+        "ro":"IEQ3:Cum ați evalua informațiile despre scala de percepție a efortului: care v-au fost prezentate în ultimele 10 zile?"
+    },
+    "30":{
+        "en":"IEQ4:How would you rate the Physical Activity Guidelines from the World Health Organisation which were delivered to you during the last 5 days?",
+        "de":"IEQ4:Wie bewerten Sie die Richtlinien für körperliche Aktivität der Weltgesundheitsorganisation, die Ihnen in den letzten 5 Tagen übermittelt wurden? ",
+        "es":"IEQ4:¿Cómo calificaría las Pautas de Actividad Física de la Organización Mundial de la Salud que le fueron entregadas durante los últimos 5 días?",
+        "it":"IEQ4:Come valuteresti le Linee guida sull'attività fisica dell'Organizzazione mondiale della sanità che ti sono state consegnate negli ultimi 5 giorni?",
+        "pt":"IEQ4:Como classifica as Diretrizes de Atividade Física da Organização Mundial da Saúde que lhe foram enviadas nos últimos 5 dias?",
+        "ro":"IEQ4:Cum ați evalua Îndrumările Organizației Mondiale a Sănătății privind activitatea fizică care v-au fost prezentate în ultimele 5 zile?"
+    },
+    "35":{
+        "en":"IEQ5:How would you rate these practical tips for physical activity which were delivered to you during the last 5 days?",
+        "de":"IEQ5:Wie bewerten Sie die praktischen Tipps zur körperlichen Aktivität, die Ihnen in den letzten 5 Tagen übermittelt wurden? ",
+        "es":"IEQ5:¿Cómo calificaría estos consejos prácticos para estar activo que le fueron entregados durante los últimos 5 días?",
+        "it":"IEQ5:Come giudichi attivi questi consigli pratici che ti sono stati forniti negli ultimi 5 giorni?",
+        "pt":"IEQ5:Como avalia as dicas práticas para ser ativo que lhe foram enviadas nos últimos 5 dias? ",
+        "ro":"IEQ5:Cum ați evalua aceste sfaturi practice pentru activitatea fizică, care v-au fost prezentate în ultimele 5 zile?"
+    },
+    "40":{
+        "en":"IEQ6:How would you rate the content of the links which were delivered to you during the last 5 days?",
+        "de":"IEQ6:Wie bewerten Sie den Inhalt der Links, die Ihnen in den letzten 5 Tagen übermittelt wurden?",
+        "es":"IEQ6:¿Cómo calificaría el contenido de los enlaces que le fueron entregados durante los últimos 5 días?",
+        "it":"IEQ6:Come valuteresti il contenuto dei link che ti sono stati consegnati negli ultimi 5 giorni?",
+        "pt":"IEQ6:Como classifica o conteúdo dos links que lhe foram enviados nos últimos 5 dias?",
+        "ro":"IEQ6:Cum ați evalua conținutul linkurilor care v-au fost prezentate în ultimele 5 zile?"
+    }
 }

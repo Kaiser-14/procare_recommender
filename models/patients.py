@@ -71,7 +71,7 @@ class RecommenderPatients(db.Model, UserMixin):
 
 			# IEQ notifications
 			if self.par_day in [10, 15, 25, 30, 35, 40]:
-				message = ieq_notifications[str(self.par_day)]
+				message = ieq_notifications[str(self.par_day)][country_code]
 				if message:
 					notification = Notifications(self.ccdr_reference, message)
 					self.notification.append(notification)
