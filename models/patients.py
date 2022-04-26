@@ -379,7 +379,7 @@ class RecommenderPatients(db.Model, UserMixin):
 		elif diagnosis == "0":
 			return 1  # Parkinson's
 		elif diagnosis in ["1", "2"]:
-			return 2  # Alzheimer's
+			return 0  # Alzheimer's
 		else:
 			return None  # Default
 
