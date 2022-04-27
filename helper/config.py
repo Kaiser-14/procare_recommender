@@ -7,6 +7,9 @@ test_flag = True
 if platform == "production":
     test_flag = False
 
+test_references = [
+    "98284945", "83288302", "38622059", "74403633", "84731590", "62664183", "92516276", "80005710", "25403788"]
+
 if os.getenv("FLASK_HOST") is not None:
     flask_host = os.getenv("FLASK_HOST")
 else:

@@ -224,7 +224,9 @@ class RecommenderPatients(db.Model, UserMixin):
 		if not config.test_flag:
 			list_of_services = RecommenderPatients.query.all()
 		else:
-			list_of_services = [RecommenderPatients.query.filter_by(ccdr_reference="98284945").first()]
+			list_of_services = []
+			for reference in config.test_references:
+				list_of_services.append(RecommenderPatients.query.filter_by(ccdr_reference=reference).first())
 		total = len(list_of_services)
 		return list_of_services, total
 
