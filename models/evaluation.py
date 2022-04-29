@@ -3,7 +3,7 @@ import requests
 import numpy as np
 from datetime import datetime, timedelta
 
-from helper.utils import logger
+from helper.utils import logger, game_notifications
 from helper import config
 
 
@@ -11,12 +11,13 @@ from helper import config
 
 # Game recommendations
 
-def game_evaluation(patient_reference):
+def game_evaluation(patient_reference, country_code):
 	"""
 	Evaluate data for specific patient based on weekly game data.
 
+	:param country_code: Country code of the patient
 	:param patient_reference: Reference to identify patient.
-	:return: A list of messages containing a list of notifications for game.
+	:return: A list of messages containing a notifications for game.
 	"""
 
 	messages = []
@@ -100,7 +101,6 @@ def game_evaluation(patient_reference):
 		if summarization_day["session_info"]:
 			# Loop through every session of the day and save the games played
 			for session in summarization_day["session_info"]:
-				# print(session)
 				game_summarization["games"]["global"].append(session["id"][-1:])
 				game_summarization["games"]["specific"][str(day)].append(session["id"][-1:])
 				game_summarization["games"]["type"][session["id"][-1:]] += 1
@@ -140,14 +140,14 @@ def game_evaluation(patient_reference):
 	# Recommendation 1:
 	# Use frequently cognitive game app
 	if game_summarization["days_played"] < 3:
-		messages.append("Use the cognitive game app more frequently.")
+		messages.append(game_notifications['R11'][country_code])
 
 	# Recommendation 2:
 	# Start a different game. Check the games played and compare with the whole list of 6 games
 	unique, counts = np.unique(game_summarization["games"]["global"], return_counts=True)
 	list_diff = np.setdiff1d(["1", "2", "3", "4", "5", "6"], list(unique))
 	if len(list_diff) > 0:
-		messages.append("Start a different game.")
+		messages.append(game_notifications['R14'][country_code])
 
 	# Recommendation 3:
 	# Customize the app
@@ -155,7 +155,7 @@ def game_evaluation(patient_reference):
 		uniques = np.unique(game_summarization["personalization"][key])
 
 		if not len(uniques) > 1:
-			messages.append("You can customize the app in the settings (language, style and text size).")
+			messages.append(game_notifications['R31'][country_code])
 
 	# Recommendation 4:
 	# Change game category
@@ -171,7 +171,7 @@ def game_evaluation(patient_reference):
 
 	if game_categories:
 		game_categories = ",".join([str(item) for item in game_categories])
-		messages.append("Change game categories for games {}.".format(game_categories))
+		messages.append(game_notifications['R21'][country_code].format(game_categories))
 
 	# Recommendation 5:
 	# Change game level
@@ -188,11 +188,10 @@ def game_evaluation(patient_reference):
 
 	if game_levels_pos:
 		game_levels_pos = ",".join([str(item) for item in game_levels_pos])
-		messages.append("Increase the level for game {}.".format(game_levels_pos))
+		messages.append(game_notifications['R22'][country_code].format(game_levels_pos))
 	if game_levels_neg:
 		game_levels_neg = ",".join([str(item) for item in game_levels_neg])
-		messages.append(
-			"Remember that you can decrease the level for games. Test it on game {}.".format(game_levels_neg))
+		messages.append(game_notifications['R23'][country_code].format(game_levels_neg))
 
 	# Recommendation 6:
 	# Read carefully game information
@@ -217,13 +216,13 @@ def game_evaluation(patient_reference):
 		values = [value for value in param if value if value < 0.5]
 
 		if values:
-			messages.append("Read game information carefully before playing.")
+			messages.append(game_notifications['R24'][country_code])
 			break
 
 	# Recommendation 7:
 	# Complete the games
 	if len(game_summarization["games"]["global"]) < sum(game_summarization["stats"]["started"].values()) / 2:
-		messages.append("Complete the games.")
+		messages.append(game_notifications['R13'][country_code])
 
 	# Recommendation 8
 	# Play slowly
@@ -238,17 +237,17 @@ def game_evaluation(patient_reference):
 				games_notification.append(idx + 1)
 	if games_notification:
 		games_notification = ",".join([str(item) for item in games_notification])
-		messages.append("Play games {} more slowly and accurately.".format(str(games_notification)))
+		messages.append(game_notifications['R12'][country_code].format(str(games_notification)))
 
 	# Recommendation 9:
 	# Extract mean global metric and send notification based on results
 	if game_summarization["metrics"]["total"]["global"]:
 		mean_score_global = np.nanmean(np.array(game_summarization["metrics"]["total"]["global"], dtype=np.float64))
 		if mean_score_global > 0.8:
-			messages.append("You are doing great!")
+			messages.append(game_notifications['R32'][country_code])
 		elif 0.5 < mean_score_global < 0.8:
-			messages.append("Keep it up. You're doing it right.")
+			messages.append(game_notifications['R33'][country_code])
 		else:
-			messages.append("Keep trying to improve your results.")
+			messages.append(game_notifications['R34'][country_code])
 
 	return messages

@@ -89,7 +89,8 @@ class RecommenderPatients(db.Model, UserMixin):
 
 	def game_notification(self):
 		if self.par_day in [7, 14, 21, 28, 35]:
-			messages = evaluation.game_evaluation(self.ccdr_reference)
+			country_code = self.organization_mapping()
+			messages = evaluation.game_evaluation(self.ccdr_reference, country_code)
 
 			# Select randomly a message if there are more than two notifications
 			if len(messages) > 2:
