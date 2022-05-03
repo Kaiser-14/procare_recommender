@@ -1,9 +1,10 @@
 import json
-import os
 import logging
-import colorlog
-import time
+import os
 import shutil
+import time
+
+import colorlog
 
 from helper.config import testing_mode
 

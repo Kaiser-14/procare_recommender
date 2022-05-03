@@ -1,11 +1,11 @@
-import requests
-
-import numpy as np
 from datetime import datetime, timedelta
 from random import sample
 
-from helper.utils import game_notifications
+import numpy as np
+import requests
+
 from helper import config
+from helper.utils import game_notifications
 
 
 # Mobile recommendations

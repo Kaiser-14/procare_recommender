@@ -1,16 +1,14 @@
 import json
-import time
+from datetime import date, datetime, timedelta
+from uuid import uuid4
 
 import requests
-from uuid import uuid4
+from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
-from flask_login import UserMixin
-from datetime import datetime, timedelta, date
-from random import sample
 
-from helper.utils import logger, par_notifications, ieq_notifications, ipaq_notifications
 from helper import config
+from helper.utils import ieq_notifications, ipaq_notifications, logger, par_notifications
 from models import evaluation
 
 db = SQLAlchemy()

@@ -1,13 +1,11 @@
-# import dependencies
 import json
-from flask import Flask, request
-from apscheduler.schedulers.background import BackgroundScheduler
 
-# Import project dependencies
+from apscheduler.schedulers.background import BackgroundScheduler
+from flask import Flask, request
+
 from helper import config
-from helper.utils import init_db
-from models.patients import RecommenderPatients, Notifications, db
-from helper.utils import logger
+from helper.utils import init_db, logger
+from models.patients import Notifications, RecommenderPatients, db
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://' + config.postgres_user + ':' + config.postgres_pass + '@' \
