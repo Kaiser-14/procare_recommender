@@ -2,6 +2,7 @@ import requests
 
 import numpy as np
 from datetime import datetime, timedelta
+from random import sample
 
 from helper.utils import game_notifications
 from helper import config
@@ -21,6 +22,8 @@ def game_evaluation(patient_reference, country_code):
 	"""
 
 	messages = []
+	messages_tier2 = []
+	messages_tier3 = []
 
 	body = {
 		"identity_management_key": patient_reference,
@@ -200,7 +203,7 @@ def game_evaluation(patient_reference, country_code):
 
 	if game_categories:
 		game_categories = ",".join([str(item) for item in game_categories])
-		messages.append(game_notifications['R21'][country_code].format(game_categories))
+		messages_tier2.append(game_notifications['R21'][country_code].format(game_categories))
 
 	# Recommendation 2.2 / 2.3
 	# Change game level
@@ -217,10 +220,10 @@ def game_evaluation(patient_reference, country_code):
 
 	if game_levels_pos:
 		game_levels_pos = ",".join([str(item) for item in game_levels_pos])
-		messages.append(game_notifications['R22'][country_code].format(game_levels_pos))
+		messages_tier2.append(game_notifications['R22'][country_code].format(game_levels_pos))
 	if game_levels_neg:
 		game_levels_neg = ",".join([str(item) for item in game_levels_neg])
-		messages.append(game_notifications['R23'][country_code].format(game_levels_neg))
+		messages_tier2.append(game_notifications['R23'][country_code].format(game_levels_neg))
 
 	# Recommendation 2.4
 	# Read carefully game information
@@ -229,7 +232,7 @@ def game_evaluation(patient_reference, country_code):
 		values = [value for value in param if value if value < 0.5]
 
 		if values:
-			messages.append(game_notifications['R24'][country_code])
+			messages_tier2.append(game_notifications['R24'][country_code])
 			break
 
 	# Recommendation 3.1
@@ -238,17 +241,32 @@ def game_evaluation(patient_reference, country_code):
 		uniques = np.unique(game_summarization["personalization"][key])
 
 		if not len(uniques) > 1:
-			messages.append(game_notifications['R31'][country_code])
+			messages_tier3.append(game_notifications['R31'][country_code])
 
 	# Recommendation 3.2 / 3.3 / 3.4
 	# Extract mean global metric and send notification based on results
 	if game_summarization["metrics"]["total"]["global"]:
 		mean_score_global = np.nanmean(np.array(game_summarization["metrics"]["total"]["global"], dtype=np.float64))
 		if mean_score_global > 0.8:
-			messages.append(game_notifications['R32'][country_code])
+			messages_tier3.append(game_notifications['R32'][country_code])
 		elif 0.5 < mean_score_global < 0.8:
-			messages.append(game_notifications['R33'][country_code])
+			messages_tier3.append(game_notifications['R33'][country_code])
 		else:
-			messages.append(game_notifications['R34'][country_code])
+			messages_tier3.append(game_notifications['R34'][country_code])
+
+	# Select randomly a message if there are more than two notifications, sorting by priority
+	if len(messages) < 2:
+		if messages_tier2:
+			try:
+				msg_sample = sample(messages_tier2, 2 - len(messages))
+				messages.extend(msg_sample)
+			except ValueError:
+				messages.extend(messages_tier2)
+		if len(messages) < 2 and messages_tier3:
+			try:
+				msg_sample = sample(messages_tier3, 2 - len(messages))
+				messages.extend(msg_sample)
+			except ValueError:
+				messages.extend(messages_tier3)
 
 	return messages

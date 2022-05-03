@@ -92,10 +92,6 @@ class RecommenderPatients(db.Model, UserMixin):
 			country_code = self.organization_mapping()
 			messages = evaluation.game_evaluation(self.ccdr_reference, country_code)
 
-			# Select randomly a message if there are more than two notifications
-			if len(messages) > 2:
-				messages = sample(messages, 2)
-
 			for message in messages:
 				notification = Notifications(self.ccdr_reference, message)
 				self.notification.append(notification)
