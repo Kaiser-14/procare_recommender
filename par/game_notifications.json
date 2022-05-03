@@ -4,7 +4,7 @@
         "de":"Verwenden Sie die App für kognitive Spiele häufiger.",
         "es":"Use la aplicación de juegos cognitivos con más frecuencia.",
         "it":"Usa l'app dei giochi cognitivi più spesso",
-        "pt":"Utilizar a aplicação de jogo cognitivo com mais frequência.",
+        "pt":"Utilize mais frequentemente o aplicativo do jogo cognitivo.",
         "ro":"Utilizați mai des aplicația de jocuri cognitive."
     },
     "R12":{
@@ -12,7 +12,7 @@
         "de":"Spiele {} langsamer und genauer spielen.",
         "es":"Juega los juegos {} de forma más lenta y precisa.",
         "it":"Usa i giochi {} più lentamente e in maniera precisa.",
-        "pt":"Jogar jogos {} mais devagar e com mais precisão.",
+        "pt":"Jogue, de forma mais lenta e precisa, o jogo {}.",
         "ro":"Jucați jocurile {} mai încet și mai precis."
     },
     "R13":{
@@ -20,7 +20,7 @@
         "de":"Beenden Sie die Spiele.",
         "es":"Completa los juegos.",
         "it":"Completa i giochi.",
-        "pt":"Completar os jogos.",
+        "pt":"Complete os jogos.",
         "ro":"Finalizați jocurile."
     },
     "R14":{
@@ -28,31 +28,31 @@
         "de":"Ein anderes Spiel beginnen.",
         "es":"Comienza un juego diferente.",
         "it":"Inizia un gioco differente.",
-        "pt":"Começar um jogo diferente.",
-        "ro":"Începeți un alt joc."
+        "pt":"Comece um jogo diferente.",
+        "ro":"Începețu un joc nou."
     },
     "R21":{
         "en":"Change game categories for games {}.",
         "de":"Spielkategorien für Spiele ändern {}.",
         "es":"Cambiar categorías de juego para los juegos {}.",
         "it":"Cambia categoria di gioco per i giochi {} .",
-        "pt":"Alterar categorias de jogos para jogos {}.",
-        "ro":"Schimbați categoriile de jocuri pentru jocuri {}."
+        "pt":"Altere as categorias do jogo para jogos {}.",
+        "ro":"Schimbați categoria de jocuri {}."
     },
     "R22":{
         "en":"Increase the level for game {}.",
         "de":"Höhere Schwierigkeitsstufe für das Spiel {}.",
         "es":"Aumenta el nivel del juego {}.",
         "it":"Aumenta il livello del gioco {}.",
-        "pt":"Aumentar o nível para o jogo {}.",
-        "ro":"Creșteți nivelul pentru jocul {}."
+        "pt":"Aumente o nível do jogo {}.",
+        "ro":"Schimbați dificultatea jocului {}."
     },
     "R23":{
         "en":"Remember that you can decrease the level for games. Test it on game {}.",
         "de":"Vergiss nicht, dass du die Schwierigkeitsstufe für Spiele verringern kannst. Testen Sie es bei Spiel {}.",
         "es":"Recuerda que puedes disminuir el nivel de los juegos. Pruébalo en el juego {}.",
         "it":"Ricorda che puoi diminuire il livello dei giochi. Provaci sul gioco {}.",
-        "pt":"Lembre-se que pode diminuir o nível dos jogos. Teste-o no jogo {}.",
+        "pt":"Lembre-se que pode diminuir o nível do jogo. Teste o jogo {}.",
         "ro":"Nu uitați că puteți reduce nivelul pentru jocuri. Testați-l pe jocul {}."
     },
     "R24":{
@@ -60,7 +60,7 @@
         "de":"Lesen Sie die Spielbeschreibung vor dem Spielen sorgfältig durch.",
         "es":"Lea la información del juego cuidadosamente antes de jugar.",
         "it":"Leggi le istruzione del gioco prima di giocare.",
-        "pt":"Leia atentamente a informação sobre o jogo antes de jogar.",
+        "pt":"Leia com atenção as informações do jogo antes de começar a jogar",
         "ro":"Citiți cu atenție informațiile despre joc înainte de a juca."
     },
     "R31":{
@@ -68,7 +68,7 @@
         "de":"Sie können die App in den Einstellungen anpassen (Sprache, Stil und Textgröße).",
         "es":"Puede personalizar la aplicación en la configuración (idioma, estilo y tamaño del texto).",
         "it":"Puoi personalizzare le impostazioni dell'app (linguaggio, stile e grandezza dei caratteri).",
-        "pt":"Pode personalizar a aplicação nas definições (idioma, estilo e tamanho do texto).",
+        "pt":"Pode personalizar a aplicação nas definições (língua, estilo e tamanho de letra).",
         "ro":"Puteți personaliza aplicația în setări (limbă, stil și dimensiunea textului)."
     },
     "R32":{
@@ -76,7 +76,7 @@
         "de":"Sie machen das großartig!",
         "es":"¡Lo estás haciendo genial!",
         "it":"Stai andando alla grande!",
-        "pt":"Está a ir muito bem!",
+        "pt":"Está a sair-se muito bem.",
         "ro":"Te descurci de minune!"
     },
     "R33":{
@@ -84,8 +84,8 @@
         "de":"Machen Sie weiter so. Sie machen das richtig.",
         "es":"Sigue así. Lo estás haciendo bien.",
         "it":"Continuate così. Lo stai facendo bene.",
-        "pt":"Continuem assim. Está a fazer tudo bem.",
-        "ro":"Țineți-o tot așa. O faci bine."
+        "pt":"Continue assim. Está a fazer bem.",
+        "ro":"Țineți-o tot așa. Jucați foarte bine!"
     },
     "R34":{
         "en":"Keep trying to improve your results.",
