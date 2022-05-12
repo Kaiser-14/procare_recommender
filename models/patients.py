@@ -305,36 +305,30 @@ class RecommenderPatients(db.Model, UserMixin):
 		today = datetime.today()
 
 		body = {
-			"identity_management_key": str(uuid4()),
+			"identity_management_key": "RecommenderLib",
 			"organization": self.organization,
 			"role": "system",
 			"scenario": "data_injection",
 			"patient_identity_management_key": self.ccdr_reference,
-			"measurements_start_date": (today - timedelta(days=7)).strftime("%d-%m-%Y"),
+			"measurements_start_date": (today - timedelta(days=6)).strftime("%d-%m-%Y"),
 			"measurements_end_date": today.strftime("%d-%m-%Y"),
 		}
 
-		# FIXME: Uncomment once tested in server
-		# In test server: RiskAssesment/ActionLib and Diagnostic/FusionLib
-		# Generate scores into the platform
+		# Generate scores and deviatons into the platform
 		headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
-		# actionlib_response = requests.post(
-		# 	config.actionlib_url + "/generate_scores", data=json.dumps(body), headers=headers)
-		# fusionlib_response = requests.post(
-		# 	config.fusionlib_url + "/generate_deviations", data=json.dumps(body), headers=headers)
 
 		try:
 			actionlib_response = requests.post(
-				config.actionlib_url + "/calculate_scores", data=json.dumps(body), headers=headers)
+				config.actionlib_url + "/generate_scores", data=json.dumps(body), headers=headers)
 
 			# If there is no response from actionLib, we can skip the fusionLib request and save time
-			# FIXME: Control this situation. 200 for test on calculate_scores / 204 for generateScores
 			if actionlib_response.status_code != 200:
 				logger.error(actionlib_response.text)
 			else:
 				fusionlib_response = requests.post(
-					config.fusionlib_url + "/calculate_deviations", data=json.dumps(body), headers=headers)
-				if fusionlib_response.status_code != 200:
+					config.fusionlib_url + "/generate_deviations", data=json.dumps(body), headers=headers)
+				# FIXME: In future, it will change to 200 and provide data
+				if fusionlib_response.status_code != 204:
 					logger.error(fusionlib_response.text)
 
 		except requests.exceptions.RequestException as e:
