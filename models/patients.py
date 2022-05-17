@@ -305,7 +305,7 @@ class RecommenderPatients(db.Model, UserMixin):
 		today = datetime.today()
 
 		body = {
-			"identity_management_key": "RecommenderLib",
+			"identity_management_key": "recommendLib",
 			"organization": self.organization,
 			"role": "system",
 			"scenario": "data_injection",
