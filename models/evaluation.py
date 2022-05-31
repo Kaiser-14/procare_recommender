@@ -159,7 +159,7 @@ def game_evaluation(patient_reference, country_code):
 
 	# Recommendation 1.1
 	# Use frequently cognitive game app
-	if game_summarization["days_played"] < 3:
+	if game_summarization["days_played"] < 3 and not game_summarization["days_played"] == 0:
 		messages.append(game_notifications['R11'][country_code])
 
 	# Recommendation 1.2
@@ -169,79 +169,86 @@ def game_evaluation(patient_reference, country_code):
 
 	# Check if len of appended values are more than 30% of the games completed and send notification if metrics are low
 	games_notification = []
-	if len(avg_clicks_values_lower) / len(game_summarization["stats"]["time_between_clicks"]) < 0.3:
-		for idx, game_mean in enumerate(global_mean):
-			if game_mean and game_mean < 0.5:
-				games_notification.append(idx + 1)
-	if games_notification:
-		games_notification = ",".join([str(item) for item in games_notification])
-		messages.append(game_notifications['R12'][country_code].format(str(games_notification)))
+	if game_summarization["days_played"] > 0:
+		if len(avg_clicks_values_lower) / len(game_summarization["stats"]["time_between_clicks"]) < 0.3:
+			for idx, game_mean in enumerate(global_mean):
+				if game_mean and game_mean < 0.5:
+					games_notification.append(idx + 1)
+		if games_notification:
+			games_notification = ",".join([str(item) for item in games_notification])
+			messages.append(game_notifications['R12'][country_code].format(str(games_notification)))
 
 	# Recommendation 1.3
 	# Complete the games
-	if len(game_summarization["games"]["global"]) < sum(game_summarization["stats"]["started"].values()) / 2:
-		messages.append(game_notifications['R13'][country_code])
+	if game_summarization["days_played"] > 0:
+		if len(game_summarization["games"]["global"]) < sum(game_summarization["stats"]["started"].values()) / 2:
+			messages.append(game_notifications['R13'][country_code])
 
 	# Recommendation 1.4
 	# Start a different game. Check the games played and compare with the whole list of 6 games
-	unique, counts = np.unique(game_summarization["games"]["global"], return_counts=True)
-	list_diff = np.setdiff1d(["1", "2", "3", "4", "5", "6"], list(unique))
-	if len(list_diff) > 0:
-		messages.append(game_notifications['R14'][country_code])
+	if game_summarization["days_played"] > 0:
+		unique, counts = np.unique(game_summarization["games"]["global"], return_counts=True)
+		list_diff = np.setdiff1d(["1", "2", "3", "4", "5", "6"], list(unique))
+		if len(list_diff) > 0:
+			messages.append(game_notifications['R14'][country_code])
 
 	# Recommendation 2.1
 	# Change game category
 	game_categories = []
-	for game in ["1", "5", "6"]:
-		unique, counts = np.unique(game_summarization["stats"]["categories"]["type"][game], return_counts=True)
-		if game == "1":
-			if 0 < len(unique) < 4:
-				game_categories.append(game)
-		else:
-			if 0 < len(unique) < 3:
-				game_categories.append(game)
+	if game_summarization["days_played"] > 0:
+		for game in ["1", "5", "6"]:
+			unique, counts = np.unique(game_summarization["stats"]["categories"]["type"][game], return_counts=True)
+			if game == "1":
+				if 0 < len(unique) < 4:
+					game_categories.append(game)
+			else:
+				if 0 < len(unique) < 3:
+					game_categories.append(game)
 
-	if game_categories:
-		game_categories = ",".join([str(item) for item in game_categories])
-		messages_tier2.append(game_notifications['R21'][country_code].format(game_categories))
+		if game_categories:
+			game_categories = ",".join([str(item) for item in game_categories])
+			messages_tier2.append(game_notifications['R21'][country_code].format(game_categories))
 
 	# Recommendation 2.2 / 2.3
 	# Change game level
-	game_levels_pos = []
-	game_levels_neg = []
-	for game in ["1", "5", "6"]:
-		unique, counts = np.unique(game_summarization["stats"]["level"]["type"][game], return_counts=True)
-		if 0 < len(unique) == 1:
-			if game_summarization["metrics"]["type"]["global"][game]:
-				if np.mean(game_summarization["metrics"]["type"]["global"][game]) > 0.5:
-					game_levels_pos.append(game)
-				else:
-					game_levels_neg.append(game)
+	if game_summarization["days_played"] > 0:
+		game_levels_pos = []
+		game_levels_neg = []
+		for game in ["1", "5", "6"]:
+			unique, counts = np.unique(game_summarization["stats"]["level"]["type"][game], return_counts=True)
+			if 0 < len(unique) == 1:
+				if game_summarization["metrics"]["type"]["global"][game]:
+					if np.mean(game_summarization["metrics"]["type"]["global"][game]) > 0.5:
+						game_levels_pos.append(game)
+					else:
+						game_levels_neg.append(game)
 
-	if game_levels_pos:
-		game_levels_pos = ",".join([str(item) for item in game_levels_pos])
-		messages_tier2.append(game_notifications['R22'][country_code].format(game_levels_pos))
-	if game_levels_neg:
-		game_levels_neg = ",".join([str(item) for item in game_levels_neg])
-		messages_tier2.append(game_notifications['R23'][country_code].format(game_levels_neg))
+		if game_levels_pos:
+			game_levels_pos = ",".join([str(item) for item in game_levels_pos])
+			messages_tier2.append(game_notifications['R22'][country_code].format(game_levels_pos))
+		if game_levels_neg:
+			game_levels_neg = ",".join([str(item) for item in game_levels_neg])
+			messages_tier2.append(game_notifications['R23'][country_code].format(game_levels_neg))
 
 	# Recommendation 2.4
 	# Read carefully game information
 	# Get games with values less than 0.5
-	for param in [global_mean, score_mean, time_mean, interaction_mean]:
-		values = [value for value in param if value if value < 0.5]
+	if game_summarization["days_played"] > 0:
+		for param in [global_mean, score_mean, time_mean, interaction_mean]:
+			values = [value for value in param if value if value < 0.5]
 
-		if values:
-			messages_tier2.append(game_notifications['R24'][country_code])
-			break
+			if values:
+				messages_tier2.append(game_notifications['R24'][country_code])
+				break
 
 	# Recommendation 3.1
 	# Customize the app
-	for key in game_summarization["personalization"]:
-		uniques = np.unique(game_summarization["personalization"][key])
+	if game_summarization["days_played"] > 0:
+		for key in game_summarization["personalization"]:
+			uniques = np.unique(game_summarization["personalization"][key])
 
-		if not len(uniques) > 1:
-			messages_tier3.append(game_notifications['R31'][country_code])
+			if not len(uniques) > 1:
+				messages_tier3.append(game_notifications['R31'][country_code])
 
 	# Recommendation 3.2 / 3.3 / 3.4
 	# Extract mean global metric and send notification based on results

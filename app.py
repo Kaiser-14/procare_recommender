@@ -55,9 +55,10 @@ def schedule_scores_injection():
 	response = {
 		"patients": None
 	}
-	patient_count = RecommenderPatients.scores_injection()
-	if patient_count:
-		response["patients"] = patient_count
+	with app.app_context():
+		patient_count = RecommenderPatients.scores_injection()
+		if patient_count:
+			response["patients"] = patient_count
 	return json.dumps(response, indent=3), 200
 
 
@@ -67,8 +68,9 @@ def create_recommendation():
 
 	patient_reference = data.get('identity_management_key')
 
-	patient = RecommenderPatients.get_by_ccdr_ref(patient_reference)
-	par_notification = patient.recommendation()
+	with app.app_context():
+		patient = RecommenderPatients.get_by_ccdr_ref(patient_reference)
+		par_notification = patient.recommendation()
 
 	return 'Notification sent for patient {}: {}'.format(patient_reference, par_notification)
 
@@ -119,9 +121,10 @@ def weekly_check_ipaq():
 		"patients": None
 	}
 
-	patients = Notifications.check_ipaq()
-	if patients:
-		response["patients"] = patients
+	with app.app_context():
+		patients = Notifications.check_ipaq()
+		if patients:
+			response["patients"] = patients
 
 	return json.dumps(response, indent=3), 200
 
@@ -132,13 +135,14 @@ def notification_read():
 	content = request.get_json()
 	notification_id = content.get("messageId")
 
-	if notification_id:
-		return Notifications.check_notification_status(notification_id)
-	else:
-		return {
-			"status": "Field can’t be null",
-			"statusCode": 1010
-		}
+	with app.app_context():
+		if notification_id:
+			return Notifications.check_notification_status(notification_id)
+		else:
+			return {
+				"status": "Field can’t be null",
+				"statusCode": 1010
+			}
 
 
 # This method is used to receive all the notification that have been sent to a patient in a specific organization,
@@ -155,33 +159,34 @@ def get_notifications():
 
 		notifications = []
 
-		if patient_reference:
-			patient = RecommenderPatients.get_by_ccdr_ref(patient_reference)
-			if patient:
-				for notification in patient.get_notifications():
-					dates = [notification.datetime_sent, date_start, date_end]
-					notification_range = Notifications.check_timestamp(dates)
-					if notification_range:
-						notification_dict = notification.get_dict()
-						body = {
-							"message": notification_dict["msg"],
-							"date_sent": notification_dict["datetime_sent"],
-							"date_read": notification_dict["datetime_read"],
-							"isReadStatus": notification_dict["read"],
-							"user": patient_reference
-						}
-						notifications.append(body)
-				return json.dumps(notifications, indent=3), 200
+		with app.app_context():
+			if patient_reference:
+				patient = RecommenderPatients.get_by_ccdr_ref(patient_reference)
+				if patient:
+					for notification in patient.get_notifications():
+						dates = [notification.datetime_sent, date_start, date_end]
+						notification_range = Notifications.check_timestamp(dates)
+						if notification_range:
+							notification_dict = notification.get_dict()
+							body = {
+								"message": notification_dict["msg"],
+								"date_sent": notification_dict["datetime_sent"],
+								"date_read": notification_dict["datetime_read"],
+								"isReadStatus": notification_dict["read"],
+								"user": patient_reference
+							}
+							notifications.append(body)
+					return json.dumps(notifications, indent=3), 200
+				else:
+					return {
+						"status": "User doesn’t exist",
+						"statusCode": 1007
+					}
 			else:
 				return {
-					"status": "User doesn’t exist",
-					"statusCode": 1007
+					"status": "Field can’t be null",
+					"statusCode": 1010
 				}
-		else:
-			return {
-				"status": "Field can’t be null",
-				"statusCode": 1010
-			}
 	except Exception as e:
 		logger.error(e)
 		return {
