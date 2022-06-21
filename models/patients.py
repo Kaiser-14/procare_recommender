@@ -8,7 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
 
 from helper import config
-from helper.utils import ieq_notifications, ipaq_notifications, logger, par_notifications
+from helper.utils import logger, ieq_notifications, ipaq_notifications, par_notifications, motivational_notifications
 from models import evaluation
 
 db = SQLAlchemy()
@@ -373,6 +373,48 @@ class RecommenderPatients(db.Model, UserMixin):
 			return 0  # Alzheimer's
 		else:
 			return None  # Default
+
+	@staticmethod
+	def round_goals():
+		patients, total = RecommenderPatients.get_patients_db()
+		patient_count = 0
+
+		for patient in patients:
+			patient_count = patient_count + 1
+			patient.personal_goals()
+
+		return patient_count
+
+	def personal_goals(self):
+		message = None
+		if self.par_day % 8 == 0:
+
+			# Get the steps from the platform
+			today = datetime.today()
+			body = {
+				"identity_management_key": self.ccdr_reference,
+				"dateBegin": (today - timedelta(days=7)).strftime("%Y-%m-%d"),
+				"dateEnd": (today - timedelta(days=1)).strftime("%Y-%m-%d")
+			}
+
+			# Get the steps from the platform
+			response = requests.post(
+				config.ccdr_url + "/api/v1/par/getWeeklySteps",
+				json=body).json()
+
+			# Create notification based on reached goals
+			if response["reached_goal"]:
+				message = motivational_notifications["STP1"]["en"].format(
+					str(response["weekly_steps"]),
+					str(response["reached_goal_daily"]),
+					str(response["weekly_objective"]))
+			else:
+				message = motivational_notifications["STP2"]["en"].format(str(response["weekly_steps"]))
+
+		if message:
+			notification = Notifications(self.ccdr_reference, message)
+			self.notification.append(notification)
+			notification.send(receiver="mobile")
 
 
 class Notifications(db.Model, UserMixin):

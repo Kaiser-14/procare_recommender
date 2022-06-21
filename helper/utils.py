@@ -121,6 +121,9 @@ abs_file_path_ipaq = os.path.join(script_dir, rel_path_ieq)
 rel_path_ieq = "../par/game_notifications.json"
 abs_file_path_game = os.path.join(script_dir, rel_path_ieq)
 
+rel_path_ieq = "../par/motivational_notifications.json"
+abs_file_path_motivational = os.path.join(script_dir, rel_path_ieq)
+
 with open(abs_file_path_par, encoding='utf-8') as json_file:
 	par_notifications = json.load(json_file)
 with open(abs_file_path_ieq, encoding='utf-8') as json_file:
@@ -129,3 +132,5 @@ with open(abs_file_path_ipaq, encoding='utf-8') as json_file:
 	ipaq_notifications = json.load(json_file)
 with open(abs_file_path_game, encoding='utf-8') as json_file:
 	game_notifications = json.load(json_file)
+with open(abs_file_path_motivational, encoding='utf-8') as json_file:
+	motivational_notifications = json.load(json_file)

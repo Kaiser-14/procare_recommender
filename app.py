@@ -129,6 +129,23 @@ def weekly_check_ipaq():
 	return json.dumps(response, indent=3), 200
 
 
+# Motivation goals: Steps
+@scheduler.scheduled_job('cron', id='weekly_goals', day='*', hour='10', minute='01')
+@app.route("/notification/weekly_goals", methods=['GET'])
+def weekly_goals():
+	logger.info("Starting weekly notification goals")
+	response = {
+		"patients": None
+	}
+
+	with app.app_context():
+		patients = RecommenderPatients.round_goals()
+		if patients:
+			response["patients"] = patients
+
+	return json.dumps(response, indent=3), 200
+
+
 # Send to the backend the unique identifier of the notification message when the user reads the notification
 @app.route("/notification/readStatus", methods=['POST'])
 def notification_read():
