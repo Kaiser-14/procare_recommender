@@ -75,6 +75,37 @@ def create_recommendation():
 	return 'Notification sent for patient {}: {}'.format(patient_reference, par_notification)
 
 
+# Change par day of specific patient
+@app.route("/recommender/update_par_day", methods=['POST'])
+def update_par():
+	logger.info("Updating par day")
+	response = {
+		"patient_identity_management_key": None,
+		"par_day": None
+	}
+
+	data = request.get_json()
+
+	patient_reference = data.get('patient_identity_management_key')
+	par_day = data.get('par_day')
+
+	with app.app_context():
+		patient = RecommenderPatients.get_by_ccdr_ref(patient_reference)
+
+		if not patient:
+			return {
+				"status": "User doesn’t exist",
+				"statusCode": 1007
+			}
+		patient.par_day = par_day
+		patient.save()
+
+		response["patient_identity_management_key"] = patient_reference
+		response["par_day"] = par_day
+
+	return json.dumps(response, indent=3), 200
+
+
 # Notifications calls
 
 # Daily notification par

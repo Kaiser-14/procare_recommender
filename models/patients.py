@@ -42,9 +42,13 @@ class RecommenderPatients(db.Model, UserMixin):
 
 	def par_notification(self, ipaq=False):
 		if not ipaq:
-			self.par_day = (self.par_day + 1) % 41
-			if self.par_day == 0:
-				self.par_day = 1
+			# Increase par day and restart the process if needed
+			# self.par_day = (self.par_day + 1) % 41
+			# if self.par_day == 0:
+			# 	self.par_day = 1
+
+			# Increase par day
+			self.par_day = self.par_day + 1
 
 			# Daily notifications
 			country_code = self.organization_mapping()
