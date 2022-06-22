@@ -5,7 +5,7 @@
         "es": "Enhorabuena. Has alcanzado tu objetivo personal de pasos para la semana. Has dado {} pasos de media. Has realizado en {} de los 7 días un mínimo de {} pasos.",
         "it": "Congratulazioni. Hai raggiunto il tuo obiettivo personale di passi per la settimana. Hai fatto in media {} passi. Hai eseguito per{} su 7 giorni un minimo di{} passi.",
         "pt": "Parabéns. Atingiu o seu objectivo pessoal de passos para a semana. Deu {} passos em média. Tomou {} de 7 dias no mínimo {} passos.",
-        "ro": "Felicitări. Ți-ai atins obiectivul personal de pași pentru această săptămână. Ați făcut {} pași în medie. Ați făcut în {} din 7 zile minimum {} pași."
+        "ro": "Felicitări. V-ați atins obiectivul de pași pentru această săptămână. În medie, ați făcut {} pași. În ultimele 7 zile, ați făcut {} din minimumul de {} pași."
     },
     "STP2": {
         "en": "This week you did not achieved your personal goal steps. You took {} steps in average.",
@@ -13,6 +13,6 @@
         "es": "Esta semana no has alcanzado tu objetivo personal de pasos. Has dado {} pasos de media.",
         "it": "Questa settimana non hai raggiunto i tuoi obiettivi personali. Hai fatto in media {} passi.",
         "pt": "Esta semana não alcançou os seus passos de objectivos pessoais. Deu {} passos em média.",
-        "ro": "Săptămâna aceasta nu v-ați atins etapele obiectivului personal. Ați făcut {} pași în medie."
+        "ro": "Săptămâna aceasta nu v-ați atins obiectivul privind numărul de pași. În medie, ați făcut {} pași."
     }
 }
