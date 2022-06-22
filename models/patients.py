@@ -284,7 +284,6 @@ class RecommenderPatients(db.Model, UserMixin):
 				# logger.info("--------------")
 
 				# Scores and deviations recommendations
-				# TODO: Implement
 				scores.append(actionlib_response_prev.json()["scores"])
 				scores.append(actionlib_response.json()["scores"])
 				deviations.append(actionlib_response_prev.json()["deviations"])
@@ -361,13 +360,25 @@ class RecommenderPatients(db.Model, UserMixin):
 
 		return actionlib_response, fusionlib_response
 
-	def recommendations_injection(self):
-		# TODO: Create method for recommendations
-		# Scores
+	@staticmethod
+	def recommendations_injection(scores, deviations):
+		# Scores. Extract difference between lists
+		res = {key: scores[1][key] - scores[0].get(key, 0) for key in scores[1].keys()}
+		print(res)
 
 		# Deviations
+		# Alarm only if any value is higher than 0.5
+		deviations_probs = []
+		[deviations_probs.append(value["probability"]) for value in deviations[1].values()]
+		# print(deviations_probs)
+		if any(prob > 0.5 for prob in deviations_probs):
+			# TODO: Enable general message to HCP
+			pass
 
-		pass
+		# Extract also type of alert (key)
+		alert_list = []
+		[alert_list.append(key) for key, value in deviations[1].items() if value["probability"] > 0.5]
+		# TODO: Enable message to HCP, notifying the type of alert
 
 	@staticmethod
 	def get_color_category(category):
