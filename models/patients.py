@@ -267,18 +267,30 @@ class RecommenderPatients(db.Model, UserMixin):
 
 		patient_count = 0
 		for patient in patients:
-			period_count = 0
 			patient_count = patient_count + 1
 			logger.info("Processing patient " + patient.ccdr_reference + "....\n")
 
+			scores = []
+			deviations = []
+
+			actionlib_response_prev, fusionlib_response_prev = patient.calculate_scores(True)
 			actionlib_response, fusionlib_response = patient.calculate_scores()
 
-			if actionlib_response == "OK" and fusionlib_response == "OK":
+			if actionlib_response.status_code == 200 and fusionlib_response.status_code == 200:
 				logger.debug("ActionLib Response:\nStatus: {}\nContent: {}\n".format(
 					str(actionlib_response.status_code), str(actionlib_response.content)))
 				logger.debug("FusionLib Response:\nStatus: {}\nContent: {}\n".format(
 					str(actionlib_response.status_code), str(actionlib_response.content)))
-				logger.info("--------------")
+				# logger.info("--------------")
+
+				# Scores and deviations recommendations
+				# TODO: Implement
+				scores.append(actionlib_response_prev.json()["scores"])
+				scores.append(actionlib_response.json()["scores"])
+				deviations.append(actionlib_response_prev.json()["deviations"])
+				deviations.append(actionlib_response.json()["deviations"])
+
+				patient.recommendations_injection(scores, deviations)
 
 		logger.info("Injection completed. Patient: {}/{}\n".format(str(patient_count), str(total)))
 		logger.info("--------------")
@@ -288,7 +300,11 @@ class RecommenderPatients(db.Model, UserMixin):
 	def scores_injection_patient(self):
 		logger.info("Processing patient " + self.ccdr_reference + "....\n")
 
+		actionlib_response_prev, fusionlib_response_prev = self.calculate_scores(True)
 		actionlib_response, fusionlib_response = self.calculate_scores()
+
+		scores_prev = actionlib_response_prev.json()['scores']
+		deviations_prev = fusionlib_response_prev.json()['deviations']
 
 		scores = actionlib_response.json()['scores']
 		deviations = fusionlib_response.json()['deviations']
@@ -299,7 +315,7 @@ class RecommenderPatients(db.Model, UserMixin):
 		return scores, deviations
 
 	# Run both ActionLib (HBR) scores and FusionLib (MMF) deviation for specific patient and date
-	def calculate_scores(self):
+	def calculate_scores(self, previous_day=False):
 		# today = datetime.today()
 		# week_ago = today - timedelta(weeks=1)
 
@@ -307,6 +323,12 @@ class RecommenderPatients(db.Model, UserMixin):
 		fusionlib_response = None
 
 		today = datetime.today()
+		if previous_day:
+			start_date = today - timedelta(days=13)
+			end_date = today - timedelta(days=7)
+		else:
+			start_date = today - timedelta(days=6)
+			end_date = today
 
 		body = {
 			"identity_management_key": "recommendLib",
@@ -314,8 +336,8 @@ class RecommenderPatients(db.Model, UserMixin):
 			"role": "system",
 			"scenario": "data_injection",
 			"patient_identity_management_key": self.ccdr_reference,
-			"measurements_start_date": (today - timedelta(days=6)).strftime("%d-%m-%Y"),
-			"measurements_end_date": today.strftime("%d-%m-%Y"),
+			"measurements_start_date": start_date.strftime("%d-%m-%Y"),
+			"measurements_end_date": end_date.strftime("%d-%m-%Y"),
 		}
 
 		# Generate scores and deviatons into the platform
@@ -331,14 +353,21 @@ class RecommenderPatients(db.Model, UserMixin):
 			else:
 				fusionlib_response = requests.post(
 					config.fusionlib_url + "/generate_deviations", data=json.dumps(body), headers=headers)
-				# FIXME: In future, it will change to 200 and provide data
-				if fusionlib_response.status_code != 204:
+				if fusionlib_response.status_code != 200:
 					logger.error(fusionlib_response.text)
 
 		except requests.exceptions.RequestException as e:
 			logger.error("Calculating scores for patient {}".format(self.ccdr_reference))
 
 		return actionlib_response, fusionlib_response
+
+	def recommendations_injection(self):
+		# TODO: Create method for recommendations
+		# Scores
+
+		# Deviations
+
+		pass
 
 	@staticmethod
 	def get_color_category(category):
