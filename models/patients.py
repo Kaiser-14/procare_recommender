@@ -498,21 +498,22 @@ class Notifications(db.Model, UserMixin):
 
 		try:
 			headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
-			notification_response = requests.post(
-				config.rmq_url + "/notification/sendNotifications",
-				data=json.dumps(body), headers=headers
-			)
+			if receiver == "web":
+				notification_response = requests.post(
+					config.rmq_url + "/notification/sendNotificationToMedicalProfessionalByPatient",
+					data=json.dumps(body), headers=headers
+				)
+				destination = "hcp"
+			else:  # Mobile, game
+				notification_response = requests.post(
+					config.rmq_url + "/notification/sendNotifications",
+					data=json.dumps(body), headers=headers
+				)
+				destination = "patient"
 
-			destination = "patient"
 			Notifications.check_response(destination, notification_response, body)
 
 			self.save_notification()
-
-		# TODO: Control to send notifications to professionals (always receiver via web)
-		# notification_response = requests.post(
-		# 	config.rmq_url + "/notification/sendNotificationToMedicalProfessionalByPatient",
-		# 	data=json.dumps(body), headers=headers
-		# )
 
 		except requests.exceptions.ConnectionError as e:
 			logger.error("Sending notification.")
