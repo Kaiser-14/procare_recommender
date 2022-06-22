@@ -360,11 +360,9 @@ class RecommenderPatients(db.Model, UserMixin):
 
 		return actionlib_response, fusionlib_response
 
-	@staticmethod
-	def recommendations_injection(scores, deviations):
+	def recommendations_injection(self, scores, deviations):
 		# Scores. Extract difference between lists
-		res = {key: scores[1][key] - scores[0].get(key, 0) for key in scores[1].keys()}
-		print(res)
+		scores_result = {key: scores[1][key] - scores[0].get(key, 0) for key in scores[1].keys()}
 
 		# Deviations
 		# Alarm only if any value is higher than 0.5
@@ -372,13 +370,21 @@ class RecommenderPatients(db.Model, UserMixin):
 		[deviations_probs.append(value["probability"]) for value in deviations[1].values()]
 		# print(deviations_probs)
 		if any(prob > 0.5 for prob in deviations_probs):
-			# TODO: Enable general message to HCP
-			pass
+			# TODO: Translate disorder messages
+			message = "Disorder happening to patient {}.".format(self.ccdr_reference)
+			notification = Notifications(self.ccdr_reference, message)
+			self.notification.append(notification)
+			notification.send(receiver="web")
 
 		# Extract also type of alert (key)
 		alert_list = []
 		[alert_list.append(key) for key, value in deviations[1].items() if value["probability"] > 0.5]
-		# TODO: Enable message to HCP, notifying the type of alert
+		if alert_list:
+			areas = ",".join([str(item) for item in alert_list])
+			message = "Disorder happening to patient {}. Areas: {}.".format(self.ccdr_reference, areas)
+			notification = Notifications(self.ccdr_reference, message)
+			self.notification.append(notification)
+			notification.send(receiver="web")
 
 	@staticmethod
 	def get_color_category(category):
