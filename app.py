@@ -164,7 +164,7 @@ def weekly_goals():
 	return json.dumps(response, indent=3), 200
 
 
-# @scheduler.scheduled_job('cron', id='scores_injection', day='*', hour='12', minute='12')
+@scheduler.scheduled_job('cron', id='scores_injection', day='*', hour='18', minute='32')
 @app.route("/recommender/scores_injection", methods=['GET'])
 def schedule_scores_injection():
 	response = {
