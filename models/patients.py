@@ -284,15 +284,23 @@ class RecommenderPatients(db.Model, UserMixin):
 				# logger.info("--------------")
 
 				# Scores and deviations recommendations
-				scores.append(actionlib_response_prev.json()["scores"])
+				scores_prev = {key: item["score"] for key, item in actionlib_response_prev.json()["scores"].items()}
+				scores.append(scores_prev)
 				scores.append(actionlib_response.json()["scores"])
 				deviations.append(actionlib_response_prev.json()["deviations"])
 				deviations.append(actionlib_response.json()["deviations"])
 
-				patient.recommendations_injection(scores, deviations)
+				country_code = patient.organization_mapping()
+				messages = evaluation.game_evaluation(patient.ccdr_reference, country_code)
 
-		logger.info("Injection completed. Patient: {}/{}\n".format(str(patient_count), str(total)))
-		logger.info("--------------")
+				# TODO: Make it not static
+				for message in messages:
+					notification = Notifications(patient.ccdr_reference, message)
+					self.notification.append(notification)
+					notification.send(receiver="web")
+
+		# logger.info("Injection completed. Patient: {}/{}\n".format(str(patient_count), str(total)))
+		# logger.info("--------------")
 
 		return patient_count
 
@@ -364,32 +372,6 @@ class RecommenderPatients(db.Model, UserMixin):
 			logger.error("Calculating scores for patient {}".format(self.ccdr_reference))
 
 		return actionlib_response, fusionlib_response
-
-	def recommendations_injection(self, scores, deviations):
-		# Scores. Extract difference between lists
-		scores_result = {key: scores[1][key] - scores[0].get(key, 0) for key in scores[1].keys()}
-
-		# Deviations
-		# Alarm only if any value is higher than 0.5
-		deviations_probs = []
-		[deviations_probs.append(value["probability"]) for value in deviations[1].values()]
-		# print(deviations_probs)
-		if any(prob > 0.5 for prob in deviations_probs):
-			# TODO: Translate disorder messages
-			message = "Disorder happening to patient {}.".format(self.ccdr_reference)
-			notification = Notifications(self.ccdr_reference, message)
-			self.notification.append(notification)
-			notification.send(receiver="web")
-
-		# Extract also type of alert (key)
-		alert_list = []
-		[alert_list.append(key) for key, value in deviations[1].items() if value["probability"] > 0.5]
-		if alert_list:
-			areas = ",".join([str(item) for item in alert_list])
-			message = "Disorder happening to patient {}. Areas: {}.".format(self.ccdr_reference, areas)
-			notification = Notifications(self.ccdr_reference, message)
-			self.notification.append(notification)
-			notification.send(receiver="web")
 
 	@staticmethod
 	def get_color_category(category):

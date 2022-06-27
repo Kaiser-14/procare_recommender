@@ -10,6 +10,48 @@ from helper.utils import game_notifications
 
 # Mobile recommendations
 
+def injection_evaluation(patient_reference, country_code, scores, deviations):
+
+	messages = []
+
+	# Scores. Extract difference between lists
+	scores_result = {key: scores[1][key] - scores[0].get(key, 0) for key in scores[1].keys()}
+
+	# Cognitive State Score (CSS)
+	if scores[1]["css"]:
+		# TODO: Patient did not perform well
+		# TODO: Patient might not be playing any games in the last two weeks
+		pass
+	if scores_result["css"] < 0:
+		# TODO: Keep playing games
+		# TODO: Suggest decreasing the game difficulty level
+		pass
+	else:
+		# TODO: Inform patient that they are doing great and improving,
+		# TODO: Give some information regarding what will happen (positively) if they keep going like this.
+		pass
+
+	# Deviations
+	# Alarm only if any value is higher than 0.5
+	deviations_probs = []
+	[deviations_probs.append(value["probability"]) for value in deviations[1].values()]
+	# print(deviations_probs)
+	if any(prob > 0.5 for prob in deviations_probs):
+		# TODO: Translate disorder messages
+		message = "Disorder happening to patient {}.".format(patient_reference)
+		messages.append(message)
+
+	# Extract also type of alert (key)
+	alert_list = []
+	[alert_list.append(key) for key, value in deviations[1].items() if value["probability"] > 0.5]
+	if alert_list:
+		areas = ",".join([str(item) for item in alert_list])
+		message = "Disorder happening to patient {}. Areas: {}.".format(patient_reference, areas)
+		messages.append(message)
+
+	return messages
+
+
 # Game recommendations
 
 def game_evaluation(patient_reference, country_code):
