@@ -453,13 +453,14 @@ class RecommenderPatients(db.Model, UserMixin):
 				json=body).json()
 
 			# Create notification based on reached goals
+			country_code = self.organization_mapping()
 			if response["reached_goal"]:
-				message = motivational_notifications["STP1"]["en"].format(
+				message = motivational_notifications["STP1"][country_code].format(
 					str(response["weekly_steps"]),
 					str(response["reached_goal_daily"]),
 					str(response["weekly_objective"]))
 			else:
-				message = motivational_notifications["STP2"]["en"].format(str(response["weekly_steps"]))
+				message = motivational_notifications["STP2"][country_code].format(str(response["weekly_steps"]))
 
 		if message:
 			notification = Notifications(self.ccdr_reference, message)
