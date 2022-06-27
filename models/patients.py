@@ -302,8 +302,8 @@ class RecommenderPatients(db.Model, UserMixin):
 		actionlib_response_prev, fusionlib_response_prev = self.calculate_scores(True)
 		actionlib_response, fusionlib_response = self.calculate_scores()
 
-		scores_prev = actionlib_response_prev.json()['scores']
-		deviations_prev = fusionlib_response_prev.json()['deviations']
+		scores_prev = {key: item["score"] for key, item in actionlib_response_prev.json()["scores"].items()}
+		# deviations_prev = fusionlib_response_prev.json()['deviations']
 
 		scores = actionlib_response.json()['scores']
 		deviations = fusionlib_response.json()['deviations']
@@ -314,7 +314,7 @@ class RecommenderPatients(db.Model, UserMixin):
 		return scores, deviations
 
 	# Run both ActionLib (HBR) scores and FusionLib (MMF) deviation for specific patient and date
-	def calculate_scores(self, previous_day=False):
+	def calculate_scores(self, previous=False):
 		# today = datetime.today()
 		# week_ago = today - timedelta(weeks=1)
 
@@ -322,12 +322,12 @@ class RecommenderPatients(db.Model, UserMixin):
 		fusionlib_response = None
 
 		today = datetime.today()
-		if previous_day:
-			start_date = today - timedelta(days=13)
-			end_date = today - timedelta(days=7)
+		if previous:
+			start_date = today - timedelta(days=14)
+			end_date = today - timedelta(days=8)
 		else:
-			start_date = today - timedelta(days=6)
-			end_date = today
+			start_date = today - timedelta(days=7)
+			end_date = today - timedelta(days=1)
 
 		body = {
 			"identity_management_key": "recommendLib",
@@ -343,17 +343,22 @@ class RecommenderPatients(db.Model, UserMixin):
 		headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
 
 		try:
-			actionlib_response = requests.post(
-				config.actionlib_url + "/generate_scores", data=json.dumps(body), headers=headers)
-
-			# If there is no response from actionLib, we can skip the fusionLib request and save time
-			if actionlib_response.status_code != 200:
-				logger.error(actionlib_response.text)
+			if previous:
+				actionlib_response = requests.post(
+					config.actionlib_url + "/api/v1/fusionlib/getWeeklyScores", data=json.dumps(body), headers=headers
+				)
 			else:
-				fusionlib_response = requests.post(
-					config.fusionlib_url + "/generate_deviations", data=json.dumps(body), headers=headers)
-				if fusionlib_response.status_code != 200:
-					logger.error(fusionlib_response.text)
+				actionlib_response = requests.post(
+					config.actionlib_url + "/generate_scores", data=json.dumps(body), headers=headers)
+
+				# If there is no response from actionLib, we can skip the fusionLib request and save time
+				if actionlib_response.status_code != 200:
+					logger.error(actionlib_response.text)
+				else:
+					fusionlib_response = requests.post(
+						config.fusionlib_url + "/generate_deviations", data=json.dumps(body), headers=headers)
+					if fusionlib_response.status_code != 200:
+						logger.error(fusionlib_response.text)
 
 		except requests.exceptions.RequestException as e:
 			logger.error("Calculating scores for patient {}".format(self.ccdr_reference))
