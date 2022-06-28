@@ -1,0 +1,122 @@
+{
+    "CSS_11": {
+        "en": "You have been introduced to cognitive games. If you like the experience, you can try again.",
+        "de": "",
+        "es": "",
+        "it": "",
+        "pt": "",
+        "ro": ""
+    },
+    "CSS_12": {
+        "en": "Remember that you have available the web cognitive game app. Play to improve your personal scores.",
+        "de": "",
+        "es": "",
+        "it": "",
+        "pt": "",
+        "ro": ""
+    },
+    "CSS_21": {
+        "en": "Did you remember to play cognitive games? You could get better improvements over your memory as soon as you play over time.",
+        "de": "",
+        "es": "",
+        "it": "",
+        "pt": "",
+        "ro": ""
+    },
+    "CSS_22": {
+        "en": "Did you find the game difficult for you? You can adjust the difficulty level to enjoy the game.",
+        "de": "",
+        "es": "",
+        "it": "",
+        "pt": "",
+        "ro": ""
+    },
+    "CSS_31": {
+        "en": "You performed very well in cognitive games. Keep it going!",
+        "de": "",
+        "es": "",
+        "it": "",
+        "pt": "",
+        "ro": ""
+    },
+    "CSS_32": {
+        "en": "Easy week for cognitive games? You can increase the difficult level of games.",
+        "de": "",
+        "es": "",
+        "it": "",
+        "pt": "",
+        "ro": ""
+    },
+    "MIS_11": {
+        "en": "Do you have prescribed medicine? Remember to register the medicine into the app.",
+        "de": "",
+        "es": "",
+        "it": "",
+        "pt": "",
+        "ro": ""
+    },
+    "MIS_21": {
+        "en": "Do not forget to take your medicine on the times prescribed by your doctor and to register into the app.",
+        "de": "",
+        "es": "",
+        "it": "",
+        "pt": "",
+        "ro": ""
+    },
+    "MIS_31": {
+        "en": "Continue your daily medicine intake as prescribed by your doctor.",
+        "de": "",
+        "es": "",
+        "it": "",
+        "pt": "",
+        "ro": ""
+    },
+    "MFS_11": {
+        "en": "Our systems have not detected any symptoms this week. Keep using the Fitbit device and the Procare4Life app.",
+        "de": "",
+        "es": "",
+        "it": "",
+        "pt": "",
+        "ro": ""
+    },
+    "MFS_21": {
+        "en": "If you have noticed any change in your symptoms, remember to share them with your health care professional in your next visit.",
+        "de": "",
+        "es": "",
+        "it": "",
+        "pt": "",
+        "ro": ""
+    },
+    "MFS_31": {
+        "en": "How do you feel this week? You could share any updates about your symptoms with your health care professional in the next visit.",
+        "de": "",
+        "es": "",
+        "it": "",
+        "pt": "",
+        "ro": ""
+    },
+    "PAS_11": {
+        "en": "Our systems have not detected any physical activity data. Make sure you are wearing your wristband and you have updated your Fitbit app.",
+        "de": "",
+        "es": "",
+        "it": "",
+        "pt": "",
+        "ro": ""
+    },
+    "PAS_21": {
+        "en": "Try to be physical active on a daily basis.",
+        "de": "",
+        "es": "",
+        "it": "",
+        "pt": "",
+        "ro": ""
+    },
+    "PAS_31": {
+        "en": "Your physical activity levels are improving. Well done! Keep going!",
+        "de": "",
+        "es": "",
+        "it": "",
+        "pt": "",
+        "ro": ""
+    }
+}
