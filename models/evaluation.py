@@ -5,7 +5,7 @@ import numpy as np
 import requests
 
 from helper import config
-from helper.utils import game_notifications
+from helper.utils import game_notifications, multimodal_notifications
 
 
 # Mobile recommendations
@@ -18,18 +18,58 @@ def injection_evaluation(patient_reference, country_code, scores, deviations):
 	scores_result = {key: scores[1][key] - scores[0].get(key, 0) for key in scores[1].keys()}
 
 	# Cognitive State Score (CSS)
-	if scores[1]["css"]:
-		# TODO: Patient did not perform well
-		# TODO: Patient might not be playing any games in the last two weeks
-		pass
+	if scores[1]["css"] == 0:
+		# TODO: Check if the patient has not played cognitive games
+		not_played_cog_games = True
+		if not not_played_cog_games:  # Patient did not perform well
+			messages.append(multimodal_notifications['CSS_11'][country_code])
+		else:  # Patient might not be playing any games in the last two weeks
+			messages.append(multimodal_notifications['CSS_12'][country_code])
 	if scores_result["css"] < 0:
-		# TODO: Keep playing games
-		# TODO: Suggest decreasing the game difficulty level
-		pass
+		msg1 = multimodal_notifications['CSS_21'][country_code]  # Patient is not playing well
+		msg2 = multimodal_notifications['CSS_22'][country_code]  # Suggest to decrease the level
+		# Select a random message between ms1 and msg2
+		messages.append(sample([msg1, msg2], 1)[0])
 	else:
-		# TODO: Inform patient that they are doing great and improving,
-		# TODO: Give some information regarding what will happen (positively) if they keep going like this.
-		pass
+		msg1 = multimodal_notifications['CSS_31'][country_code]  # Patient is doing great
+		msg2 = multimodal_notifications['CSS_32'][country_code]  # Suggest to increase level
+		# Select a random message between ms1 and msg2
+		messages.append(sample([msg1, msg2], 1)[0])
+
+	# Medication Intake Score (MIS)
+	if scores[1]["mis"] == 0:
+		# TODO: Check not medicine prescribed
+		not_medicine_prescribed = True
+		if not not_medicine_prescribed:  # Patient did not register medicine
+			messages.append(multimodal_notifications['MIS_11'][country_code])
+	if scores_result["mis"] < 0:
+		messages.append(multimodal_notifications['MIS_21'][country_code])  # Register the medicine
+	else:
+		messages.append(multimodal_notifications['MIS_31'][country_code])  # Continue daily medicine intake
+
+	# Motor Functions Score (MFS)
+	if scores[1]["mfs"] == 1:
+		messages.append(multimodal_notifications['MFS_11'][country_code])  # No symptoms detected
+	if scores_result["mfs"] < 0:
+		messages.append(multimodal_notifications['MFS_21'][country_code])  # Contact doctor to get feedback
+	else:
+		messages.append(multimodal_notifications['MFS_31'][country_code])  # Improving motor functions
+
+	# Physical Activity Score (PAS)
+	if scores[1]["pas"] == 0:
+		messages.append(multimodal_notifications['PAS_11'][country_code])  # No activity detected
+	if scores_result["pas"] < 0:
+		messages.append(multimodal_notifications['PAS_21'][country_code])  # Encourage to be physically active
+	else:
+		messages.append(multimodal_notifications['PAS_31'][country_code])  # Physical activity are improving
+
+	# Sleep Score (SS)
+	if scores[1]["ss"] == 0:
+		messages.append(multimodal_notifications['SS_11'][country_code])  # No sleep detected, wear the wristband
+	if scores_result["ss"] < 0:
+		messages.append(multimodal_notifications['SS_21'][country_code])  # Encourage to sleep
+	else:
+		messages.append(multimodal_notifications['SS_31'][country_code])  # Sleep score is improving
 
 	# Deviations
 	# Alarm only if any value is higher than 0.5
