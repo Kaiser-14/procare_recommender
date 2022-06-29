@@ -274,8 +274,8 @@ class RecommenderPatients(db.Model, UserMixin):
 			scores = []
 			deviations = []
 
-			actionlib_response_prev, fusionlib_response_prev = patient.calculate_scores(True)
-			actionlib_response, fusionlib_response = patient.calculate_scores()
+			actionlib_response_prev, fusionlib_response_prev = self.calculate_scores(True)
+			actionlib_response, fusionlib_response = self.calculate_scores()
 
 			if actionlib_response.status_code == 200 and fusionlib_response.status_code == 200:
 				logger.debug("ActionLib Response:\nStatus: {}\nContent: {}\n".format(
@@ -292,7 +292,7 @@ class RecommenderPatients(db.Model, UserMixin):
 				deviations.append(actionlib_response.json()["deviations"])
 
 				# Scores and deviations recommendations
-				country_code = patient.organization_mapping()
+				country_code = self.organization_mapping()
 				messages_scores, messages_deviations = evaluation.multimodal_notifications(patient.ccdr_reference, country_code)
 
 				for message in messages_scores:
