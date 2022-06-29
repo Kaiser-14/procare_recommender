@@ -142,5 +142,13 @@
         "it": "",
         "pt": "",
         "ro": ""
+    },
+    "D_1": {
+        "en": "For Patient {} and dates between {} – {} there is a {} probability that {} will be observed.",
+        "de": "",
+        "es": "",
+        "it": "",
+        "pt": "",
+        "ro": ""
     }
 }
