@@ -12,9 +12,10 @@ from helper.utils import game_notifications, multimodal_notifications
 
 def injection_evaluation(patient_reference, country_code, scores, deviations):
 
-	messages = []
+	messages_scores = []
+	messages_deviations = []
 
-	# Scores. Extract difference between lists
+	# Scores. Extract difference between weeks
 	scores_result = {key: scores[1][key] - scores[0].get(key, 0) for key in scores[1].keys()}
 
 	# Cognitive State Score (CSS)
@@ -22,74 +23,73 @@ def injection_evaluation(patient_reference, country_code, scores, deviations):
 		# TODO: Check if the patient has not played cognitive games
 		not_played_cog_games = True
 		if not not_played_cog_games:  # Patient did not perform well
-			messages.append(multimodal_notifications['CSS_11'][country_code])
+			messages_scores.append(multimodal_notifications['CSS_11'][country_code])
 		else:  # Patient might not be playing any games in the last two weeks
-			messages.append(multimodal_notifications['CSS_12'][country_code])
+			messages_scores.append(multimodal_notifications['CSS_12'][country_code])
 	if scores_result["css"] < 0:
 		msg1 = multimodal_notifications['CSS_21'][country_code]  # Patient is not playing well
 		msg2 = multimodal_notifications['CSS_22'][country_code]  # Suggest to decrease the level
 		# Select a random message between ms1 and msg2
-		messages.append(sample([msg1, msg2], 1)[0])
+		messages_scores.append(sample([msg1, msg2], 1)[0])
 	else:
 		msg1 = multimodal_notifications['CSS_31'][country_code]  # Patient is doing great
 		msg2 = multimodal_notifications['CSS_32'][country_code]  # Suggest to increase level
 		# Select a random message between ms1 and msg2
-		messages.append(sample([msg1, msg2], 1)[0])
+		messages_scores.append(sample([msg1, msg2], 1)[0])
 
 	# Medication Intake Score (MIS)
 	if scores[1]["mis"] == 0:
 		# TODO: Check not medicine prescribed
 		not_medicine_prescribed = True
 		if not not_medicine_prescribed:  # Patient did not register medicine
-			messages.append(multimodal_notifications['MIS_11'][country_code])
+			messages_scores.append(multimodal_notifications['MIS_11'][country_code])
 	if scores_result["mis"] < 0:
-		messages.append(multimodal_notifications['MIS_21'][country_code])  # Register the medicine
+		messages_scores.append(multimodal_notifications['MIS_21'][country_code])  # Register the medicine
 	else:
-		messages.append(multimodal_notifications['MIS_31'][country_code])  # Continue daily medicine intake
+		messages_scores.append(multimodal_notifications['MIS_31'][country_code])  # Continue daily medicine intake
 
 	# Motor Functions Score (MFS)
 	if scores[1]["mfs"] == 1:
-		messages.append(multimodal_notifications['MFS_11'][country_code])  # No symptoms detected
+		messages_scores.append(multimodal_notifications['MFS_11'][country_code])  # No symptoms detected
 	if scores_result["mfs"] < 0:
-		messages.append(multimodal_notifications['MFS_21'][country_code])  # Contact doctor to get feedback
+		messages_scores.append(multimodal_notifications['MFS_21'][country_code])  # Contact doctor to get feedback
 	else:
-		messages.append(multimodal_notifications['MFS_31'][country_code])  # Improving motor functions
+		messages_scores.append(multimodal_notifications['MFS_31'][country_code])  # Improving motor functions
 
 	# Physical Activity Score (PAS)
 	if scores[1]["pas"] == 0:
-		messages.append(multimodal_notifications['PAS_11'][country_code])  # No activity detected
+		messages_scores.append(multimodal_notifications['PAS_11'][country_code])  # No activity detected
 	if scores_result["pas"] < 0:
-		messages.append(multimodal_notifications['PAS_21'][country_code])  # Encourage to be physically active
+		messages_scores.append(multimodal_notifications['PAS_21'][country_code])  # Encourage to be physically active
 	else:
-		messages.append(multimodal_notifications['PAS_31'][country_code])  # Physical activity are improving
+		messages_scores.append(multimodal_notifications['PAS_31'][country_code])  # Physical activity are improving
 
 	# Sleep Score (SS)
 	if scores[1]["ss"] == 0:
-		messages.append(multimodal_notifications['SS_11'][country_code])  # No sleep detected, wear the wristband
+		messages_scores.append(multimodal_notifications['SS_11'][country_code])  # No sleep detected, wear the wristband
 	if scores_result["ss"] < 0:
-		messages.append(multimodal_notifications['SS_21'][country_code])  # Encourage to sleep
+		messages_scores.append(multimodal_notifications['SS_21'][country_code])  # Encourage to sleep
 	else:
-		messages.append(multimodal_notifications['SS_31'][country_code])  # Sleep score is improving
+		messages_scores.append(multimodal_notifications['SS_31'][country_code])  # Sleep score is improving
 
 	# Deviations
-	# Alarm only if any value is higher than 0.5
-	deviations_probs = []
-	[deviations_probs.append(value["probability"]) for value in deviations[1].values()]
-	# print(deviations_probs)
-	if any(prob > 0.5 for prob in deviations_probs):
-		# TODO: Translate disorder messages
-		message = "Disorder happening to patient {}.".format(patient_reference)
-		messages.append(message)
-
-	# Extract also type of alert (key)
+	# Alarm by type of alert (key) if probability is greater than 0.5
 	alert_list = []
 	[alert_list.append(key) for key, value in deviations[1].items() if value["probability"] > 0.5]
-	if alert_list:
-		areas = ",".join([str(item) for item in alert_list])
-		message = "Disorder happening to patient {}. Areas: {}.".format(patient_reference, areas)
-		messages.append(message)
+	for category in alert_list:
+		category_dict = {
+			"amf": "Abnormalities in Motor Functions", "DCA": "Decline in Cognitive Abilities",
+			"dpa": "Decline in Physical Activities", "sd": "Sleep Disorders", "OVD": "Overall Deviation"}
 
-	return messages
+		today = datetime.today()
+		start_date = today - timedelta(days=14)
+		end_date = today - timedelta(days=1)
+
+		messages_deviations.append(multimodal_notifications["D_1"][country_code].format(
+			patient_reference, start_date.strftime("%d/%m/%Y"), end_date.strftime("%d/%m/%Y"),
+			deviations[1][category]["probability"], category_dict[category]))
+
+	return messages_scores, messages_deviations
 
 
 # Game recommendations
