@@ -236,11 +236,13 @@ class RecommenderPatients(db.Model, UserMixin):
 
 		for patient in patient_references:
 			patient_count = patient_count + 1
-			if receiver == "mobile":
+			if receiver == "par":
 				logger.info('Par notification: Patient {}/{}'.format(patient_count, patients_total))
 				patient.par_notification()
 			elif receiver == "game":
 				patient.game_notification()
+			elif receiver == "multimodal":
+				patient.multimodal_notification()
 
 		return patient_count
 
@@ -261,14 +263,13 @@ class RecommenderPatients(db.Model, UserMixin):
 			logger.error("Getting all patients from CCDR.")
 			return str(e), 0
 
-	@staticmethod
-	def scores_injection():
+	def multimodal_notification(self):
 		patients, total = RecommenderPatients.get_patients_db()
 
 		patient_count = 0
 		for patient in patients:
 			patient_count = patient_count + 1
-			logger.info("Processing patient " + patient.ccdr_reference + "....\n")
+			# logger.info("Processing patient " + patient.ccdr_reference + "....\n")
 
 			scores = []
 			deviations = []
@@ -283,18 +284,22 @@ class RecommenderPatients(db.Model, UserMixin):
 					str(actionlib_response.status_code), str(actionlib_response.content)))
 				# logger.info("--------------")
 
-				# Scores and deviations recommendations
+				# Scores and deviations information
 				scores_prev = {key: item["score"] for key, item in actionlib_response_prev.json()["scores"].items()}
 				scores.append(scores_prev)
 				scores.append(actionlib_response.json()["scores"])
 				deviations.append(actionlib_response_prev.json()["deviations"])
 				deviations.append(actionlib_response.json()["deviations"])
 
+				# Scores and deviations recommendations
 				country_code = patient.organization_mapping()
-				messages = evaluation.game_evaluation(patient.ccdr_reference, country_code)
+				messages_scores, messages_deviations = evaluation.multimodal_notifications(patient.ccdr_reference, country_code)
 
-				# TODO: Make it not static
-				for message in messages:
+				for message in messages_scores:
+					notification = Notifications(patient.ccdr_reference, message)
+					self.notification.append(notification)
+					notification.send(receiver="mobile")
+				for message in messages_deviations:
 					notification = Notifications(patient.ccdr_reference, message)
 					self.notification.append(notification)
 					notification.send(receiver="web")

@@ -106,7 +106,7 @@ def daily_par():
 
 	with app.app_context():
 		update()
-		patients = RecommenderPatients.notifications_round(receiver="mobile")
+		patients = RecommenderPatients.notifications_round(receiver="par")
 		if patients:
 			response["patients"] = patients
 
@@ -167,13 +167,17 @@ def weekly_goals():
 @scheduler.scheduled_job('cron', id='scores_injection', day='*', hour='18', minute='32')
 @app.route("/recommender/scores_injection", methods=['GET'])
 def schedule_scores_injection():
+	logger.info("Running daily injection round")
 	response = {
 		"patients": None
 	}
+
 	with app.app_context():
-		patient_count = RecommenderPatients.scores_injection()
-		if patient_count:
-			response["patients"] = patient_count
+		update()
+		patients = RecommenderPatients.notifications_round(receiver="multimodal")
+		if patients:
+			response["patients"] = patients
+
 	return json.dumps(response, indent=3), 200
 
 
