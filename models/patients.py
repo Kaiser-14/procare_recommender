@@ -242,7 +242,6 @@ class RecommenderPatients(db.Model, UserMixin):
 			elif receiver == "game":
 				patient.game_notification()
 			elif receiver == "multimodal":
-				# logger.info('Multimodal notification: Patient {}/{}'.format(patient_count, patients_total))
 				logger.info("[Multimodal] Patient " + patient.ccdr_reference + ": " + str(patient_count) + "/" + str(patients_total))
 				patient.multimodal_notification()
 
@@ -269,49 +268,44 @@ class RecommenderPatients(db.Model, UserMixin):
 		scores = []
 		deviations = []
 
-		actionlib_response_prev, fusionlib_response_prev = self.calculate_scores(True)
-		actionlib_response, fusionlib_response = self.calculate_scores()
+		if self.par_day % 8 == 0 and self.par_day != 0:
+			actionlib_response_prev, fusionlib_response_prev = self.calculate_scores(True)
+			actionlib_response, fusionlib_response = self.calculate_scores()
 
-		if actionlib_response.status_code == 200 and fusionlib_response.status_code == 200:
-			logger.debug("ActionLib Response:\nStatus: {}\nContent: {}\n".format(
-				str(actionlib_response.status_code), str(actionlib_response.content)))
-			logger.debug("FusionLib Response:\nStatus: {}\nContent: {}\n".format(
-				str(actionlib_response.status_code), str(actionlib_response.content)))
+			if actionlib_response.status_code == 200 and fusionlib_response.status_code == 200:
+				logger.debug("ActionLib Response:\nStatus: {}\nContent: {}\n".format(
+					str(actionlib_response.status_code), str(actionlib_response.content)))
+				logger.debug("FusionLib Response:\nStatus: {}\nContent: {}\n".format(
+					str(actionlib_response.status_code), str(actionlib_response.content)))
 
-			# Scores and deviations information
-			scores_prev = {key: item["score"] for key, item in actionlib_response_prev.json()["scores"].items()}
-			scores.append(scores_prev)
-			scores.append(actionlib_response.json()["scores"])
-			deviations.append(None)
-			deviations.append(fusionlib_response.json()["deviations"])
+				# Scores and deviations information
+				scores_prev = {key: item["score"] for key, item in actionlib_response_prev.json()["scores"].items()}
+				scores.append(scores_prev)
+				scores.append(actionlib_response.json()["scores"])
+				deviations.append(None)
+				deviations.append(fusionlib_response.json()["deviations"])
 
-			logger.info(scores)
-			logger.info(deviations)
-			logger.info("--------------")
+				logger.info(scores)
+				logger.info(deviations)
 
-			# Scores and deviations recommendations
-			country_code = self.organization_mapping()
-			messages_scores, messages_deviations = evaluation.multimodal_evaluation(
-				self.ccdr_reference, country_code, scores, deviations)
+				# Scores and deviations recommendations
+				country_code = self.organization_mapping()
+				messages_scores, messages_deviations = evaluation.multimodal_evaluation(
+					self.ccdr_reference, country_code, scores, deviations)
 
-			for message in messages_scores:
-				if message:
-					# logger.info(message)
-					notification = Notifications(self.ccdr_reference, message)
-					self.notification.append(notification)
-					notification.send(receiver="mobile")
-			for message in messages_deviations:
-				if message:
-					# logger.info(message)
-					notification = Notifications(self.ccdr_reference, message)
-					self.notification.append(notification)
-					notification.send(receiver="web")
-			# logger.info("--------------")
-
-		# logger.info("Injection completed. Patient: {}/{}\n".format(str(patient_count), str(total)))
-		# logger.info("--------------")
-
-		# return patient_count
+				for message in messages_scores:
+					if message:
+						# logger.info(message)
+						notification = Notifications(self.ccdr_reference, message)
+						self.notification.append(notification)
+						notification.send(receiver="mobile")
+				for message in messages_deviations:
+					if message:
+						# logger.info(message)
+						notification = Notifications(self.ccdr_reference, message)
+						self.notification.append(notification)
+						notification.send(receiver="web")
+				logger.info("--------------")
 
 	def scores_injection_patient(self):
 		logger.info("Processing patient " + self.ccdr_reference + "....\n")
