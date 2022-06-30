@@ -151,13 +151,13 @@ def weekly_check_ipaq():
 @scheduler.scheduled_job('cron', id='weekly_goals', day='*', hour='10', minute='01')
 @app.route("/notification/weekly_goals", methods=['GET'])
 def weekly_goals():
-	logger.info("Starting weekly notification goals")
+	logger.info("Running weekly notification goals")
 	response = {
 		"patients": None
 	}
 
 	with app.app_context():
-		patients = RecommenderPatients.round_goals()
+		patients = RecommenderPatients.notifications_round(receiver="goals")
 		if patients:
 			response["patients"] = patients
 
@@ -165,7 +165,7 @@ def weekly_goals():
 
 
 @scheduler.scheduled_job('cron', id='scores_injection', day='*', hour='18', minute='32')
-@app.route("/recommender/scores_injection", methods=['GET'])
+@app.route("/notification/scores_injection", methods=['GET'])
 def schedule_scores_injection():
 	logger.info("Running daily injection round")
 	response = {

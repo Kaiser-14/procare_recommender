@@ -237,12 +237,20 @@ class RecommenderPatients(db.Model, UserMixin):
 		for patient in patient_references:
 			patient_count = patient_count + 1
 			if receiver == "par":
-				logger.info('Par notification: Patient {}/{}'.format(patient_count, patients_total))
+				logger.info("[PAR] Patient " + patient.ccdr_reference + ": " + str(patient_count) + "/" + str(
+					patients_total))
 				patient.par_notification()
 			elif receiver == "game":
+				logger.info("[Game] Patient " + patient.ccdr_reference + ": " + str(patient_count) + "/" + str(
+					patients_total))
 				patient.game_notification()
+			elif receiver == "goals":
+				logger.info("[Goals] Patient " + patient.ccdr_reference + ": " + str(patient_count) + "/" + str(
+					patients_total))
+				patient.goals_notifications()
 			elif receiver == "multimodal":
-				logger.info("[Multimodal] Patient " + patient.ccdr_reference + ": " + str(patient_count) + "/" + str(patients_total))
+				logger.info("[Multimodal] Patient " + patient.ccdr_reference + ": " + str(patient_count) + "/" + str(
+					patients_total))
 				patient.multimodal_notification()
 
 		return patient_count
@@ -414,20 +422,20 @@ class RecommenderPatients(db.Model, UserMixin):
 		else:
 			return None  # Default
 
-	@staticmethod
-	def round_goals():
-		patients, total = RecommenderPatients.get_patients_db()
-		patient_count = 0
+	# @staticmethod
+	# def round_goals():
+	# 	patients, total = RecommenderPatients.get_patients_db()
+	# 	patient_count = 0
+	#
+	# 	for patient in patients:
+	# 		patient_count = patient_count + 1
+	# 		patient.personal_goals()
+	#
+	# 	return patient_count
 
-		for patient in patients:
-			patient_count = patient_count + 1
-			patient.personal_goals()
-
-		return patient_count
-
-	def personal_goals(self):
+	def goals_notifications(self):
 		message = None
-		if self.par_day % 8 == 0:
+		if self.par_day % 8 == 0 and self.par_day != 0:
 
 			# Get the steps from the platform
 			today = datetime.today()
