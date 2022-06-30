@@ -10,7 +10,7 @@ from helper.utils import game_notifications, multimodal_notifications
 
 # Mobile recommendations
 
-def injection_evaluation(patient_reference, country_code, scores, deviations):
+def multimodal_evaluation(patient_reference, country_code, scores, deviations):
 
 	messages_scores = []
 	messages_deviations = []
@@ -75,19 +75,20 @@ def injection_evaluation(patient_reference, country_code, scores, deviations):
 	# Deviations
 	# Alarm by type of alert (key) if probability is greater than 0.5
 	alert_list = []
-	[alert_list.append(key) for key, value in deviations[1].items() if value["probability"] > 0.5]
+	[alert_list.append(key) for key, value in deviations[1].items() if value > 0.5]
+
+	category_dict = {
+		"amf": "Abnormalities in Motor Functions", "dca": "Decline in Cognitive Abilities",
+		"dpa": "Decline in Physical Activities", "sd": "Sleep Disorders", "ovd": "Overall Deviation"}
+
+	today = datetime.today()
+	start_date = today - timedelta(days=14)
+	end_date = today - timedelta(days=1)
+
 	for category in alert_list:
-		category_dict = {
-			"amf": "Abnormalities in Motor Functions", "DCA": "Decline in Cognitive Abilities",
-			"dpa": "Decline in Physical Activities", "sd": "Sleep Disorders", "OVD": "Overall Deviation"}
-
-		today = datetime.today()
-		start_date = today - timedelta(days=14)
-		end_date = today - timedelta(days=1)
-
 		messages_deviations.append(multimodal_notifications["D_1"][country_code].format(
 			patient_reference, start_date.strftime("%d/%m/%Y"), end_date.strftime("%d/%m/%Y"),
-			deviations[1][category]["probability"], category_dict[category]))
+			"{:.3f}".format(deviations[1][category]), category_dict[category]))
 
 	return messages_scores, messages_deviations
 

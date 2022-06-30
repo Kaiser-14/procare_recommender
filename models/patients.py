@@ -116,7 +116,7 @@ class RecommenderPatients(db.Model, UserMixin):
 
 		notification = Notifications(self.ccdr_reference, par_notification)
 		self.notification.append(notification)
-		notification.send()
+		notification.send(receiver="mobile")
 		db.session.commit()
 
 		return par_notification
@@ -212,7 +212,7 @@ class RecommenderPatients(db.Model, UserMixin):
 									category = 1  # Inactive
 						else:
 							category = 1  # Inactive
-		except requests.exceptions.ConnectionError as e:
+		except requests.exceptions.ConnectionError:
 			logger.error("Error in par_analysis. No connection to CCDR.")
 			category = None
 			variables = None
@@ -242,6 +242,8 @@ class RecommenderPatients(db.Model, UserMixin):
 			elif receiver == "game":
 				patient.game_notification()
 			elif receiver == "multimodal":
+				# logger.info('Multimodal notification: Patient {}/{}'.format(patient_count, patients_total))
+				logger.info("[Multimodal] Patient " + patient.ccdr_reference + ": " + str(patient_count) + "/" + str(patients_total))
 				patient.multimodal_notification()
 
 		return patient_count
@@ -264,58 +266,60 @@ class RecommenderPatients(db.Model, UserMixin):
 			return str(e), 0
 
 	def multimodal_notification(self):
-		patients, total = RecommenderPatients.get_patients_db()
-
-		patient_count = 0
-		for patient in patients:
-			patient_count = patient_count + 1
-			# logger.info("Processing patient " + patient.ccdr_reference + "....\n")
-
-			scores = []
-			deviations = []
-
-			actionlib_response_prev, fusionlib_response_prev = self.calculate_scores(True)
-			actionlib_response, fusionlib_response = self.calculate_scores()
-
-			if actionlib_response.status_code == 200 and fusionlib_response.status_code == 200:
-				logger.debug("ActionLib Response:\nStatus: {}\nContent: {}\n".format(
-					str(actionlib_response.status_code), str(actionlib_response.content)))
-				logger.debug("FusionLib Response:\nStatus: {}\nContent: {}\n".format(
-					str(actionlib_response.status_code), str(actionlib_response.content)))
-				# logger.info("--------------")
-
-				# Scores and deviations information
-				scores_prev = {key: item["score"] for key, item in actionlib_response_prev.json()["scores"].items()}
-				scores.append(scores_prev)
-				scores.append(actionlib_response.json()["scores"])
-				deviations.append(actionlib_response_prev.json()["deviations"])
-				deviations.append(actionlib_response.json()["deviations"])
-
-				# Scores and deviations recommendations
-				country_code = self.organization_mapping()
-				messages_scores, messages_deviations = evaluation.multimodal_notifications(patient.ccdr_reference, country_code)
-
-				for message in messages_scores:
-					notification = Notifications(patient.ccdr_reference, message)
-					self.notification.append(notification)
-					notification.send(receiver="mobile")
-				for message in messages_deviations:
-					notification = Notifications(patient.ccdr_reference, message)
-					self.notification.append(notification)
-					notification.send(receiver="web")
-
-		# logger.info("Injection completed. Patient: {}/{}\n".format(str(patient_count), str(total)))
-		# logger.info("--------------")
-
-		return patient_count
-
-	def scores_injection_patient(self):
-		logger.info("Processing patient " + self.ccdr_reference + "....\n")
+		scores = []
+		deviations = []
 
 		actionlib_response_prev, fusionlib_response_prev = self.calculate_scores(True)
 		actionlib_response, fusionlib_response = self.calculate_scores()
 
-		scores_prev = {key: item["score"] for key, item in actionlib_response_prev.json()["scores"].items()}
+		if actionlib_response.status_code == 200 and fusionlib_response.status_code == 200:
+			logger.debug("ActionLib Response:\nStatus: {}\nContent: {}\n".format(
+				str(actionlib_response.status_code), str(actionlib_response.content)))
+			logger.debug("FusionLib Response:\nStatus: {}\nContent: {}\n".format(
+				str(actionlib_response.status_code), str(actionlib_response.content)))
+
+			# Scores and deviations information
+			scores_prev = {key: item["score"] for key, item in actionlib_response_prev.json()["scores"].items()}
+			scores.append(scores_prev)
+			scores.append(actionlib_response.json()["scores"])
+			deviations.append(None)
+			deviations.append(fusionlib_response.json()["deviations"])
+
+			logger.info(scores)
+			logger.info(deviations)
+			logger.info("--------------")
+
+			# Scores and deviations recommendations
+			country_code = self.organization_mapping()
+			messages_scores, messages_deviations = evaluation.multimodal_evaluation(
+				self.ccdr_reference, country_code, scores, deviations)
+
+			for message in messages_scores:
+				if message:
+					# logger.info(message)
+					notification = Notifications(self.ccdr_reference, message)
+					self.notification.append(notification)
+					notification.send(receiver="mobile")
+			for message in messages_deviations:
+				if message:
+					# logger.info(message)
+					notification = Notifications(self.ccdr_reference, message)
+					self.notification.append(notification)
+					notification.send(receiver="web")
+			# logger.info("--------------")
+
+		# logger.info("Injection completed. Patient: {}/{}\n".format(str(patient_count), str(total)))
+		# logger.info("--------------")
+
+		# return patient_count
+
+	def scores_injection_patient(self):
+		logger.info("Processing patient " + self.ccdr_reference + "....\n")
+
+		# actionlib_response_prev, fusionlib_response_prev = self.calculate_scores(True)
+		actionlib_response, fusionlib_response = self.calculate_scores()
+
+		# scores_prev = {key: item["score"] for key, item in actionlib_response_prev.json()["scores"].items()}
 		# deviations_prev = fusionlib_response_prev.json()['deviations']
 
 		scores = actionlib_response.json()['scores']
@@ -358,7 +362,7 @@ class RecommenderPatients(db.Model, UserMixin):
 		try:
 			if previous:
 				actionlib_response = requests.post(
-					config.actionlib_url + "/api/v1/fusionlib/getWeeklyScores", data=json.dumps(body), headers=headers
+					config.ccdr_url + "/api/v1/fusionlib/getWeeklyScores", data=json.dumps(body), headers=headers
 				)
 			else:
 				actionlib_response = requests.post(
@@ -373,7 +377,7 @@ class RecommenderPatients(db.Model, UserMixin):
 					if fusionlib_response.status_code != 200:
 						logger.error(fusionlib_response.text)
 
-		except requests.exceptions.RequestException as e:
+		except requests.exceptions.RequestException:
 			logger.error("Calculating scores for patient {}".format(self.ccdr_reference))
 
 		return actionlib_response, fusionlib_response
@@ -508,7 +512,7 @@ class Notifications(db.Model, UserMixin):
 
 			self.save_notification()
 
-		except requests.exceptions.ConnectionError as e:
+		except requests.exceptions.ConnectionError:
 			logger.error("Sending notification.")
 
 	def get_dict(self):
@@ -594,11 +598,11 @@ class Notifications(db.Model, UserMixin):
 
 	@staticmethod
 	def check_timestamp(dates):
-		for i, date in enumerate(dates):
-			date = ''.join(filter(str.isdigit, date[:10]))
-			date = datetime.strptime(date, "%d%m%Y")
-			date = datetime.timestamp(date)
-			dates[i] = date
+		for i, date_ts in enumerate(dates):
+			date_ts = ''.join(filter(str.isdigit, date_ts[:10]))
+			date_ts = datetime.strptime(date_ts, "%d%m%Y")
+			date_ts = datetime.timestamp(date_ts)
+			dates[i] = date_ts
 
 		if dates[2] >= dates[0] >= dates[1]:
 			return True
@@ -627,6 +631,7 @@ class Notifications(db.Model, UserMixin):
 							config.ccdr_url + "/api/v1/mobile/surveys/get_response/7.2?identity_management_key=" +
 							patient.ccdr_reference).json()
 
+						ipaq_datetime = None
 						if ipaq_response:
 							ipaq_datetime = datetime.strptime(
 								ipaq_response[-1]["date"][4:].replace("UTC ", ""),
