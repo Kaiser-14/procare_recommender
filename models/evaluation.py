@@ -49,10 +49,15 @@ def multimodal_evaluation(patient_reference, country_code, scores, deviations):
 
 	# Medication Intake Score (MIS)
 	if scores[1]["mis"] == 0:
-		# TODO: Check not medicine prescribed
-		not_medicine_prescribed = True
-		if not not_medicine_prescribed:  # Patient did not register medicine
-			messages_scores.append(multimodal_notifications['MIS_11'][country_code])
+		# Check prescribed medicine
+		body = {
+			"identity_management_key": patient_reference,
+		}
+
+		prescription_list = requests.post(config.ccdr_url + "/api/v1/mobile/prescription/list/", json=body)
+
+		if prescription_list:
+			messages_scores.append(multimodal_notifications['MIS_11'][country_code])  # Patient did not register medicine
 	if scores_result["mis"] < 0:
 		messages_scores.append(multimodal_notifications['MIS_21'][country_code])  # Register the medicine
 	else:
