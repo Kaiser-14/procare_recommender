@@ -20,9 +20,19 @@ def multimodal_evaluation(patient_reference, country_code, scores, deviations):
 
 	# Cognitive State Score (CSS)
 	if scores[1]["css"] == 0:
-		# TODO: Check if the patient has not played cognitive games
-		not_played_cog_games = True
-		if not not_played_cog_games:  # Patient did not perform well
+		# Check if the patient has not played cognitive games in the last two weeks
+		body = {
+			"identity_management_key": patient_reference,
+			"role": "patient",
+			"startDate": (datetime.now() - timedelta(days=14)).strftime("%d-%m-%Y"),
+			"endDate": (datetime.now() - timedelta(days=1)).strftime("%d-%m-%Y")
+		}
+
+		summarization_list = requests.post(config.ccdr_url + "/api/v1/game/getSummarizationList", json=body)
+		cognitive_played = [True for session in summarization_list.json() if not session["session_info"]]
+		cognitive_played = True if any(cognitive_played) else False
+
+		if cognitive_played:  # Patient did not perform well
 			messages_scores.append(multimodal_notifications['CSS_11'][country_code])
 		else:  # Patient might not be playing any games in the last two weeks
 			messages_scores.append(multimodal_notifications['CSS_12'][country_code])
