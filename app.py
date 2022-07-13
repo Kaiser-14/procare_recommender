@@ -171,7 +171,7 @@ def schedule_scores_injection():
 @scheduler.scheduled_job('cron', id='hydration', day='*', hour='9', minute='25')
 @scheduler.scheduled_job('cron', id='hydration', day='*', hour='17', minute='47')
 @app.route("/notification/hydration", methods=['GET'])
-def schedule_scores_injection():
+def schedule_hydration():
 	logger.info("Running daily hydration round")
 	response = {
 		"patients": None
