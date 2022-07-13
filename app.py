@@ -49,19 +49,6 @@ with app.app_context():
 	update()
 
 
-@app.route("/recommender/create_recommendation", methods=['POST'])
-def create_recommendation():
-	data = request.get_json()
-
-	patient_reference = data.get('identity_management_key')
-
-	with app.app_context():
-		patient = RecommenderPatients.get_by_ccdr_ref(patient_reference)
-		par_notification = patient.recommendation()
-
-	return 'Notification sent for patient {}: {}'.format(patient_reference, par_notification)
-
-
 # Change par day of specific patient
 @app.route("/recommender/update_par_day", methods=['POST'])
 def update_par():

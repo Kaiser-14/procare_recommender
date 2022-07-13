@@ -106,21 +106,6 @@ class RecommenderPatients(db.Model, UserMixin):
 	def get_by_ccdr_ref(ref):
 		return RecommenderPatients.query.filter_by(ccdr_reference=ref).first()
 
-	def recommendation(self):
-
-		category, sitting_minutes = self.par_analysis()
-		scores, deviations = self.scores_injection_patient()
-
-		notification_key = "2"
-		par_notification = par_notifications[str(notification_key)]
-
-		notification = Notifications(self.ccdr_reference, par_notification)
-		self.notification.append(notification)
-		notification.send(receiver="mobile")
-		db.session.commit()
-
-		return par_notification
-
 	def par_analysis(self):
 		logger.info("Evaluating activity for patient " + self.ccdr_reference)
 		body = {
@@ -314,23 +299,6 @@ class RecommenderPatients(db.Model, UserMixin):
 						self.notification.append(notification)
 						notification.send(receiver="web")
 				logger.info("--------------")
-
-	def scores_injection_patient(self):
-		logger.info("Processing patient " + self.ccdr_reference + "....\n")
-
-		# actionlib_response_prev, fusionlib_response_prev = self.calculate_scores(True)
-		actionlib_response, fusionlib_response = self.calculate_scores()
-
-		# scores_prev = {key: item["score"] for key, item in actionlib_response_prev.json()["scores"].items()}
-		# deviations_prev = fusionlib_response_prev.json()['deviations']
-
-		scores = actionlib_response.json()['scores']
-		deviations = fusionlib_response.json()['deviations']
-
-		logger.info("Scores: {}".format(scores))
-		logger.info("Deviations: {}".format(deviations))
-
-		return scores, deviations
 
 	# Run both ActionLib (HBR) scores and FusionLib (MMF) deviation for specific patient and date
 	def calculate_scores(self, previous=False):
