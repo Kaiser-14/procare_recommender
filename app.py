@@ -168,6 +168,24 @@ def schedule_scores_injection():
 	return json.dumps(response, indent=3), 200
 
 
+@scheduler.scheduled_job('cron', id='hydration', day='*', hour='9', minute='25')
+@scheduler.scheduled_job('cron', id='hydration', day='*', hour='17', minute='47')
+@app.route("/notification/hydration", methods=['GET'])
+def schedule_scores_injection():
+	logger.info("Running daily hydration round")
+	response = {
+		"patients": None
+	}
+
+	with app.app_context():
+		update()
+		patients = RecommenderPatients.notifications_round(receiver="hydration")
+		if patients:
+			response["patients"] = patients
+
+	return json.dumps(response, indent=3), 200
+
+
 # Send to the backend the unique identifier of the notification message when the user reads the notification
 @app.route("/notification/readStatus", methods=['POST'])
 def notification_read():

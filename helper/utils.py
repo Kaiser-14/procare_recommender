@@ -109,33 +109,28 @@ else:
 # Par notifications
 script_dir = os.path.dirname(__file__)  # <-- absolute dir the script is in
 
-rel_path_par = "../par/par_notifications.json"
+rel_path_general = "../notifications/general_notifications.json"
+abs_file_path_general = os.path.join(script_dir, rel_path_general)
+
+rel_path_par = "../notifications/par_notifications.json"
 abs_file_path_par = os.path.join(script_dir, rel_path_par)
 
-rel_path_ieq = "../par/ieq_notifications.json"
+rel_path_ieq = "../notifications/ieq_notifications.json"
 abs_file_path_ieq = os.path.join(script_dir, rel_path_ieq)
 
-rel_path_ieq = "../par/ipaq_notifications.json"
-abs_file_path_ipaq = os.path.join(script_dir, rel_path_ieq)
+rel_path_game = "../notifications/game_notifications.json"
+abs_file_path_game = os.path.join(script_dir, rel_path_game)
 
-rel_path_ieq = "../par/game_notifications.json"
-abs_file_path_game = os.path.join(script_dir, rel_path_ieq)
+rel_path_multimodal = "../notifications/multimodal_notifications.json"
+abs_file_path_multimodal = os.path.join(script_dir, rel_path_multimodal)
 
-rel_path_ieq = "../par/motivational_notifications.json"
-abs_file_path_motivational = os.path.join(script_dir, rel_path_ieq)
-
-rel_path_ieq = "../par/multimodal_notifications.json"
-abs_file_path_multimodal = os.path.join(script_dir, rel_path_ieq)
-
+with open(abs_file_path_general, encoding='utf-8') as json_file:
+	general_notifications = json.load(json_file)
 with open(abs_file_path_par, encoding='utf-8') as json_file:
 	par_notifications = json.load(json_file)
 with open(abs_file_path_ieq, encoding='utf-8') as json_file:
 	ieq_notifications = json.load(json_file)
-with open(abs_file_path_ipaq, encoding='utf-8') as json_file:
-	ipaq_notifications = json.load(json_file)
 with open(abs_file_path_game, encoding='utf-8') as json_file:
 	game_notifications = json.load(json_file)
-with open(abs_file_path_motivational, encoding='utf-8') as json_file:
-	motivational_notifications = json.load(json_file)
 with open(abs_file_path_multimodal, encoding='utf-8') as json_file:
 	multimodal_notifications = json.load(json_file)

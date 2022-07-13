@@ -8,7 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
 
 from helper import config
-from helper.utils import logger, ieq_notifications, ipaq_notifications, par_notifications, motivational_notifications
+from helper.utils import logger, general_notifications, ieq_notifications, par_notifications
 from models import evaluation
 
 db = SQLAlchemy()
@@ -82,7 +82,7 @@ class RecommenderPatients(db.Model, UserMixin):
 		# IPAQ notification
 		if self.par_day in [7, 14, 21, 28, 35] or ipaq:
 			country_code = self.organization_mapping()
-			message = ipaq_notifications[country_code]
+			message = general_notifications["IPAQ"][country_code]
 			ipaq_notification = Notifications(self.ccdr_reference, message)
 			self.notification.append(ipaq_notification)
 			ipaq_notification.send(receiver="mobile")
@@ -237,6 +237,10 @@ class RecommenderPatients(db.Model, UserMixin):
 				logger.info("[Multimodal] Patient " + patient.ccdr_reference + ": " + str(patient_count) + "/" + str(
 					patients_total))
 				patient.multimodal_notification()
+			elif receiver == "hydration":
+				logger.info("[Hydration] Patient " + patient.ccdr_reference + ": " + str(patient_count) + "/" + str(
+					patients_total))
+				patient.hydration_notification()
 
 		return patient_count
 
@@ -299,6 +303,14 @@ class RecommenderPatients(db.Model, UserMixin):
 						self.notification.append(notification)
 						notification.send(receiver="web")
 				logger.info("--------------")
+
+	# Send reminder to drink water during the day
+	def hydration_notification(self):
+		country_code = self.organization_mapping()
+		message = general_notifications["HYDRATION"][country_code]
+		notification = Notifications(self.ccdr_reference, message)
+		self.notification.append(notification)
+		notification.send(receiver="mobile")
 
 	# Run both ActionLib (HBR) scores and FusionLib (MMF) deviation for specific patient and date
 	def calculate_scores(self, previous=False):
@@ -421,12 +433,12 @@ class RecommenderPatients(db.Model, UserMixin):
 			# Create notification based on reached goals
 			country_code = self.organization_mapping()
 			if response["reached_goal"]:
-				message = motivational_notifications["STP1"][country_code].format(
+				message = general_notifications["MOTIVATION"]["STP1"][country_code].format(
 					str(response["weekly_steps"]),
 					str(response["reached_goal_daily"]),
 					str(response["weekly_objective"]))
 			else:
-				message = motivational_notifications["STP2"][country_code].format(str(response["weekly_steps"]))
+				message = general_notifications["MOTIVATION"]["STP2"][country_code].format(str(response["weekly_steps"]))
 
 		if message:
 			notification = Notifications(self.ccdr_reference, message)
@@ -596,7 +608,7 @@ class Notifications(db.Model, UserMixin):
 					dates = [notification.datetime_sent, yesterday.strftime("%d-%m-%Y"), today.strftime("%d-%m-%Y")]
 
 					# IPAQ notifications always start with "IPAQ"
-					if notification.msg in ipaq_notifications.values() and Notifications.check_timestamp(dates):
+					if notification.msg in general_notifications["IPAQ"].values() and Notifications.check_timestamp(dates):
 						ipaq_response = requests.post(
 							config.ccdr_url + "/api/v1/mobile/surveys/get_response/7.2?identity_management_key=" +
 							patient.ccdr_reference).json()

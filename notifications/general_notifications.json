@@ -1,0 +1,36 @@
+{
+    "IPAQ": {
+        "en":"Your weekly questionnaire is available. If you have not answered, please, fill the form into the app.",
+        "de":"Ihr wöchentlicher Fragebogen ist verfügbar. Falls Sie den Fragebogen noch nicht beantwortet haben, füllen Sie bitte den Fragebogen in der App aus.",
+        "es":"Su cuestionario semanal está disponible. Si no has contestado, por favor, rellena el formulario en la aplicación.",
+        "it":"Il tuo questionario settimanale è disponibile. Se non hai risposto, per favore, compila il modulo nell'app.",
+        "pt":"O seu questionário semanal está disponível. Se não tiver respondido, por favor, preencha o formulário na aplicação.",
+        "ro":"Chestionarul dumneavoastră săptămânal este disponibil. Dacă incă nu ați răspuns, vă rugăm să completați formularul în aplicație."
+    },
+    "MOTIVATION": {
+        "STP1": {
+            "en":"Congratulations. You achieved your personal goal of steps for the week. You took {} steps in average. You took on {} of 7 days minimum {} steps.",
+            "de":"Herzlichen Glückwunsch! Sie haben Ihr persönliches Schrittziel für diese Woche erreicht. Sie haben im Durchschnitt {} Schritte gemacht. Sie haben an {} von 7 Tagen mindestens {} Schritte gemacht.",
+            "es":"Enhorabuena. Has alcanzado tu objetivo personal de pasos para la semana. Has dado {} pasos de media. Has realizado en {} de los 7 días un mínimo de {} pasos.",
+            "it":"Congratulazioni. Hai raggiunto il tuo obiettivo personale di passi per la settimana. Hai fatto in media {} passi. Hai eseguito per{} su 7 giorni un minimo di{} passi.",
+            "pt":"Parabéns. Atingiu o seu objectivo pessoal de passos para a semana. Deu {} passos em média. Tomou {} de 7 dias no mínimo {} passos.",
+            "ro":"Felicitări. V-ați atins obiectivul de pași pentru această săptămână. În medie, ați făcut {} pași. În ultimele 7 zile, ați făcut {} din minimumul de {} pași."
+        },
+        "STP2": {
+            "en":"This week you did not achieved your personal goal steps. You took {} steps in average.",
+            "de":"Diese Woche haben Sie Ihr persönliches Schrittziel nicht erreicht. Sie haben im Durchschnitt {} Schritte gemacht.",
+            "es":"Esta semana no has alcanzado tu objetivo personal de pasos. Has dado {} pasos de media.",
+            "it":"Questa settimana non hai raggiunto i tuoi obiettivi personali. Hai fatto in media {} passi.",
+            "pt":"Esta semana não alcançou os seus passos de objectivos pessoais. Deu {} passos em média.",
+            "ro":"Săptămâna aceasta nu v-ați atins obiectivul privind numărul de pași. În medie, ați făcut {} pași."
+        }
+    },
+    "HYDRATION": {
+        "en":"Do you drink enough water? Maintaining good hydration throughout the day is essential for a healthy body and mind.",
+        "de":"Trinken Sie genug Wasser? Eine gute Flüssigkeitszufuhr über den Tag verteilt ist für einen gesunden Körper und Geist unerlässlich.",
+        "es":"¿Bebes suficiente agua? Mantener una buena hidratación durante todo el año es fundamental para tener un cuerpo y una mente sana.",
+        "it":"Bevete abbastanza acqua? Mantenere una buona idratazione durante la giornata è essenziale per un corpo e una mente sani.",
+        "pt":"Bebe água suficiente? Manter uma boa hidratação ao longo do dia é essencial para um corpo e mente saudáveis.",
+        "ro":"Beți suficientă apă? Menținerea unei bune hidratări pe tot parcursul zilei este esențială pentru un corp și o minte sănătoasă."
+    }
+}
