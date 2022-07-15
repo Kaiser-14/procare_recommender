@@ -106,7 +106,7 @@ def multimodal_evaluation(patient_reference, country_code, scores, deviations):
 			"{:.3f}".format(deviations[1][category]), category_dict[category]))
 
 	# Sample three random messages from the list of scores messages
-	messages_scores = sample(messages_scores, 3)
+	# messages_scores = sample(messages_scores, 3)
 
 	return messages_scores, messages_deviations
 
