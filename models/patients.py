@@ -282,8 +282,8 @@ class RecommenderPatients(db.Model, UserMixin):
 				deviations.append(None)
 				deviations.append(fusionlib_response.json()["deviations"])
 
-				logger.info(scores)
-				logger.info(deviations)
+				logger.debug(scores)
+				logger.debug(deviations)
 
 				# Scores and deviations recommendations
 				country_code = self.organization_mapping()
@@ -302,7 +302,7 @@ class RecommenderPatients(db.Model, UserMixin):
 						notification = Notifications(self.ccdr_reference, message)
 						self.notification.append(notification)
 						notification.send(receiver="web")
-				logger.info("--------------")
+				# logger.info("--------------")
 
 	# Send reminder to drink water during the day
 	def hydration_notification(self):
