@@ -621,7 +621,7 @@ class Notifications(db.Model, UserMixin):
 
 						# Send notification if the survey is not present or if the last survey is not from yesterday
 						if not ipaq_response or ipaq_datetime not in [yesterday, today]:
-							logger.info("Sending reminder for IPAQ notification to patient {}".format(patient.ccdr_reference))
+							logger.info("[IPAQ] Patient {}: ".format(patient.ccdr_reference))
 
 							patient.par_notification(True)
 							patient_count = patient_count + 1

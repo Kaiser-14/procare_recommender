@@ -118,7 +118,7 @@ def game_notifications():
 
 
 # Check weekly IPAQ questionnaire filled
-@scheduler.scheduled_job('cron', id='daily_check_ipaq', day='*', hour='18', minute='05')
+@scheduler.scheduled_job('cron', id='daily_check_ipaq', day='*', hour='17', minute='35')
 @app.route("/notification/daily_check_ipaq", methods=['GET'])
 def weekly_check_ipaq():
 	logger.info("Checking daily IPAQ notifications")
@@ -169,7 +169,7 @@ def schedule_scores_injection():
 
 
 @scheduler.scheduled_job('cron', id='hydration', day='*', hour='9', minute='25')
-@scheduler.scheduled_job('cron', id='hydration', day='*', hour='17', minute='47')
+@scheduler.scheduled_job('cron', id='hydration', day='*', hour='19', minute='47')
 @app.route("/notification/hydration", methods=['GET'])
 def schedule_hydration():
 	logger.info("Running daily hydration round")
