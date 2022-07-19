@@ -41,7 +41,7 @@ else:
     if testing_mode == "yes":
         postgres_host = "localhost"
     else:
-        postgres_host = "db"
+        postgres_host = "db-rec"
 
 if os.getenv("POSTGRES_PORT") is not None:
     postgres_port = os.getenv("POSTGRES_PORT")

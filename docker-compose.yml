@@ -21,8 +21,8 @@ services:
     ports:
       - "5005:5005"
     depends_on:
-      - db
-  db:
+      - db-rec
+  db-rec:
     container_name: "dbpostgresql-rec"
     image: postgres
     restart: always
