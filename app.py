@@ -1,4 +1,5 @@
 import json
+import time
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from flask import Flask, request
@@ -46,6 +47,7 @@ def update():
 scheduler = BackgroundScheduler()
 with app.app_context():
 	logger.info("First database update")
+	time.sleep(5)
 	update()
 
 
@@ -144,6 +146,7 @@ def weekly_goals():
 	}
 
 	with app.app_context():
+		update()
 		patients = RecommenderPatients.notifications_round(receiver="goals")
 		if patients:
 			response["patients"] = patients
