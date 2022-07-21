@@ -82,6 +82,27 @@ def update_par():
 	return json.dumps(response, indent=3), 200
 
 
+# Change par day of every patient
+@app.route("/recommender/update_par_day_total", methods=['GET'])
+def update_par_total():
+	logger.info("Updating par day database")
+
+	response = {
+		"total": None
+	}
+
+	with app.app_context():
+		# patients = RecommenderPatients.get_all()
+		patients, total = RecommenderPatients.update_db()
+		for patient in patients:
+			patient.par_day = 0
+			patient.save()
+
+	response["total"] = total
+
+	return json.dumps(response, indent=3), 200
+
+
 # Notifications calls
 
 # Daily notification par
