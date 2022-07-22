@@ -144,11 +144,11 @@
         "ro": "Calitatea somnului dumneavoastră s-a îmbunătățit. Vise plăcute!"
     },
     "D_1": {
-        "en": "For Patient {} and dates between {} – {} there is a {} probability that {} will be observed.",
-        "de": "Beim Patienten {} und den Daten zwischen {} - {} besteht eine {}-Wahrscheinlichkeit, dass {} beobachtet wird.",
-        "es": "Para el paciente {} y las fechas entre {} y {}, existe un {} de probabilidad de que se observe {}.",
-        "it": "Per il paziente {} e le date comprese tra {} e {} esiste una probabilità {} che {} venga osservata.",
-        "pt": "Para o Paciente {} e datas entre {} - {} existe uma {} probabilidade de {} ser observado.",
-        "ro": "Pentru pacientul {} și datele cuprinse între {} - {} există o probabilitate {} ca {} să fie observat."
+        "en": "For Patient {} ({}) and dates between {} – {} there is a {} probability that {} will be observed.",
+        "de": "Beim Patienten {} ({}) und den Daten zwischen {} - {} besteht eine {}-Wahrscheinlichkeit, dass {} beobachtet wird.",
+        "es": "Para el paciente {} ({}) y las fechas entre {} y {}, existe un {} de probabilidad de que se observe {}.",
+        "it": "Per il paziente {} ({}) e le date comprese tra {} e {} esiste una probabilità {} che {} venga osservata.",
+        "pt": "Para o Paciente {} ({}) e datas entre {} - {} existe uma {} probabilidade de {} ser observado.",
+        "ro": "Pentru pacientul {} ({}) și datele cuprinse între {} - {} există o probabilitate {} ca {} să fie observat."
     }
 }

@@ -100,9 +100,16 @@ def multimodal_evaluation(patient_reference, country_code, scores, deviations):
 	start_date = today - timedelta(days=14)
 	end_date = today - timedelta(days=1)
 
+	# Extract username and email from patient_reference
+	body = {
+		"identity_management_key": patient_reference
+	}
+	patient_information = requests.post(config.idm_url + "/findUserByIdentityKey", json=body).json()
+	username = patient_information["username"]
+
 	for category in alert_list:
 		messages_deviations.append(multimodal_notifications["D_1"][country_code].format(
-			patient_reference, start_date.strftime("%d/%m/%Y"), end_date.strftime("%d/%m/%Y"),
+			username, patient_reference, start_date.strftime("%d/%m/%Y"), end_date.strftime("%d/%m/%Y"),
 			"{:.3f}".format(deviations[1][category]), category_dict[category]))
 
 	# Sample three random messages from the list of scores messages
