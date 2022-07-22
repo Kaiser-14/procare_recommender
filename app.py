@@ -191,8 +191,7 @@ def schedule_scores_injection():
 	return json.dumps(response, indent=3), 200
 
 
-@scheduler.scheduled_job('cron', id='hydration', day='*', hour='9', minute='25')
-@scheduler.scheduled_job('cron', id='hydration', day='*', hour='19', minute='47')
+@scheduler.scheduled_job('cron', id='hydration', day='*', hour='7,18', minute='22')
 @app.route("/notification/hydration", methods=['GET'])
 def schedule_hydration():
 	logger.info("Running daily hydration round")
