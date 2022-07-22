@@ -92,7 +92,6 @@ def update_par_total():
 	}
 
 	with app.app_context():
-		# patients = RecommenderPatients.get_all()
 		patients, total = RecommenderPatients.update_db()
 		for patient in patients:
 			patient.par_day = 0
