@@ -29,8 +29,14 @@ def status():
 
 
 # Recommender calls
+
 @app.route("/recommender/update_patient_db", methods=['GET'])
 def update():
+	"""
+	Update the patient database.
+
+	:return: response: Total number of patients in the database.
+	"""
 	response = {
 		"rec_patients": [],
 		"total": None
@@ -51,9 +57,13 @@ with app.app_context():
 	update()
 
 
-# Change par day of specific patient
 @app.route("/recommender/update_par_day", methods=['POST'])
 def update_par():
+	"""
+	Update par day of specific patient.
+
+	:return: par_day and patient ID.
+	"""
 	logger.info("Updating par day")
 	response = {
 		"patient_identity_management_key": None,
@@ -82,9 +92,13 @@ def update_par():
 	return json.dumps(response, indent=3), 200
 
 
-# Change par day of every patient
 @app.route("/recommender/update_par_day_total", methods=['GET'])
 def update_par_total():
+	"""
+	Updates par day of every patient
+
+	:return: response: Total number of patients updated
+	"""
 	logger.info("Updating par day database")
 
 	response = {
@@ -104,10 +118,14 @@ def update_par_total():
 
 # Notifications calls
 
-# Daily notification par
 @scheduler.scheduled_job('cron', id='update_and_par', day='*', hour='12', minute='13')
 @app.route("/notification/daily_par", methods=['GET'])
 def daily_par():
+	"""
+	Send daily par notification to patients.
+
+	:return: response: Total number of patients notified.
+	"""
 	logger.info("Running daily PAR round")
 	response = {
 		"patients": None
@@ -125,6 +143,11 @@ def daily_par():
 @scheduler.scheduled_job('cron', id='game_notifications', day='*', hour='19', minute='15')
 @app.route("/notification/game_notifications", methods=['GET'])
 def game_notifications():
+	"""
+	Send game notifications to patients.
+
+	:return: response: Total number of patients notified.
+	"""
 	logger.info("Running daily game round")
 	response = {
 		"patients": None
@@ -139,10 +162,14 @@ def game_notifications():
 	return json.dumps(response, indent=3), 200
 
 
-# Check weekly IPAQ questionnaire filled
 @scheduler.scheduled_job('cron', id='daily_check_ipaq', day='*', hour='17', minute='35')
 @app.route("/notification/daily_check_ipaq", methods=['GET'])
 def weekly_check_ipaq():
+	"""
+	Check weekly IPAQ filled reminder to patients.
+
+	:return: response: Total number of patients notified.
+	"""
 	logger.info("Checking daily IPAQ notifications")
 	response = {
 		"patients": None
@@ -156,10 +183,14 @@ def weekly_check_ipaq():
 	return json.dumps(response, indent=3), 200
 
 
-# Motivation goals: Steps
 @scheduler.scheduled_job('cron', id='weekly_goals', day='*', hour='10', minute='01')
 @app.route("/notification/weekly_goals", methods=['GET'])
 def weekly_goals():
+	"""
+	Send weekly goals to patients.
+
+	:return: response: Total number of patients notified.
+	"""
 	logger.info("Running weekly notification goals")
 	response = {
 		"patients": None
@@ -177,6 +208,11 @@ def weekly_goals():
 @scheduler.scheduled_job('cron', id='scores_injection', day='*', hour='18', minute='32')
 @app.route("/notification/scores_injection", methods=['GET'])
 def schedule_scores_injection():
+	"""
+	Send scores injection to patients.
+
+	:return: response: Total number of patients notified.
+	"""
 	logger.info("Running daily injection round")
 	response = {
 		"patients": None
@@ -194,6 +230,11 @@ def schedule_scores_injection():
 @scheduler.scheduled_job('cron', id='hydration', day='*', hour='7,18', minute='22')
 @app.route("/notification/hydration", methods=['GET'])
 def schedule_hydration():
+	"""
+	Send hydration notifications to patients.
+
+	:return: response: Total number of patients notified.
+	"""
 	logger.info("Running daily hydration round")
 	response = {
 		"patients": None
@@ -211,6 +252,11 @@ def schedule_hydration():
 # Send to the backend the unique identifier of the notification message when the user reads the notification
 @app.route("/notification/readStatus", methods=['POST'])
 def notification_read():
+	"""
+	Check notification as read.
+
+	:return: Notification status
+	"""
 	content = request.get_json()
 	notification_id = content.get("messageId")
 
@@ -228,6 +274,11 @@ def notification_read():
 # as well as the read status of these notifications.
 @app.route("/notification/getNotifications", methods=['POST'])
 def get_notifications():
+	"""
+	Get notifications as well as status notification.
+
+	:return: List of notifications with information.
+	"""
 	try:
 		data = request.get_json()
 

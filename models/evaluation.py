@@ -11,6 +11,16 @@ from helper.utils import game_notifications, multimodal_notifications
 # Mobile recommendations
 
 def multimodal_evaluation(patient_reference, country_code, scores, deviations):
+	"""
+	This method is used to evaluate the multimodal recommendation system.
+
+	:param patient_reference: Patient identification
+	:param country_code: Patient country code
+	:param scores: Data list of scores for two consecutive weeks
+	:param deviations: Data list of deviations for two consecutive weeks
+	:return: messages_scores: A list of messages containing deviations notifications.
+	messages_deviations: A list of messages containing deviations notifications
+	"""
 
 	messages_scores = []
 	messages_deviations = []

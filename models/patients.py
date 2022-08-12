@@ -28,6 +28,10 @@ class RecommenderPatients(db.Model, UserMixin):
 		self.organization = organization
 
 	def get_dict(self):
+		"""
+		Get information patient as a dictionary
+		:return:
+		"""
 		return {
 			"ccdr_reference": self.ccdr_reference,
 			"par_day": self.par_day,
@@ -35,12 +39,23 @@ class RecommenderPatients(db.Model, UserMixin):
 		}
 
 	def save(self):
+		"""
+		Save the patient to the database
+
+		:return: None
+		"""
 		if self.ccdr_reference:
 			db.session.add(self)
 			logger.debug(self.ccdr_reference)
 		db.session.commit()
 
 	def par_notification(self, ipaq=False):
+		"""
+		Send par notification to the patient
+
+		:param ipaq: True for IPAQ reminders
+		:return: None
+		"""
 		if not ipaq:
 			# Increase par day and restart the process if needed
 			# self.par_day = (self.par_day + 1) % 41
@@ -92,6 +107,11 @@ class RecommenderPatients(db.Model, UserMixin):
 		db.session.commit()
 
 	def game_notification(self):
+		"""
+		Send game notification to the patient
+
+		:return: None
+		"""
 		if self.par_day in [7, 14, 21, 28, 35]:
 			country_code = self.organization_mapping()
 			messages = evaluation.game_evaluation(self.ccdr_reference, country_code)
@@ -102,13 +122,30 @@ class RecommenderPatients(db.Model, UserMixin):
 				notification.send(receiver="game")
 
 	def get_notifications(self):
+		"""
+		Get all notifications for the patient
+
+		:return: notification: List of Nntifications
+		"""
 		return self.notification
 
 	@staticmethod
 	def get_by_ccdr_ref(ref):
+		"""
+		Get patient by ccdr reference
+
+		:param ref: Patient identification
+		:return: Patient object
+		"""
 		return RecommenderPatients.query.filter_by(ccdr_reference=ref).first()
 
 	def par_analysis(self):
+		"""
+		Make par analysys to provide patient category and variables
+
+		:return: category: Patient category.
+		variables: Dictionary with patient quest data
+		"""
 		logger.info("Evaluating activity for patient " + self.ccdr_reference)
 		body = {
 			"identity_management_key": self.ccdr_reference
@@ -207,6 +244,11 @@ class RecommenderPatients(db.Model, UserMixin):
 
 	@staticmethod
 	def get_patients_db():
+		"""
+		Get all patients from the database.
+
+		:return: List of patients.
+		"""
 		if not config.test_flag:
 			list_of_services = RecommenderPatients.query.all()
 		else:
@@ -218,6 +260,12 @@ class RecommenderPatients(db.Model, UserMixin):
 
 	@staticmethod
 	def notifications_round(receiver):
+		"""
+		Function to handle every daily user notification.
+
+		:param receiver: Environment for receiving messages.
+		:return: patient_count: Number of patients that have been notified.
+		"""
 		patient_references, patients_total = RecommenderPatients.get_patients_db()
 		patient_count = 0
 
@@ -248,6 +296,11 @@ class RecommenderPatients(db.Model, UserMixin):
 
 	@staticmethod
 	def update_db():
+		"""
+		Update the database with the new patient data.
+
+		:return: List of patients.
+		"""
 		try:
 			response = requests.get(config.ccdr_url + "/api/v1/mobile/patient").json()
 			for patient in response:
@@ -264,6 +317,11 @@ class RecommenderPatients(db.Model, UserMixin):
 			return str(e), 0
 
 	def multimodal_notification(self):
+		"""
+		Function to send a notification to the patient about the multimodal activity.
+
+		:return: None
+		"""
 		scores = []
 		deviations = []
 
@@ -308,6 +366,11 @@ class RecommenderPatients(db.Model, UserMixin):
 
 	# Send reminder to drink water during the day
 	def hydration_notification(self):
+		"""
+		Function to send a notification to the patient about the hydration activity.
+
+		:return: None
+		"""
 		country_code = self.organization_mapping()
 		message = general_notifications["HYDRATION"][country_code]
 		notification = Notifications(self.ccdr_reference, message)
@@ -316,8 +379,12 @@ class RecommenderPatients(db.Model, UserMixin):
 
 	# Run both ActionLib (HBR) scores and FusionLib (MMF) deviation for specific patient and date
 	def calculate_scores(self, previous=False):
-		# today = datetime.today()
-		# week_ago = today - timedelta(weeks=1)
+		"""
+		Function to calculate the scores and deviations for a specific patient and date.
+
+		:param previous: Compute previous week scores and deviations.
+		:return: None
+		"""
 
 		actionlib_response = None
 		fusionlib_response = None
@@ -368,6 +435,12 @@ class RecommenderPatients(db.Model, UserMixin):
 
 	@staticmethod
 	def get_color_category(category):
+		"""
+		Function to get the patient color category for a specific category.
+
+		:param category: Patient category
+		:return: color_category: Color category
+		"""
 		if category == 1:
 			return "red"
 		elif category == 2:
@@ -379,6 +452,11 @@ class RecommenderPatients(db.Model, UserMixin):
 
 	# Map the organization code to the country code
 	def organization_mapping(self):
+		"""
+		Function to map the organization code to the country code.
+
+		:return: Country code
+		"""
 		if self.organization == "001":
 			return "pt"  # Portugal
 		elif self.organization == "002":
@@ -395,6 +473,12 @@ class RecommenderPatients(db.Model, UserMixin):
 	# Map the diagnosis code to the disease code
 	@staticmethod
 	def diagnosis_mapping(diagnosis):
+		"""
+		Function to map the diagnosis code to the disease code.
+
+		:param diagnosis: Diagnosis identification
+		:return: Disease code
+		"""
 		if diagnosis in ["3", "4", "5", "6"]:
 			return 0  # Dementia
 		elif diagnosis == "0":
@@ -404,18 +488,12 @@ class RecommenderPatients(db.Model, UserMixin):
 		else:
 			return None  # Default
 
-	# @staticmethod
-	# def round_goals():
-	# 	patients, total = RecommenderPatients.get_patients_db()
-	# 	patient_count = 0
-	#
-	# 	for patient in patients:
-	# 		patient_count = patient_count + 1
-	# 		patient.personal_goals()
-	#
-	# 	return patient_count
-
 	def goals_notifications(self):
+		"""
+		Function to send notifications to the patient about goals and motivations.
+
+		:return: None
+		"""
 		message = None
 		if self.par_day % 8 == 0 and self.par_day != 0:
 
@@ -467,6 +545,12 @@ class Notifications(db.Model, UserMixin):
 		self.patient = ccdr_reference
 
 	def send(self, receiver):
+		"""
+		Function to send a notification to the patient.
+
+		:param receiver: Environment for receiving messages.
+		:return: None
+		"""
 		body = {
 			"identity_management_key": self.patient,
 			"message_body": self.msg,
@@ -500,6 +584,11 @@ class Notifications(db.Model, UserMixin):
 			logger.error("Sending notification.")
 
 	def get_dict(self):
+		"""
+		Function to get the notification as a dictionary.
+
+		:return: Notification information
+		"""
 		return {
 			"id": self.id,
 			"msg": self.msg,
@@ -510,6 +599,11 @@ class Notifications(db.Model, UserMixin):
 		}
 
 	def save_notification(self):
+		"""
+		Function to save the notification in the database.
+
+		:return: None
+		"""
 		if self.id and self.msg and self.patient and self.datetime_sent:
 			db.session.add(self)
 			logger.debug("Notification " + str(self.id) + " saved")
@@ -519,10 +613,24 @@ class Notifications(db.Model, UserMixin):
 
 	@staticmethod
 	def get_by_id(_id):
+		"""
+		Function to get the notification by its id.
+
+		:param _id: Notification id
+		:return: Notification information
+		"""
 		return Notifications.query.filter_by(id=_id).first()
 
 	@staticmethod
 	def check_response(destination, response, body):
+		"""
+		Function to check the response of the notification.
+
+		:param destination: patient or professional
+		:param response: Request response information
+		:param body: Body information
+		:return: None
+		"""
 		if response:
 			if response.status_code == 200:
 				logger.debug('Notification sent to {} via {}'.format(
@@ -544,6 +652,12 @@ class Notifications(db.Model, UserMixin):
 
 	@staticmethod
 	def check_notification_status(notification_id):
+		"""
+		Function to check the status of the notification to be marked as read.
+
+		:param notification_id: Notification identification
+		:return: Normal case or activity level color
+		"""
 		notification = Notifications.get_by_id(notification_id)
 
 		if notification:
@@ -575,6 +689,12 @@ class Notifications(db.Model, UserMixin):
 
 	@staticmethod
 	def check_par_notification(msg):
+		"""
+		Function to check if the notification is a PAR notification.
+
+		:param msg: Message
+		:return: par: Boolean value
+		"""
 		par = False
 		if any(msg in day.values() for day in par_notifications.values()):
 			par = True
@@ -582,6 +702,12 @@ class Notifications(db.Model, UserMixin):
 
 	@staticmethod
 	def check_timestamp(dates):
+		"""
+		Function to check the timestamp of the notification between dates.
+
+		:param dates: Range of dates
+		:return: date: Boolean value
+		"""
 		for i, date_ts in enumerate(dates):
 			date_ts = ''.join(filter(str.isdigit, date_ts[:10]))
 			date_ts = datetime.strptime(date_ts, "%d%m%Y")
@@ -595,6 +721,11 @@ class Notifications(db.Model, UserMixin):
 
 	@staticmethod
 	def check_ipaq():
+		"""
+		Function to check if the patient has answered recent IPAQ questionnaire. If has not answered, send reminder
+
+		:return: patient_count: Number of patients with unanswered IPAQ
+		"""
 		patients, total = RecommenderPatients.get_patients_db()
 		patient_count = 0
 

@@ -10,6 +10,13 @@ from helper.config import testing_mode
 
 
 def check_directory_expired_date(total_time=3600, app_logs_dir="app_logs"):
+	"""
+	Check if the directory is expired.
+
+	:param total_time:
+	:param app_logs_dir:
+	:return:
+	"""
 	try:
 
 		# If not exists
@@ -35,6 +42,13 @@ def check_directory_expired_date(total_time=3600, app_logs_dir="app_logs"):
 
 
 def init_logger(dunder_name, testing_logger) -> logging.Logger:
+	"""
+	Initialize the logger.
+
+	:param dunder_name:
+	:param testing_logger:
+	:return:
+	"""
 
 	log_format = (
 		'%(asctime)s - '
@@ -92,6 +106,14 @@ def init_logger(dunder_name, testing_logger) -> logging.Logger:
 
 
 def init_db(_db, app, drop=False):
+	"""
+	Initialize the database.
+
+	:param _db: Database object.
+	:param app: Application instance
+	:param drop: Drop database tables
+	:return:
+	"""
 	_db.init_app(app)
 	with app.app_context():
 		if drop:
@@ -106,7 +128,7 @@ if testing_mode == "yes":
 else:
 	logger = init_logger(__name__, testing_logger=False)
 
-# Par notifications
+# Notifications files
 script_dir = os.path.dirname(__file__)  # <-- absolute dir the script is in
 
 rel_path_general = "../notifications/general_notifications.json"
