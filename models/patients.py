@@ -49,6 +49,17 @@ class RecommenderPatients(db.Model, UserMixin):
 			logger.debug(self.ccdr_reference)
 		db.session.commit()
 
+	def delete(self):
+		"""
+		Delete the patient from the database
+
+		:return: None
+		"""
+		if self.ccdr_reference:
+			db.session.delete(self)
+			logger.debug(self.ccdr_reference)
+		db.session.commit()
+
 	def par_notification(self, ipaq=False):
 		"""
 		Send par notification to the patient
@@ -303,13 +314,24 @@ class RecommenderPatients(db.Model, UserMixin):
 		"""
 		try:
 			response = requests.get(config.ccdr_url + "/api/v1/mobile/patient").json()
+			ccdr_list = []
 			for patient in response:
 				ccdr_ref = patient["identity_management_key"]
 				organization = patient["organization_code"]
+
+				ccdr_list.append(ccdr_ref)
+
+				# Add new patients to internal recommender database
 				rec_patient = RecommenderPatients.get_by_ccdr_ref(ccdr_ref)
 				if not rec_patient:
 					rec_patient = RecommenderPatients(ccdr_ref, organization)
 					rec_patient.save()
+
+			# Clean deleted patients from central database in the internal one
+			patients_rmdr, total = RecommenderPatients.get_patients_db()
+			for patient in patients_rmdr:
+				if patient.ccdr_reference not in ccdr_list:
+					patient.delete()
 			return RecommenderPatients.get_patients_db()
 
 		except requests.exceptions.RequestException as e:
