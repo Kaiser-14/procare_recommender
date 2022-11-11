@@ -313,11 +313,16 @@ class RecommenderPatients(db.Model, UserMixin):
 		:return: List of patients.
 		"""
 		try:
-			response = requests.get(config.ccdr_url + "/api/v1/mobile/patient").json()
+			if config.platform == "local":
+				response = requests.get(config.ccdr_url + "/api/v1/mobile/patient").json()
+				org = "organization_code"
+			else:
+				response = requests.get(config.idm_url + "/getPilotThreePatientKeys").json()
+				org = "organization"
 			ccdr_list = []
 			for patient in response:
 				ccdr_ref = patient["identity_management_key"]
-				organization = patient["organization_code"]
+				organization = patient[org]
 
 				ccdr_list.append(ccdr_ref)
 
