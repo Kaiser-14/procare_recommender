@@ -67,12 +67,8 @@ class RecommenderPatients(db.Model, UserMixin):
 		:param ipaq: True for IPAQ reminders
 		:return: None
 		"""
+		receiver = "mobile"
 		if not ipaq:
-			# Increase par day and restart the process if needed
-			# self.par_day = (self.par_day + 1) % 41
-			# if self.par_day == 0:
-			# 	self.par_day = 1
-
 			# Increase par day
 			self.par_day = self.par_day + 1
 
@@ -95,25 +91,25 @@ class RecommenderPatients(db.Model, UserMixin):
 				except (IndexError, TypeError):
 					message = ""
 			if message:
-				notification = Notifications(self.ccdr_reference, message)
+				notification = Notifications(self.ccdr_reference, message, receiver)
 				self.notification.append(notification)
-				notification.send(receiver="mobile")
+				notification.send()
 
 			# IEQ notifications
 			if self.par_day in [10, 15, 25, 30, 35, 40]:
 				message = ieq_notifications[str(self.par_day)][country_code]
 				if message:
-					notification = Notifications(self.ccdr_reference, message)
+					notification = Notifications(self.ccdr_reference, message, receiver)
 					self.notification.append(notification)
-					notification.send(receiver="mobile")
+					notification.send()
 
 		# IPAQ notification
 		if self.par_day in [7, 14, 21, 28, 35] or ipaq:
 			country_code = self.organization_mapping()
 			message = general_notifications["IPAQ"][country_code]
-			ipaq_notification = Notifications(self.ccdr_reference, message)
+			ipaq_notification = Notifications(self.ccdr_reference, message, receiver)
 			self.notification.append(ipaq_notification)
-			ipaq_notification.send(receiver="mobile")
+			ipaq_notification.send()
 
 		db.session.commit()
 
@@ -123,20 +119,21 @@ class RecommenderPatients(db.Model, UserMixin):
 
 		:return: None
 		"""
+		receiver = "game"
 		if self.par_day in [7, 14, 21, 28, 35]:
 			country_code = self.organization_mapping()
 			messages = evaluation.game_evaluation(self.ccdr_reference, country_code)
 
 			if messages:
 				for message in messages:
-					notification = Notifications(self.ccdr_reference, message)
+					notification = Notifications(self.ccdr_reference, message, receiver)
 					self.notification.append(notification)
-					notification.send(receiver="game")
+					notification.send()
 			else:
 				message = general_notifications["COGNITIVE"][country_code]
-				notification = Notifications(self.ccdr_reference, message)
+				notification = Notifications(self.ccdr_reference, message, receiver)
 				self.notification.append(notification)
-				notification.send(receiver="game")
+				notification.send()
 
 	def get_notifications(self):
 		"""
@@ -385,16 +382,16 @@ class RecommenderPatients(db.Model, UserMixin):
 
 				for message in messages_scores:
 					if message:
-						# logger.info(message)
-						notification = Notifications(self.ccdr_reference, message)
+						receiver = "mobile"
+						notification = Notifications(self.ccdr_reference, message, receiver)
 						self.notification.append(notification)
-						notification.send(receiver="mobile")
+						notification.send()
 				for message in messages_deviations:
 					if message:
-						# logger.info(message)
-						notification = Notifications(self.ccdr_reference, message)
+						receiver = "web"
+						notification = Notifications(self.ccdr_reference, message, receiver)
 						self.notification.append(notification)
-						notification.send(receiver="web")
+						notification.send()
 				# logger.info("--------------")
 
 	# Send reminder to drink water during the day
@@ -405,10 +402,11 @@ class RecommenderPatients(db.Model, UserMixin):
 		:return: None
 		"""
 		country_code = self.organization_mapping()
+		receiver = "mobile"
 		message = general_notifications["HYDRATION"][country_code]
-		notification = Notifications(self.ccdr_reference, message)
+		notification = Notifications(self.ccdr_reference, message, receiver)
 		self.notification.append(notification)
-		notification.send(receiver="mobile")
+		notification.send()
 
 	# Run both ActionLib (HBR) scores and FusionLib (MMF) deviation for specific patient and date
 	def calculate_scores(self, previous=False):
@@ -554,9 +552,10 @@ class RecommenderPatients(db.Model, UserMixin):
 				message = general_notifications["MOTIVATION"]["STP2"][country_code].format(str(response["weekly_steps"]))
 
 		if message:
-			notification = Notifications(self.ccdr_reference, message)
+			receiver = "mobile"
+			notification = Notifications(self.ccdr_reference, message, receiver)
 			self.notification.append(notification)
-			notification.send(receiver="mobile")
+			notification.send()
 
 
 class Notifications(db.Model, UserMixin):
@@ -567,21 +566,21 @@ class Notifications(db.Model, UserMixin):
 	msg = db.Column(db.String, nullable=False)
 	datetime_sent = db.Column(db.String, nullable=True)
 	datetime_read = db.Column(db.String, nullable=True)
+	receiver = db.Column(db.String, nullable=True)
 	patient = db.Column(db.String, db.ForeignKey('RecommenderPatients.ccdr_reference'))
 
-	def __init__(self, ccdr_reference, msg):
+	def __init__(self, ccdr_reference, msg, receiver):
 		self.id = str(uuid4())
 		self.msg = msg
 		self.read = False
 		self.datetime_sent = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
 		self.datetime_read = None
+		self.receiver = receiver
 		self.patient = ccdr_reference
 
-	def send(self, receiver):
+	def send(self):
 		"""
 		Function to send a notification to the patient.
-
-		:param receiver: Environment for receiving messages.
 		:return: None
 		"""
 		body = {
@@ -589,14 +588,14 @@ class Notifications(db.Model, UserMixin):
 			"message_body": self.msg,
 			"message_unique_identifier": self.id,
 			"sender_unique_identifier": "recommendLib",
-			"receiver_device_type": receiver,
+			"receiver_device_type": self.receiver,
 		}
 
 		logger.debug(body)
 
 		try:
 			headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
-			if receiver == "web":
+			if self.receiver == "web":
 				notification_response = requests.post(
 					config.rmq_url + "/notification/sendNotificationToMedicalProfessionalByPatient",
 					data=json.dumps(body), headers=headers
@@ -628,6 +627,7 @@ class Notifications(db.Model, UserMixin):
 			"read": self.read,
 			"datetime_sent": self.datetime_sent,
 			"datetime_read": self.datetime_read,
+			"receiver": self.receiver,
 			"patient": self.patient,
 		}
 
