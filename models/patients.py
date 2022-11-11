@@ -127,7 +127,13 @@ class RecommenderPatients(db.Model, UserMixin):
 			country_code = self.organization_mapping()
 			messages = evaluation.game_evaluation(self.ccdr_reference, country_code)
 
-			for message in messages:
+			if messages:
+				for message in messages:
+					notification = Notifications(self.ccdr_reference, message)
+					self.notification.append(notification)
+					notification.send(receiver="game")
+			else:
+				message = general_notifications["COGNITIVE"][country_code]
 				notification = Notifications(self.ccdr_reference, message)
 				self.notification.append(notification)
 				notification.send(receiver="game")
