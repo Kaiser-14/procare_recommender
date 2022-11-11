@@ -21,11 +21,13 @@ class RecommenderPatients(db.Model, UserMixin):
 	par_day = db.Column(db.Integer, nullable=False)
 	organization = db.Column(db.String, nullable=False)
 	notification = relationship("Notifications", backref="RecommenderPatient")
+	status = db.Column(db.Boolean, nullable=False)
 
 	def __init__(self, ccdr_reference, organization, par_day=0):
 		self.ccdr_reference = ccdr_reference
 		self.par_day = par_day
 		self.organization = organization
+		self.status = True
 
 	def get_dict(self):
 		"""
@@ -285,26 +287,27 @@ class RecommenderPatients(db.Model, UserMixin):
 
 		for patient in patient_references:
 			patient_count = patient_count + 1
-			if receiver == "par":
-				logger.info("[PAR] Patient " + patient.ccdr_reference + ": " + str(patient_count) + "/" + str(
-					patients_total))
-				patient.par_notification()
-			elif receiver == "game":
-				logger.info("[Game] Patient " + patient.ccdr_reference + ": " + str(patient_count) + "/" + str(
-					patients_total))
-				patient.game_notification()
-			elif receiver == "goals":
-				logger.info("[Goals] Patient " + patient.ccdr_reference + ": " + str(patient_count) + "/" + str(
-					patients_total))
-				patient.goals_notifications()
-			elif receiver == "multimodal":
-				logger.info("[Multimodal] Patient " + patient.ccdr_reference + ": " + str(patient_count) + "/" + str(
-					patients_total))
-				patient.multimodal_notification()
-			elif receiver == "hydration":
-				logger.info("[Hydration] Patient " + patient.ccdr_reference + ": " + str(patient_count) + "/" + str(
-					patients_total))
-				patient.hydration_notification()
+			if patient.status:
+				if receiver == "par":
+					logger.info("[PAR] Patient " + patient.ccdr_reference + ": " + str(patient_count) + "/" + str(
+						patients_total))
+					patient.par_notification()
+				elif receiver == "game":
+					logger.info("[Game] Patient " + patient.ccdr_reference + ": " + str(patient_count) + "/" + str(
+						patients_total))
+					patient.game_notification()
+				elif receiver == "goals":
+					logger.info("[Goals] Patient " + patient.ccdr_reference + ": " + str(patient_count) + "/" + str(
+						patients_total))
+					patient.goals_notifications()
+				elif receiver == "multimodal":
+					logger.info("[Multimodal] Patient " + patient.ccdr_reference + ": " + str(patient_count) + "/" + str(
+						patients_total))
+					patient.multimodal_notification()
+				elif receiver == "hydration":
+					logger.info("[Hydration] Patient " + patient.ccdr_reference + ": " + str(patient_count) + "/" + str(
+						patients_total))
+					patient.hydration_notification()
 
 		return patient_count
 
@@ -334,12 +337,16 @@ class RecommenderPatients(db.Model, UserMixin):
 				if not rec_patient:
 					rec_patient = RecommenderPatients(ccdr_ref, organization)
 					rec_patient.save()
+				else:
+					rec_patient.status = True
+					rec_patient.save()
 
 			# Clean deleted patients from central database in the internal one
 			patients_rmdr, total = RecommenderPatients.get_patients_db()
 			for patient in patients_rmdr:
 				if patient.ccdr_reference not in ccdr_list:
-					patient.delete()
+					patient.status = False
+					patient.save()
 			return RecommenderPatients.get_patients_db()
 
 		except requests.exceptions.RequestException as e:
@@ -766,33 +773,34 @@ class Notifications(db.Model, UserMixin):
 		yesterday = today - timedelta(days=1)
 
 		for patient in patients:
-			try:
-				# Get patient notifications
-				notifications = patient.get_notifications()
+			if patient.status:
+				try:
+					# Get patient notifications
+					notifications = patient.get_notifications()
 
-				for notification in notifications:
-					dates = [notification.datetime_sent, yesterday.strftime("%d-%m-%Y"), today.strftime("%d-%m-%Y")]
+					for notification in notifications:
+						dates = [notification.datetime_sent, yesterday.strftime("%d-%m-%Y"), today.strftime("%d-%m-%Y")]
 
-					# IPAQ notifications always start with "IPAQ"
-					if notification.msg in general_notifications["IPAQ"].values() and Notifications.check_timestamp(dates):
-						ipaq_response = requests.post(
-							config.ccdr_url + "/api/v1/mobile/surveys/get_response/7.2?identity_management_key=" +
-							patient.ccdr_reference).json()
+						# IPAQ notifications always start with "IPAQ"
+						if notification.msg in general_notifications["IPAQ"].values() and Notifications.check_timestamp(dates):
+							ipaq_response = requests.post(
+								config.ccdr_url + "/api/v1/mobile/surveys/get_response/7.2?identity_management_key=" +
+								patient.ccdr_reference).json()
 
-						ipaq_datetime = None
-						if ipaq_response:
-							ipaq_datetime = datetime.strptime(
-								ipaq_response[-1]["date"][4:].replace("UTC ", ""),
-								'%b %d %H:%M:%S %Y').strftime("%d-%m-%Y")
+							ipaq_datetime = None
+							if ipaq_response:
+								ipaq_datetime = datetime.strptime(
+									ipaq_response[-1]["date"][4:].replace("UTC ", ""),
+									'%b %d %H:%M:%S %Y').strftime("%d-%m-%Y")
 
-						# Send notification if the survey is not present or if the last survey is not from yesterday
-						if not ipaq_response or ipaq_datetime not in [yesterday, today]:
-							logger.info("[IPAQ] Patient {}: ".format(patient.ccdr_reference))
+							# Send notification if the survey is not present or if the last survey is not from yesterday
+							if not ipaq_response or ipaq_datetime not in [yesterday, today]:
+								logger.info("[IPAQ] Patient {}: ".format(patient.ccdr_reference))
 
-							patient.par_notification(True)
-							patient_count = patient_count + 1
-							break
-			except requests.exceptions.ConnectionError:
-				logger.error("Connection error.")
+								patient.par_notification(True)
+								patient_count = patient_count + 1
+								break
+				except requests.exceptions.ConnectionError:
+					logger.error("Connection error.")
 
 		return patient_count
