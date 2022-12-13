@@ -121,17 +121,18 @@ class RecommenderPatients(db.Model, UserMixin):
 
 		:return: None
 		"""
-		receiver = "game"
 		if self.par_day in [7, 14, 21, 28, 35]:
 			country_code = self.organization_mapping()
 			messages = evaluation.game_evaluation(self.ccdr_reference, country_code)
 
 			if messages:
+				receiver = "game"
 				for message in messages:
 					notification = Notifications(self.ccdr_reference, message, receiver)
 					self.notification.append(notification)
 					notification.send()
 			else:
+				receiver = "mobile"
 				message = general_notifications["COGNITIVE"][country_code]
 				notification = Notifications(self.ccdr_reference, message, receiver)
 				self.notification.append(notification)
