@@ -46,16 +46,17 @@ def multimodal_evaluation(patient_reference, country_code, scores, deviations):
 			messages_scores.append(multimodal_notifications['CSS_11'][country_code])
 		else:  # Patient might not be playing any games in the last two weeks
 			messages_scores.append(multimodal_notifications['CSS_12'][country_code])
-	if scores_result["css"] < 0:
-		msg1 = multimodal_notifications['CSS_21'][country_code]  # Patient is not playing well
-		msg2 = multimodal_notifications['CSS_22'][country_code]  # Suggest to decrease the level
-		# Select a random message between ms1 and msg2
-		messages_scores.append(sample([msg1, msg2], 1)[0])
 	else:
-		msg1 = multimodal_notifications['CSS_31'][country_code]  # Patient is doing great
-		msg2 = multimodal_notifications['CSS_32'][country_code]  # Suggest to increase level
-		# Select a random message between ms1 and msg2
-		messages_scores.append(sample([msg1, msg2], 1)[0])
+		if scores_result["css"] < 0:
+			msg1 = multimodal_notifications['CSS_21'][country_code]  # Patient is not playing well
+			msg2 = multimodal_notifications['CSS_22'][country_code]  # Suggest to decrease the level
+			# Select a random message between ms1 and msg2
+			messages_scores.append(sample([msg1, msg2], 1)[0])
+		else:
+			msg1 = multimodal_notifications['CSS_31'][country_code]  # Patient is doing great
+			msg2 = multimodal_notifications['CSS_32'][country_code]  # Suggest to increase level
+			# Select a random message between ms1 and msg2
+			messages_scores.append(sample([msg1, msg2], 1)[0])
 
 	# Medication Intake Score (MIS)
 	if scores[1]["mis"] == 0:
@@ -68,34 +69,38 @@ def multimodal_evaluation(patient_reference, country_code, scores, deviations):
 
 		if prescription_list:
 			messages_scores.append(multimodal_notifications['MIS_11'][country_code])  # Patient did not register medicine
-	if scores_result["mis"] < 0:
-		messages_scores.append(multimodal_notifications['MIS_21'][country_code])  # Register the medicine
 	else:
-		messages_scores.append(multimodal_notifications['MIS_31'][country_code])  # Continue daily medicine intake
+		if scores_result["mis"] < 0:
+			messages_scores.append(multimodal_notifications['MIS_21'][country_code])  # Register the medicine
+		else:
+			messages_scores.append(multimodal_notifications['MIS_31'][country_code])  # Continue daily medicine intake
 
 	# Motor Functions Score (MFS)
 	if scores[1]["mfs"] == 1:
 		messages_scores.append(multimodal_notifications['MFS_11'][country_code])  # No symptoms detected
-	if scores_result["mfs"] < 0:
-		messages_scores.append(multimodal_notifications['MFS_21'][country_code])  # Contact doctor to get feedback
 	else:
-		messages_scores.append(multimodal_notifications['MFS_31'][country_code])  # Improving motor functions
+		if scores_result["mfs"] < 0:
+			messages_scores.append(multimodal_notifications['MFS_21'][country_code])  # Contact doctor to get feedback
+		else:
+			messages_scores.append(multimodal_notifications['MFS_31'][country_code])  # Improving motor functions
 
 	# Physical Activity Score (PAS)
 	if scores[1]["pas"] == 0:
 		messages_scores.append(multimodal_notifications['PAS_11'][country_code])  # No activity detected
-	if scores_result["pas"] < 0:
-		messages_scores.append(multimodal_notifications['PAS_21'][country_code])  # Encourage to be physically active
 	else:
-		messages_scores.append(multimodal_notifications['PAS_31'][country_code])  # Physical activity are improving
+		if scores_result["pas"] < 0:
+			messages_scores.append(multimodal_notifications['PAS_21'][country_code])  # Encourage to be physically active
+		else:
+			messages_scores.append(multimodal_notifications['PAS_31'][country_code])  # Physical activity are improving
 
 	# Sleep Score (SS)
 	if scores[1]["ss"] == 0:
 		messages_scores.append(multimodal_notifications['SS_11'][country_code])  # No sleep detected, wear the wristband
-	if scores_result["ss"] < 0:
-		messages_scores.append(multimodal_notifications['SS_21'][country_code])  # Encourage to sleep
 	else:
-		messages_scores.append(multimodal_notifications['SS_31'][country_code])  # Sleep score is improving
+		if scores_result["ss"] < 0:
+			messages_scores.append(multimodal_notifications['SS_21'][country_code])  # Encourage to sleep
+		else:
+			messages_scores.append(multimodal_notifications['SS_31'][country_code])  # Sleep score is improving
 
 	# Deviations
 	# Alarm by type of alert (key) if probability is greater than 0.5
