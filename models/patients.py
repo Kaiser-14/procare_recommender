@@ -77,10 +77,10 @@ class RecommenderPatients(db.Model, UserMixin):
 			# Daily notifications
 			message = None
 			country_code = self.organization_mapping()
-			if self.par_day in range(1, 40):
+			if self.par_day in range(1, 41):
 				message = par_notifications[str(self.par_day)][country_code]
 			# Latest notifications in the cycle may contain different message based on diagnosis
-			if self.par_day in range(35, 40) and len(message) == 3:
+			if self.par_day in range(36, 41) and len(message) == 3:
 				body = {
 					"identity_management_key": self.ccdr_reference
 				}
